@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Play, ThumbsUp, ThumbsDown, Users } from "lucide-react";
+import { Play, ThumbsUp, ThumbsDown, Users, MessageCircle, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VoteButton from "./VoteButton";
 import CreatorInfo from "./CreatorInfo";
@@ -33,7 +33,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
 }) => {
   return (
     <div className="relative w-full h-full flex">
-      <div className="video-container w-full h-full bg-gradient-to-br from-streamixy-dark to-streamixy-primary/10">
+      <div className="video-container w-full h-full bg-black">
         {/* Video Placeholder or Thumbnail */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -41,14 +41,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
         />
         
         {/* Overlay for dim effect */}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/20" />
 
         {/* Video Play Button */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Button
             variant="ghost"
             size="icon"
-            className="h-16 w-16 rounded-full bg-streamixy-primary/50 hover:bg-streamixy-primary/80 transition-all duration-300"
+            className="h-16 w-16 rounded-full bg-streamixy-primary/30 hover:bg-streamixy-primary/50 transition-all duration-300"
           >
             <Play className="h-8 w-8 text-white" />
           </Button>
@@ -56,44 +56,54 @@ const VideoReel: React.FC<VideoReelProps> = ({
 
         {/* Live Indicator */}
         {isLive && (
-          <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center animate-pulse-glow">
-            <span className="mr-1 h-2 w-2 bg-white rounded-full"></span>
-            LIVE
+          <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse">
+            <span className="h-2 w-2 bg-white rounded-full"></span>
+            <span>LIVE</span>
           </div>
         )}
 
         {/* Creator Info */}
-        <div className="absolute bottom-20 left-4 animate-slide-up">
+        <div className="absolute bottom-24 left-4 animate-slide-up">
           <CreatorInfo creator={creator} />
         </div>
 
         {/* Stream Title */}
-        <div className="absolute bottom-40 left-4 max-w-[80%]">
+        <div className="absolute bottom-44 left-4 max-w-[80%]">
           <h3 className="text-lg font-bold text-white glow-text">{title}</h3>
         </div>
 
         {/* Viewer Count */}
         <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1">
-          <Users className="h-4 w-4 text-white" />
+          <Users className="h-4 w-4 text-red-500" />
           <span className="text-xs text-white">{viewers}</span>
         </div>
 
-        {/* Voting Section */}
-        <div className="absolute right-4 bottom-1/3 flex flex-col space-y-4">
+        {/* Interaction Buttons */}
+        <div className="absolute right-4 bottom-1/3 flex flex-col space-y-6">
           <VoteButton
             icon={<ThumbsUp className="h-6 w-6" />}
             count={likes}
-            label="Up"
+            label="Like"
           />
           <VoteButton
             icon={<ThumbsDown className="h-6 w-6" />}
             count={dislikes}
-            label="Down"
+            label="Dislike"
+          />
+          <VoteButton
+            icon={<MessageCircle className="h-6 w-6" />}
+            count={Math.floor(Math.random() * 100)}
+            label="Comment"
+          />
+          <VoteButton
+            icon={<Share className="h-6 w-6" />}
+            count={Math.floor(Math.random() * 50)}
+            label="Share"
           />
         </div>
 
         {/* SYX Token Vote Section */}
-        <div className="absolute bottom-20 right-4 glass p-2 rounded-lg animate-fade-in">
+        <div className="absolute bottom-24 right-4 glass p-2 rounded-lg animate-fade-in">
           <div className="flex flex-col items-center space-y-2">
             <span className="text-xs text-streamixy-light/80">Vote SYX</span>
             <div className="flex space-x-2">

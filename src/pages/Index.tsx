@@ -19,14 +19,14 @@ const MOCK_REELS = [
     likes: 532,
     dislikes: 21,
     isLive: true,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?tech",
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?gaming",
   },
   {
     streamId: "stream-2",
-    title: "Trading Crypto Live: Market Analysis",
+    title: "Live Pixel Art Creation",
     creator: {
-      name: "TradingQueen",
-      username: "trading_queen",
+      name: "ArtisticSoul",
+      username: "artistic_soul",
       avatar: "https://i.pravatar.cc/150?img=5",
       followers: 18900,
     },
@@ -34,23 +34,53 @@ const MOCK_REELS = [
     likes: 342,
     dislikes: 15,
     isLive: true,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?crypto",
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?art",
   },
   {
     streamId: "stream-3",
-    title: "NFT Art Creation Session",
+    title: "Music Production Session",
     creator: {
-      name: "DigitalArtist",
-      username: "digital_artist",
+      name: "BeatMaker",
+      username: "beat_maker",
       avatar: "https://i.pravatar.cc/150?img=8",
       followers: 12300,
     },
     viewers: 652,
     likes: 245,
     dislikes: 8,
-    isLive: false,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?art",
+    isLive: true,
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?music",
   },
+  {
+    streamId: "stream-4",
+    title: "Cooking Stream: Italian Pasta",
+    creator: {
+      name: "ChefMaster",
+      username: "chef_master",
+      avatar: "https://i.pravatar.cc/150?img=4",
+      followers: 45200,
+    },
+    viewers: 2341,
+    likes: 892,
+    dislikes: 23,
+    isLive: true,
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?cooking",
+  },
+  {
+    streamId: "stream-5",
+    title: "Sunset Yoga Session",
+    creator: {
+      name: "YogaGuru",
+      username: "yoga_guru",
+      avatar: "https://i.pravatar.cc/150?img=9",
+      followers: 32100,
+    },
+    viewers: 1567,
+    likes: 623,
+    dislikes: 12,
+    isLive: true,
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?yoga",
+  }
 ];
 
 const Index = () => {
@@ -69,11 +99,11 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-streamixy-dark text-white">
+    <div className="min-h-screen bg-black text-white">
       <Navbar />
       
       <div className="h-screen w-full flex items-center justify-center">
-        <div className="w-full max-w-md h-full max-h-[80vh] pt-16 pb-4">
+        <div className="w-full max-w-md h-full pt-16 pb-4">
           <VideoReel {...MOCK_REELS[currentReelIndex]} />
         </div>
       </div>
@@ -84,14 +114,14 @@ const Index = () => {
       />
       
       {/* Navigation indicators */}
-      <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40 flex space-x-2">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 flex space-x-1.5">
         {MOCK_REELS.map((_, index) => (
           <div 
             key={index}
-            className={`h-2 w-2 rounded-full ${
+            className={`h-1 w-4 rounded-full transition-all duration-300 ${
               index === currentReelIndex 
-                ? "bg-streamixy-primary" 
-                : "bg-gray-500"
+                ? "bg-streamixy-primary w-6" 
+                : "bg-gray-500/50"
             }`}
           />
         ))}
