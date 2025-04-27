@@ -15,9 +15,15 @@ const VoteButton: React.FC<VoteButtonProps> = ({
   onClick,
   active = false,
 }) => {
+  // Add stopPropagation to prevent the click from bubbling up
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) onClick();
+  };
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className="flex flex-col items-center glass p-3 rounded-full transition-all hover:bg-streamixy-primary/30"
     >
       <div

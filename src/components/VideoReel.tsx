@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { Play, Gift, Share, Vote } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Play, Gift, Share, Vote, MessageSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VoteButton from "./VoteButton";
 import CreatorInfo from "./CreatorInfo";
@@ -8,6 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 
 interface VideoReelProps {
   streamId: string;
@@ -27,7 +29,6 @@ interface VideoReelProps {
 
 const VideoReel: React.FC<VideoReelProps> = ({
   streamId,
-  title,
   creator,
   viewers,
   isLive,
@@ -36,6 +37,38 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const { toast } = useToast();
   const [creatorTokens, setCreatorTokens] = useState(0);
   const isMobile = useIsMobile();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [comments, setComments] = useState<{text: string, id: number}[]>([]);
+  const [activeComment, setActiveComment] = useState<{text: string, id: number} | null>(null);
+  const [nextCommentId, setNextCommentId] = useState(1);
+  
+  // Auto-play video when it becomes visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && videoRef.current) {
+            videoRef.current.play().catch(error => {
+              console.log("Auto-play prevented:", error);
+            });
+          } else if (!entry.isIntersecting && videoRef.current) {
+            videoRef.current.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
+  }, []);
   
   // Gift items and their values
   const giftItems = [
@@ -89,29 +122,45 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
     // In a real app, we would implement actual sharing functionality here
   };
+
+  const handleComment = (text: string) => {
+    if (!text.trim()) return;
+    
+    const newComment = { text, id: nextCommentId };
+    setNextCommentId(prev => prev + 1);
+    setComments(prev => [...prev, newComment]);
+    setActiveComment(newComment);
+    
+    // Display comment for 3 seconds then fade out
+    setTimeout(() => {
+      setActiveComment(null);
+    }, 3000);
+    
+    toast({
+      title: "Comment Posted!",
+      description: "Your comment is now visible on stream",
+    });
+  };
   
   return (
-    <div className="relative w-full h-full flex">
+    <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
-        {/* Video Placeholder or Thumbnail */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${thumbnailUrl})` }}
-        />
+        {/* Video Element (Autoplay) */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 object-cover w-full h-full"
+          muted
+          loop
+          playsInline
+          poster={thumbnailUrl}
+          preload="auto"
+        >
+          <source src={`https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         
         {/* Overlay for dim effect */}
         <div className="absolute inset-0 bg-black/20" />
-
-        {/* Video Play Button */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-16 w-16 rounded-full bg-streamixy-primary/30 hover:bg-streamixy-primary/50 transition-all duration-300"
-          >
-            <Play className="h-8 w-8 text-white" />
-          </Button>
-        </div>
 
         {/* Live Indicator */}
         {isLive && (
@@ -121,18 +170,22 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         )}
 
-        {/* Creator Info with Tokens */}
-        <div className="absolute bottom-24 left-4 animate-slide-up">
-          <CreatorInfo creator={creator} />
+        {/* Creator Avatar and Tokens Only */}
+        <div className="absolute bottom-24 left-4 animate-slide-up flex items-center">
+          <div className="relative">
+            <img
+              src={creator.avatar}
+              alt={creator.name}
+              className="h-12 w-12 rounded-full border-2 border-streamixy-primary"
+            />
+            <div className="absolute -bottom-1 -right-1 bg-streamixy-primary text-xs text-white rounded-full px-1">
+              SYX
+            </div>
+          </div>
           {/* Real-time token display */}
-          <div className="mt-2 bg-streamixy-primary/50 rounded-full px-3 py-1 text-xs text-white inline-flex items-center">
+          <div className="ml-2 bg-streamixy-primary/50 rounded-full px-3 py-1 text-xs text-white inline-flex items-center">
             <span className="font-bold mr-1">SYX:</span> {creatorTokens}
           </div>
-        </div>
-
-        {/* Stream Title */}
-        <div className="absolute bottom-44 left-4 max-w-[80%]">
-          <h3 className="text-lg font-bold text-white glow-text">{title}</h3>
         </div>
 
         {/* Viewer Count */}
@@ -140,8 +193,27 @@ const VideoReel: React.FC<VideoReelProps> = ({
           <span className="text-xs text-white">{viewers} viewers</span>
         </div>
 
+        {/* Active Comment Display */}
+        {activeComment && (
+          <div className="absolute bottom-48 left-4 max-w-[80%] animate-fade-in glass px-4 py-2 rounded-lg">
+            <p className="text-white text-sm">{activeComment.text}</p>
+          </div>
+        )}
+
         {/* Interaction Buttons */}
         <div className={`absolute ${isMobile ? 'right-2' : 'right-4'} bottom-1/3 flex flex-col space-y-6`}>
+          {/* Search Button */}
+          <VoteButton
+            icon={<Search className="h-6 w-6" />}
+            label="Search"
+            onClick={() => {
+              toast({
+                title: "Search",
+                description: "Search functionality coming soon...",
+              });
+            }}
+          />
+          
           {/* Vote Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
@@ -152,7 +224,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 />
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onClick={(e) => e.stopPropagation()}>
               <DialogHeader>
                 <DialogTitle>Vote SYX Tokens</DialogTitle>
               </DialogHeader>
@@ -165,7 +237,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     <Button 
                       key={amount} 
                       className="bg-streamixy-highlight hover:bg-streamixy-highlight/80"
-                      onClick={() => handleVote(amount)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVote(amount);
+                      }}
                     >
                       {amount} SYX
                     </Button>
@@ -180,7 +255,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     id="custom-amount"
                   />
                   <Button 
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       const input = document.getElementById('custom-amount') as HTMLInputElement;
                       const value = parseInt(input.value);
                       if (value && value > 0) {
@@ -205,7 +281,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 />
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onClick={(e) => e.stopPropagation()}>
               <DialogHeader>
                 <DialogTitle>Send Gifts</DialogTitle>
               </DialogHeader>
@@ -219,7 +295,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
                       key={gift.id} 
                       variant="outline" 
                       className="h-auto flex flex-col p-4 items-center"
-                      onClick={() => handleGift(gift)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGift(gift);
+                      }}
                     >
                       <span className="text-3xl mb-2">{gift.emoji}</span>
                       <span className="text-sm">{gift.name}</span>
@@ -241,7 +320,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 />
               </div>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent onClick={(e) => e.stopPropagation()}>
               <DialogHeader>
                 <DialogTitle>Share Stream</DialogTitle>
               </DialogHeader>
@@ -255,7 +334,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
                       key={option.name} 
                       variant="outline" 
                       className="h-auto flex flex-col p-4 items-center"
-                      onClick={() => handleShare(option.name)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShare(option.name);
+                      }}
                       style={{ 
                         borderColor: option.color,
                         color: option.color 
@@ -265,6 +347,41 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     </Button>
                   ))}
                 </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          {/* Comment Button - Opens Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <div>
+                <VoteButton
+                  icon={<MessageSquare className="h-6 w-6" />}
+                  label="Comment"
+                />
+              </div>
+            </DialogTrigger>
+            <DialogContent onClick={(e) => e.stopPropagation()}>
+              <DialogHeader>
+                <DialogTitle>Add Comment</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4 py-4">
+                <Textarea 
+                  placeholder="Type your comment here..."
+                  className="min-h-[100px]"
+                  id="comment-input"
+                />
+                <Button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const input = document.getElementById('comment-input') as HTMLTextAreaElement;
+                    handleComment(input.value);
+                    input.value = '';
+                  }}
+                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                >
+                  Post Comment
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

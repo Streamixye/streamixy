@@ -89,6 +89,13 @@ const Index = () => {
 
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
+    e.stopPropagation();
+    
+    // Only change reels if not interacting with controls
+    if ((e.target as HTMLElement).closest(".dialog-content")) {
+      return;
+    }
+    
     if (e.deltaY > 0) {
       // Scrolling down
       setCurrentReelIndex((prevIndex) =>
@@ -107,6 +114,10 @@ const Index = () => {
   const [touchEnd, setTouchEnd] = useState(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Don't handle touch if interacting with controls
+    if ((e.target as HTMLElement).closest(".dialog-content")) {
+      return;
+    }
     setTouchStart(e.targetTouches[0].clientY);
   };
 
@@ -114,7 +125,12 @@ const Index = () => {
     setTouchEnd(e.targetTouches[0].clientY);
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    // Don't handle touch end if interacting with controls
+    if ((e.target as HTMLElement).closest(".dialog-content")) {
+      return;
+    }
+    
     if (touchStart - touchEnd > 50) {
       // Swipe up - go to next reel
       setCurrentReelIndex((prevIndex) =>
