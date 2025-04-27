@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Video, List, NftIcon, BarChart3 } from "lucide-react";
+import { Home, Video, List, NfcIcon, BarChart3 } from "lucide-react";
 
 const BottomNav = () => {
   const location = useLocation();

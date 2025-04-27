@@ -15,8 +15,9 @@ const VoteButton: React.FC<VoteButtonProps> = ({
   onClick,
   active = false,
 }) => {
-  // Add stopPropagation to prevent the click from bubbling up
+  // Ensure the click doesn't bubble up AND doesn't trigger default behavior
   const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (onClick) onClick();
   };
