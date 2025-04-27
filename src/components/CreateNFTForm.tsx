@@ -6,30 +6,51 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Image as ImageIcon } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 interface CreateNFTFormProps {
   onSuccess?: () => void;
 }
 
-const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const { toast } = useToast();
+// Define schema for form validation
+const formSchema = z.object({
+  name: z.string().min(3, {
+    message: "NFT name must be at least 3 characters.",
+  }),
+  imageUrl: z.string().url({
+    message: "Please enter a valid URL.",
+  }),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+});
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
+  const { toast } = useToast();
+  
+  // Setup react-hook-form with zod validation
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      imageUrl: "",
+      description: "",
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
     // In a real app, this would interact with your NFT contract
     toast({
       title: "NFT Created Successfully",
-      description: `${name} has been created with a base value of 15 SYX`,
+      description: `${values.name} has been created with a base value of 15 SYX`,
       duration: 3000,
     });
     
-    setName('');
-    setDescription('');
-    setImageUrl('');
+    // Reset the form
+    form.reset();
     
     if (onSuccess) {
       onSuccess();
@@ -45,49 +66,69 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm text-white mb-1.5 block">NFT Name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter NFT name"
-              required
-              className="bg-transparent border-white/20 text-white"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm text-white mb-1.5 block">NFT Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter NFT name"
+                      className="bg-transparent border-white/20 text-white"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div>
-            <label className="text-sm text-white mb-1.5 block">Image URL</label>
-            <Input
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Enter image URL"
-              required
-              className="bg-transparent border-white/20 text-white"
+            
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm text-white mb-1.5 block">Image URL</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter image URL"
+                      className="bg-transparent border-white/20 text-white"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div>
-            <label className="text-sm text-white mb-1.5 block">Description</label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter NFT description"
-              required
-              className="bg-transparent border-white/20 min-h-[100px] text-white"
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm text-white mb-1.5 block">Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Enter NFT description"
+                      className="bg-transparent border-white/20 min-h-[100px] text-white"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="flex justify-end">
-            <Button 
-              type="submit"
-              className="bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
-            >
-              Create NFT (15 SYX)
-            </Button>
-          </div>
-        </form>
+            
+            <div className="flex justify-end">
+              <Button 
+                type="submit"
+                className="bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
+              >
+                Create NFT (15 SYX)
+              </Button>
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
