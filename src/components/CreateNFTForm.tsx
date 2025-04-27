@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Image as ImageIcon } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -58,7 +58,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <Card className="bg-black border border-white/10">
+    <Card className="bg-black border border-white/10 w-full">
       <CardHeader>
         <CardTitle className="text-base flex items-center text-white">
           <ImageIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
@@ -81,6 +81,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
                       className="bg-transparent border-white/20 text-white"
                     />
                   </FormControl>
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -98,6 +99,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
                       className="bg-transparent border-white/20 text-white"
                     />
                   </FormControl>
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -115,6 +117,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
                       className="bg-transparent border-white/20 min-h-[100px] text-white"
                     />
                   </FormControl>
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
