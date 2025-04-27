@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Play, Gift, Share, Vote, MessageSquare, Search, MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -195,217 +196,219 @@ const VideoReel: React.FC<VideoReelProps> = ({
         )}
 
         <div 
-          className="absolute right-4 bottom-1/3 flex flex-col space-y-4"
+          className="absolute right-4 bottom-1/4 flex flex-col space-y-6"
           onClick={stopAllPropagation}
         >
-          <div onClick={() => setIsSearchOpen(true)}>
-            <VoteButton
-              icon={<Search className="h-6 w-6" />}
-              label="Search"
-            />
-          </div>
-
-          <Dialog>
-            <DialogTrigger asChild>
-              <div onClick={stopAllPropagation}>
-                <VoteButton
-                  icon={<Vote className="h-6 w-6" />}
-                  label="Vote"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent onClick={stopAllPropagation} className="dialog-content">
-              <DialogHeader>
-                <DialogTitle>Vote SYX Tokens</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Send SYX tokens to support {creator.name}
-                </p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {[10, 50, 100, 500, 1000].map((amount) => (
+          <button 
+            className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
+            onClick={() => setIsSearchOpen(true)}
+          >
+            <Search className="h-7 w-7 text-white" />
+          </button>
+          
+          <div className="flex flex-col space-y-6 mt-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<Vote className="h-7 w-7" />}
+                    label="Vote"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Vote SYX Tokens</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Send SYX tokens to support {creator.name}
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {[10, 50, 100, 500, 1000].map((amount) => (
+                      <Button 
+                        key={amount} 
+                        className="bg-streamixy-highlight hover:bg-streamixy-highlight/80"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleVote(amount);
+                        }}
+                      >
+                        {amount} SYX
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="flex space-x-2 items-center mt-4">
+                    <Input 
+                      type="number" 
+                      placeholder="Custom amount" 
+                      className="flex-1" 
+                      min={1}
+                      id="custom-amount"
+                    />
                     <Button 
-                      key={amount} 
-                      className="bg-streamixy-highlight hover:bg-streamixy-highlight/80"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleVote(amount);
+                        const input = document.getElementById('custom-amount') as HTMLInputElement;
+                        const value = parseInt(input.value);
+                        if (value && value > 0) {
+                          handleVote(value);
+                        }
                       }}
                     >
-                      {amount} SYX
+                      Send
                     </Button>
-                  ))}
+                  </div>
                 </div>
-                <div className="flex space-x-2 items-center mt-4">
-                  <Input 
-                    type="number" 
-                    placeholder="Custom amount" 
-                    className="flex-1" 
-                    min={1}
-                    id="custom-amount"
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<Gift className="h-7 w-7" />}
+                    label="Gift"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Send Gifts</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Send gifts to {creator.name}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {giftItems.map((gift) => (
+                      <Button 
+                        key={gift.id} 
+                        variant="outline" 
+                        className="h-auto flex flex-col p-4 items-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGift(gift);
+                        }}
+                      >
+                        <span className="text-3xl mb-2">{gift.emoji}</span>
+                        <span className="text-sm">{gift.name}</span>
+                        <span className="text-xs text-muted-foreground mt-1">{gift.value} SYX</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<Share className="h-7 w-7" />}
+                    label="Share"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Share Stream</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Share {creator.name}'s stream
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {shareOptions.map((option) => (
+                      <Button 
+                        key={option.name} 
+                        variant="outline" 
+                        className="h-auto flex flex-col p-4 items-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare(option.name);
+                        }}
+                        style={{ 
+                          borderColor: option.color,
+                          color: option.color 
+                        }}
+                      >
+                        <span className="text-sm">{option.name}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<MessageSquare className="h-7 w-7" />}
+                    label="Comment"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Add Comment</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <Textarea 
+                    placeholder="Type your comment here..."
+                    className="min-h-[100px]"
+                    id="comment-input"
                   />
                   <Button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      const input = document.getElementById('custom-amount') as HTMLInputElement;
-                      const value = parseInt(input.value);
-                      if (value && value > 0) {
-                        handleVote(value);
-                      }
+                      handleComment((document.getElementById('comment-input') as HTMLTextAreaElement).value);
+                      (document.getElementById('comment-input') as HTMLTextAreaElement).value = '';
                     }}
+                    className="bg-streamixy-primary hover:bg-streamixy-primary/80"
                   >
-                    Send
+                    Post Comment
                   </Button>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <div onClick={stopAllPropagation}>
-                <VoteButton
-                  icon={<Gift className="h-6 w-6" />}
-                  label="Gift"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent onClick={stopAllPropagation} className="dialog-content">
-              <DialogHeader>
-                <DialogTitle>Send Gifts</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Send gifts to {creator.name}
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  {giftItems.map((gift) => (
-                    <Button 
-                      key={gift.id} 
-                      variant="outline" 
-                      className="h-auto flex flex-col p-4 items-center"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleGift(gift);
-                      }}
-                    >
-                      <span className="text-3xl mb-2">{gift.emoji}</span>
-                      <span className="text-sm">{gift.name}</span>
-                      <span className="text-xs text-muted-foreground mt-1">{gift.value} SYX</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <div onClick={stopAllPropagation}>
-                <VoteButton
-                  icon={<Share className="h-6 w-6" />}
-                  label="Share"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent onClick={stopAllPropagation} className="dialog-content">
-              <DialogHeader>
-                <DialogTitle>Share Stream</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Share {creator.name}'s stream
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  {shareOptions.map((option) => (
-                    <Button 
-                      key={option.name} 
-                      variant="outline" 
-                      className="h-auto flex flex-col p-4 items-center"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShare(option.name);
-                      }}
-                      style={{ 
-                        borderColor: option.color,
-                        color: option.color 
-                      }}
-                    >
-                      <span className="text-sm">{option.name}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <div onClick={stopAllPropagation}>
-                <VoteButton
-                  icon={<MessageSquare className="h-6 w-6" />}
-                  label="Comment"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent onClick={stopAllPropagation} className="dialog-content">
-              <DialogHeader>
-                <DialogTitle>Add Comment</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col space-y-4 py-4">
-                <Textarea 
-                  placeholder="Type your comment here..."
-                  className="min-h-[100px]"
-                  id="comment-input"
-                />
-                <Button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleComment((document.getElementById('comment-input') as HTMLTextAreaElement).value);
-                    (document.getElementById('comment-input') as HTMLTextAreaElement).value = '';
-                  }}
-                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                >
-                  Post Comment
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
 
-          <Dialog>
-            <DialogTrigger asChild>
-              <div onClick={stopAllPropagation}>
-                <VoteButton
-                  icon={<MessagesSquare className="h-6 w-6" />}
-                  label="Request"
-                />
-              </div>
-            </DialogTrigger>
-            <DialogContent onClick={stopAllPropagation} className="dialog-content">
-              <DialogHeader>
-                <DialogTitle>Send Request</DialogTitle>
-              </DialogHeader>
-              <div className="flex flex-col space-y-4 py-4">
-                <Textarea 
-                  placeholder="Type your request here..."
-                  className="min-h-[100px]"
-                  id="request-input"
-                />
-                <Button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toast({
-                      title: "Request Sent",
-                      description: "Your request has been sent to the creator",
-                    });
-                  }}
-                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                >
-                  Send Request
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<MessagesSquare className="h-7 w-7" />}
+                    label="Request"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+                <DialogHeader>
+                  <DialogTitle>Send Request</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <Textarea 
+                    placeholder="Type your request here..."
+                    className="min-h-[100px]"
+                    id="request-input"
+                  />
+                  <Button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast({
+                        title: "Request Sent",
+                        description: "Your request has been sent to the creator",
+                      });
+                    }}
+                    className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  >
+                    Send Request
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
