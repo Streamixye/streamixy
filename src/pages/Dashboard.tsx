@@ -302,32 +302,10 @@ const Dashboard = () => {
     });
   };
 
-  if (!walletConnected) {
-    return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-        <Card className="max-w-md w-full bg-black border border-white/10">
-          <CardHeader>
-            <CardTitle className="text-xl text-center">Connect Wallet</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-white/70 text-center">Connect your wallet to access your dashboard</p>
-            <Button 
-              onClick={connectWallet}
-              className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center"
-            >
-              <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
           <DialogTrigger asChild>
             <Button 
@@ -400,8 +378,12 @@ const Dashboard = () => {
           </AvatarFallback>
         </Avatar>
         <div className="ml-4">
-          <h2 className="text-xl font-bold">{profile.nickname}</h2>
-          <p className="text-white/70 text-sm">Wallet: {walletConnected ? `0x...${Math.random().toString(36).substring(2, 8)}` : 'Not Connected'}</p>
+          <h2 className="text-xl font-bold text-white">{profile.nickname}</h2>
+          <p className="text-white/70 text-sm">
+            {walletConnected 
+              ? `Wallet: 0x...${Math.random().toString(36).substring(2, 8)}` 
+              : 'Wallet Not Connected'}
+          </p>
         </div>
       </div>
 
@@ -418,22 +400,20 @@ const Dashboard = () => {
         </TabsList>
         
         <TabsContent value="creator" className="space-y-4 animate-fade-in">
-          <Card className="bg-black border border-white/10">
-            <CardContent className="pt-6">
-              <p className="text-white/70 mb-4">Start your creator journey and earn SYX tokens from your content</p>
-              {!walletConnected && (
+          {!walletConnected ? (
+            <Card className="bg-black border border-white/10">
+              <CardContent className="pt-6">
+                <p className="text-white/70 mb-4">Connect your wallet to start your creator journey</p>
                 <Button 
                   onClick={connectWallet}
-                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center"
+                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
                 >
                   <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet to Start
+                  Connect Wallet
                 </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {walletConnected && (
+              </CardContent>
+            </Card>
+          ) : (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
@@ -584,22 +564,20 @@ const Dashboard = () => {
         </TabsContent>
         
         <TabsContent value="audience" className="space-y-4 animate-fade-in">
-          <Card className="bg-black border border-white/10">
-            <CardContent className="pt-6">
-              <p className="text-white/70 mb-4">Support your favorite creators and earn rewards through staking</p>
-              {!walletConnected && (
+          {!walletConnected ? (
+            <Card className="bg-black border border-white/10">
+              <CardContent className="pt-6">
+                <p className="text-white/70 mb-4">Connect your wallet to support creators and earn rewards</p>
                 <Button 
                   onClick={connectWallet}
-                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center"
+                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
                 >
                   <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet to Start
+                  Connect Wallet
                 </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {walletConnected && (
+              </CardContent>
+            </Card>
+          ) : (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
