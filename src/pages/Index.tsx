@@ -1,8 +1,5 @@
-
 import React, { useState } from "react";
 import VideoReel from "@/components/VideoReel";
-import Navbar from "@/components/Navbar";
-import ReelNavigation from "@/components/ReelNavigation";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -86,45 +83,38 @@ const MOCK_REELS = [
 const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
 
-  const handleNextReel = () => {
-    setCurrentReelIndex((prevIndex) =>
-      prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const handlePreviousReel = () => {
-    setCurrentReelIndex((prevIndex) =>
-      prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
-    );
+  const handleScroll = (e: React.WheelEvent) => {
+    if (e.deltaY > 0) {
+      // Scrolling down
+      setCurrentReelIndex((prevIndex) =>
+        prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
+      );
+    } else {
+      // Scrolling up
+      setCurrentReelIndex((prevIndex) =>
+        prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <Navbar />
-      
-      <div className="h-screen w-full flex items-center justify-center">
-        <div className="w-full max-w-md h-full pt-16 pb-4">
-          <VideoReel {...MOCK_REELS[currentReelIndex]} />
+      <div 
+        className="h-screen w-full overflow-hidden"
+        onWheel={handleScroll}
+      >
+        <div 
+          className="w-full h-full transition-transform duration-300"
+          style={{
+            transform: `translateY(-${currentReelIndex * 100}%)`
+          }}
+        >
+          {MOCK_REELS.map((reel, index) => (
+            <div key={reel.streamId} className="h-screen w-full">
+              <VideoReel {...reel} />
+            </div>
+          ))}
         </div>
-      </div>
-      
-      <ReelNavigation
-        onNext={handleNextReel}
-        onPrevious={handlePreviousReel}
-      />
-      
-      {/* Navigation indicators */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 flex space-x-1.5">
-        {MOCK_REELS.map((_, index) => (
-          <div 
-            key={index}
-            className={`h-1 w-4 rounded-full transition-all duration-300 ${
-              index === currentReelIndex 
-                ? "bg-streamixy-primary w-6" 
-                : "bg-gray-500/50"
-            }`}
-          />
-        ))}
       </div>
     </div>
   );
