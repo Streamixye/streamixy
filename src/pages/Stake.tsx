@@ -11,22 +11,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Coins, TrendingUp, Clock, Calendar } from "lucide-react";
+import { Coins, TrendingUp, ArrowUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 
 const Stake = () => {
-  const [balance, setBalance] = useState(1000); // Mock user balance
+  const [balance, setBalance] = useState(1000);
   const [stakeAmount, setStakeAmount] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
   const [stakedAmount, setStakedAmount] = useState(0);
   const [lockPeriod, setLockPeriod] = useState("3weeks");
   const [apy, setApy] = useState(12);
   const [earnings, setEarnings] = useState(0);
+  const [showPerformance, setShowPerformance] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [progress, setProgress] = useState(0);
   
-  // Calculate APY based on lock period
   useEffect(() => {
     switch(lockPeriod) {
       case "3weeks":
@@ -43,19 +42,15 @@ const Stake = () => {
     }
   }, [lockPeriod]);
   
-  // Simulate earnings growth
   useEffect(() => {
     const timer = setInterval(() => {
       if (stakedAmount > 0) {
-        // Calculate daily earnings based on APY
         const dailyRate = apy / 365 / 100;
-        const newEarnings = earnings + (stakedAmount * dailyRate) / 24; // Hourly simulation
+        const newEarnings = earnings + (stakedAmount * dailyRate) / 24;
         setEarnings(newEarnings);
-        
-        // Update progress
         setProgress(prev => (prev < 100 ? prev + 0.1 : 0));
       }
-    }, 1000); // Update every second for demo purposes
+    }, 1000);
     
     return () => clearInterval(timer);
   }, [stakedAmount, earnings, apy]);
@@ -67,8 +62,8 @@ const Stake = () => {
     const newStakedAmount = stakedAmount + amount;
     setStakedAmount(newStakedAmount);
     setBalance(balance - amount);
+    setShowPerformance(true);
     
-    // Add transaction record
     const transaction = {
       id: Date.now(),
       type: "Stake",
@@ -82,202 +77,158 @@ const Stake = () => {
   };
   
   const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount);
-    if (isNaN(amount) || amount <= 0 || amount > stakedAmount) return;
+    if (stakedAmount <= 0) return;
     
-    const newStakedAmount = stakedAmount - amount;
-    setStakedAmount(newStakedAmount);
-    setBalance(balance + amount + (amount * apy / 100) * (progress / 100));
+    const newBalance = balance + stakedAmount + earnings;
+    setBalance(newBalance);
     
-    // Add transaction record
     const transaction = {
       id: Date.now(),
       type: "Withdraw",
-      amount: amount,
+      amount: stakedAmount,
       date: new Date().toLocaleString(),
-      earnings: (amount * apy / 100) * (progress / 100)
+      earnings: earnings
     };
     
     setTransactions([transaction, ...transactions]);
-    setWithdrawAmount("");
+    setStakedAmount(0);
+    setEarnings(0);
+    setProgress(0);
+    setShowPerformance(false);
   };
 
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-20">
-      <h1 className="text-2xl font-bold mb-4">Stake SYX</h1>
+      <h1 className="text-2xl font-bold mb-4 text-white">Stake SYX</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Card className="bg-black border border-white/10">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <Coins className="h-5 w-5 text-streamixy-primary" />
               Available Balance
             </CardTitle>
-            <CardDescription className="text-white/70">
+            <CardDescription className="text-white">
               Your available SYX tokens
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{balance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
+            <p className="text-3xl font-bold text-white">{balance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
           </CardContent>
         </Card>
         
-        <Card className="bg-black border border-white/10">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-streamixy-primary" />
-              Staking Rewards
-            </CardTitle>
-            <CardDescription className="text-white/70">
-              Your current earnings
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{earnings.toFixed(4)} <span className="text-streamixy-primary">SYX</span></p>
-            <Progress className="mt-2" value={progress} />
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card className="bg-black border border-white/10">
-          <CardHeader>
-            <CardTitle>Stake Tokens</CardTitle>
-            <CardDescription className="text-white/70">
-              Lock your SYX tokens to earn rewards
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Amount to Stake</label>
-                <Input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={stakeAmount}
-                  onChange={(e) => setStakeAmount(e.target.value)}
-                  className="bg-transparent border-white/20"
-                />
+        {showPerformance && (
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <TrendingUp className="h-5 w-5 text-streamixy-primary" />
+                Staking Performance 
+              </CardTitle>
+              <CardDescription className="text-white">
+                Your current earnings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-3xl font-bold text-white">{earnings.toFixed(4)} <span className="text-streamixy-primary">SYX</span></p>
+                <Progress className="mt-2" value={progress} />
+                <Button 
+                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  onClick={handleWithdraw}
+                >
+                  Withdraw All ({stakedAmount.toFixed(2)} SYX)
+                </Button>
               </div>
-              
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Lock Period</label>
-                <div className="flex flex-wrap gap-2">
-                  <Button 
-                    variant={lockPeriod === "3weeks" ? "default" : "outline"} 
-                    className={lockPeriod === "3weeks" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
-                    onClick={() => setLockPeriod("3weeks")}
-                  >
-                    <Clock className="h-4 w-4 mr-2" />
-                    3 Weeks
-                  </Button>
-                  <Button 
-                    variant={lockPeriod === "6weeks" ? "default" : "outline"}
-                    className={lockPeriod === "6weeks" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
-                    onClick={() => setLockPeriod("6weeks")}
-                  >
-                    <Clock className="h-4 w-4 mr-2" />
-                    6 Weeks
-                  </Button>
-                  <Button 
-                    variant={lockPeriod === "3months" ? "default" : "outline"}
-                    className={lockPeriod === "3months" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
-                    onClick={() => setLockPeriod("3months")}
-                  >
-                    <Calendar className="h-4 w-4 mr-2" />
-                    3 Months
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
-                <p className="flex justify-between">
-                  <span>Lock Period:</span>
-                  <span className="font-medium">{lockPeriod === "3weeks" ? "3 Weeks" : lockPeriod === "6weeks" ? "6 Weeks" : "3 Months"}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>APY:</span>
-                  <span className="font-medium">{apy}%</span>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
-              onClick={handleStake}
-              disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > balance}
-            >
-              Stake Now
-            </Button>
-          </CardFooter>
-        </Card>
-        
-        <Card className="bg-black border border-white/10">
-          <CardHeader>
-            <CardTitle>Withdraw Tokens</CardTitle>
-            <CardDescription className="text-white/70">
-              Withdraw your staked SYX tokens
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Staked Amount</label>
-                <p className="text-xl font-bold">{stakedAmount} <span className="text-streamixy-primary">SYX</span></p>
-              </div>
-              
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Amount to Withdraw</label>
-                <Input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="bg-transparent border-white/20"
-                />
-              </div>
-              
-              <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
-                <p className="flex justify-between">
-                  <span>Estimated Rewards:</span>
-                  <span className="font-medium">
-                    {withdrawAmount && !isNaN(parseFloat(withdrawAmount)) 
-                      ? ((parseFloat(withdrawAmount) * apy / 100) * (progress / 100)).toFixed(4) 
-                      : "0"} SYX
-                  </span>
-                </p>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
-              onClick={handleWithdraw}
-              disabled={!withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > stakedAmount}
-            >
-              Withdraw
-            </Button>
-          </CardFooter>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
       
       <Card className="bg-black border border-white/10">
         <CardHeader>
-          <CardTitle>Transaction History</CardTitle>
+          <CardTitle className="text-white">Stake Tokens</CardTitle>
+          <CardDescription className="text-white">
+            Lock your SYX tokens to earn rewards
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {transactions.length === 0 ? (
-            <p className="text-center text-white/50 py-4">No transactions yet</p>
-          ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-white mb-1 block">Amount to Stake</label>
+              <Input
+                type="number"
+                placeholder="Enter amount"
+                value={stakeAmount}
+                onChange={(e) => setStakeAmount(e.target.value)}
+                className="bg-transparent border-white/20"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-white mb-1 block">Lock Period</label>
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  variant={lockPeriod === "3weeks" ? "default" : "outline"} 
+                  className={lockPeriod === "3weeks" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
+                  onClick={() => setLockPeriod("3weeks")}
+                >
+                  3 Weeks
+                </Button>
+                <Button 
+                  variant={lockPeriod === "6weeks" ? "default" : "outline"}
+                  className={lockPeriod === "6weeks" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
+                  onClick={() => setLockPeriod("6weeks")}
+                >
+                  6 Weeks
+                </Button>
+                <Button 
+                  variant={lockPeriod === "3months" ? "default" : "outline"}
+                  className={lockPeriod === "3months" ? "bg-streamixy-primary" : "border-white/20 hover:bg-streamixy-primary/20"}
+                  onClick={() => setLockPeriod("3months")}
+                >
+                  3 Months
+                </Button>
+              </div>
+            </div>
+            
+            <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
+              <p className="flex justify-between text-white">
+                <span>Lock Period:</span>
+                <span className="font-medium">{lockPeriod === "3weeks" ? "3 Weeks" : lockPeriod === "6weeks" ? "6 Weeks" : "3 Months"}</span>
+              </p>
+              <p className="flex justify-between text-white">
+                <span>APY:</span>
+                <span className="font-medium">{apy}%</span>
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button 
+            className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
+            onClick={handleStake}
+            disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > balance}
+          >
+            <ArrowUp className="h-4 w-4 mr-2" />
+            Stake Now
+          </Button>
+        </CardFooter>
+      </Card>
+      
+      {transactions.length > 0 && (
+        <Card className="bg-black border border-white/10 mt-6">
+          <CardHeader>
+            <CardTitle className="text-white">Transaction History</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Details</TableHead>
+                    <TableHead className="text-white">Type</TableHead>
+                    <TableHead className="text-white">Amount</TableHead>
+                    <TableHead className="text-white">Date</TableHead>
+                    <TableHead className="text-white">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -288,9 +239,9 @@ const Stake = () => {
                           {transaction.type}
                         </Badge>
                       </TableCell>
-                      <TableCell>{transaction.amount} SYX</TableCell>
-                      <TableCell>{transaction.date}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-white">{transaction.amount} SYX</TableCell>
+                      <TableCell className="text-white">{transaction.date}</TableCell>
+                      <TableCell className="text-white">
                         {transaction.type === "Stake" 
                           ? `Locked for ${transaction.period === "3weeks" ? "3 Weeks" : transaction.period === "6weeks" ? "6 Weeks" : "3 Months"}`
                           : `+${transaction.earnings?.toFixed(4) || 0} SYX rewards`}
@@ -300,9 +251,9 @@ const Stake = () => {
                 </TableBody>
               </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
