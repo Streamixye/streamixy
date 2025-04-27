@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   Card, 
   CardContent, 
@@ -8,12 +8,10 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
-// NFT data structure
 interface NFT {
   id: number;
   name: string;
@@ -83,24 +81,19 @@ const NFTs = () => {
   const [userBalance, setUserBalance] = useState(1000);
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   
-  // Simulate price changes
   useEffect(() => {
     const interval = setInterval(() => {
       setNfts(prevNfts => 
         prevNfts.map(nft => {
-          // Generate random price movement
-          const priceChange = (Math.random() * 10) - 5; // -5 to +5
+          const priceChange = (Math.random() * 10) - 5;
           const previousPrice = nft.price;
           const newPrice = Math.max(10, nft.price + priceChange);
           
-          // Calculate ROI based on price change
           const roi = ((newPrice - previousPrice) / previousPrice) * 100;
           
-          // Random market cap change
           const capChange = Math.random() < 0.5 ? -1 : 1;
           const newMarketCap = nft.marketCap + (capChange * Math.random() * 1000);
           
-          // Calculate PNL if staked
           const pnl = nft.staked > 0 
             ? nft.staked * ((newPrice - previousPrice) / previousPrice) 
             : nft.pnl;
@@ -130,10 +123,8 @@ const NFTs = () => {
     
     const amount = parseFloat(stakeAmount);
     
-    // Update user balance
     setUserBalance(userBalance - amount);
     
-    // Update NFT staked amount
     setNfts(prevNfts => 
       prevNfts.map(nft => 
         nft.id === selectedNft.id 
@@ -142,7 +133,6 @@ const NFTs = () => {
       )
     );
     
-    // Reset form
     setStakeAmount("");
     setStakeModalOpen(false);
     setSelectedNft(null);
@@ -160,77 +150,79 @@ const NFTs = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {nfts.map((nft) => (
-          <Card key={nft.id} className="bg-black border border-white/10 overflow-hidden">
-            <div className="w-full h-48 bg-streamixy-dark/50 flex items-center justify-center">
-              <div className="text-4xl font-bold text-streamixy-primary/30">{nft.name}</div>
-            </div>
-            
-            <CardHeader>
-              <CardTitle className="flex justify-between">
-                <span>{nft.name}</span>
-                <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
-                  {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                  {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
-                </Badge>
-              </CardTitle>
-              <div className="text-sm text-white/70">Creator: {nft.creator}</div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <div className="p-2 rounded bg-black/40">
-                  <div className="text-white/70">Price</div>
-                  <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500' : 'text-red-500'}`}>
-                    {nft.price.toFixed(2)} SYX
-                  </div>
-                </div>
-                
-                <div className="p-2 rounded bg-black/40">
-                  <div className="text-white/70">Market Cap</div>
-                  <div className="font-bold">{nft.marketCap.toLocaleString()} SYX</div>
-                  <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
-                  </div>
-                </div>
-                
-                <div className="p-2 rounded bg-black/40">
-                  <div className="text-white/70">ROI</div>
-                  <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
-                  </div>
-                </div>
+          <Link to={`/nfts/${nft.id}`} key={nft.id}>
+            <Card className="bg-black border border-white/10 overflow-hidden hover:border-streamixy-primary/50 transition-colors">
+              <div className="w-full h-48 bg-streamixy-dark/50 flex items-center justify-center">
+                <div className="text-4xl font-bold text-streamixy-primary/30">{nft.name}</div>
               </div>
               
-              {nft.staked > 0 && (
-                <div className="mt-2 p-3 rounded bg-streamixy-primary/10">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Your Stake:</span>
-                    <span className="font-bold">{nft.staked.toFixed(2)} SYX</span>
+              <CardHeader>
+                <CardTitle className="flex justify-between">
+                  <span>{nft.name}</span>
+                  <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
+                    {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                    {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
+                  </Badge>
+                </CardTitle>
+                <div className="text-sm text-white/70">Creator: {nft.creator}</div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div className="p-2 rounded bg-black/40">
+                    <div className="text-white/70">Price</div>
+                    <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500' : 'text-red-500'}`}>
+                      {nft.price.toFixed(2)} SYX
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>P&L:</span>
-                    <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
-                    </span>
+                  
+                  <div className="p-2 rounded bg-black/40">
+                    <div className="text-white/70">Market Cap</div>
+                    <div className="font-bold">{nft.marketCap.toLocaleString()} SYX</div>
+                    <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
+                      <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
+                    </div>
                   </div>
-                  <Progress 
-                    className="mt-2" 
-                    value={50 + (nft.pnl / nft.staked * 500)} 
-                  />
+                  
+                  <div className="p-2 rounded bg-black/40">
+                    <div className="text-white/70">ROI</div>
+                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
+                    </div>
+                  </div>
                 </div>
-              )}
-            </CardContent>
-            
-            <CardFooter>
-              <Button 
-                onClick={() => handleStakeModalOpen(nft)} 
-                className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
-              >
-                <Coins className="h-4 w-4 mr-2" /> 
-                Stake SYX
-              </Button>
-            </CardFooter>
-          </Card>
+                
+                {nft.staked > 0 && (
+                  <div className="mt-2 p-3 rounded bg-streamixy-primary/10">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Your Stake:</span>
+                      <span className="font-bold">{nft.staked.toFixed(2)} SYX</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>P&L:</span>
+                      <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
+                      </span>
+                    </div>
+                    <Progress 
+                      className="mt-2" 
+                      value={50 + (nft.pnl / nft.staked * 500)} 
+                    />
+                  </div>
+                )}
+              </CardContent>
+              
+              <CardFooter>
+                <Button 
+                  onClick={() => handleStakeModalOpen(nft)} 
+                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
+                >
+                  <Coins className="h-4 w-4 mr-2" /> 
+                  Stake SYX
+                </Button>
+              </CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
       
