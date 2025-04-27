@@ -12,6 +12,7 @@ import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import NFTDetail from "./pages/NFTDetail";
+import CreatorProfile from "./pages/CreatorProfile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/stake" element={<Stake />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/creator/:username" element={<CreatorProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNav />
