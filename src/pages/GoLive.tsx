@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -38,18 +37,15 @@ const GoLive = () => {
     avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb"
   };
 
-  // Start camera when component mounts
   useEffect(() => {
     startCamera();
 
-    // Simulate viewer count increasing
     const viewerInterval = setInterval(() => {
       if (isLive) {
         setViewerCount(prev => Math.min(prev + Math.floor(Math.random() * 5), 999));
       }
     }, 5000);
     
-    // Simulate random comments
     const commentInterval = setInterval(() => {
       if (isLive && Math.random() > 0.6) {
         const randomComments = [
@@ -65,7 +61,6 @@ const GoLive = () => {
       }
     }, 3000);
 
-    // Simulate receiving gifts
     const giftInterval = setInterval(() => {
       if (isLive && Math.random() > 0.8) {
         const giftItems = ["🌹", "🦁", "👑", "💎"];
@@ -86,12 +81,11 @@ const GoLive = () => {
     };
   }, [isLive]);
 
-  // Apply filter effect in real-time
   useEffect(() => {
     if (isLive && videoRef.current && canvasRef.current && activeFilter) {
       const interval = setInterval(() => {
         applyFilterToVideo();
-      }, 33); // ~30fps
+      }, 33);
       
       return () => clearInterval(interval);
     }
@@ -164,7 +158,6 @@ const GoLive = () => {
     const context = canvasRef.current.getContext('2d');
     if (!context) return;
     
-    // Draw the current video frame
     context.drawImage(
       videoRef.current, 
       0, 0, 
@@ -172,7 +165,6 @@ const GoLive = () => {
       canvasRef.current.height
     );
     
-    // Apply filter effects based on activeFilter
     const imageData = context.getImageData(
       0, 0, 
       canvasRef.current.width, 
@@ -200,11 +192,9 @@ const GoLive = () => {
         break;
     }
     
-    // Put the modified image data back
     context.putImageData(imageData, 0, 0);
   };
 
-  // Filter effect functions
   const applyGrayscale = (data: Uint8ClampedArray) => {
     for (let i = 0; i < data.length; i += 4) {
       const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
@@ -252,7 +242,6 @@ const GoLive = () => {
     setComments(prev => [...prev, newComment]);
     setCommentCounter(prev => prev + 1);
     
-    // Remove comment after 5 seconds
     setTimeout(() => {
       setComments(prev => prev.filter(comment => comment.id !== newComment.id));
     }, 5000);
@@ -267,7 +256,6 @@ const GoLive = () => {
     setReceivedGifts(prev => [...prev, newGift]);
     setGiftCounter(prev => prev + 1);
     
-    // Remove gift after 3 seconds
     setTimeout(() => {
       setReceivedGifts(prev => prev.filter(gift => gift.id !== newGift.id));
     }, 3000);
@@ -299,9 +287,7 @@ const GoLive = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Camera View (Full Screen) */}
       <div className="relative w-full h-screen overflow-hidden">
-        {/* Video Element */}
         <video 
           ref={videoRef}
           autoPlay 
@@ -310,7 +296,6 @@ const GoLive = () => {
           className={`absolute inset-0 h-full w-full object-cover ${!activeFilter || activeFilter === 'normal' ? '' : filters.find(f => f.id === activeFilter)?.class || ''}`}
         />
         
-        {/* Canvas for filter processing */}
         <canvas 
           ref={canvasRef} 
           width="640" 
@@ -318,10 +303,8 @@ const GoLive = () => {
           className={`absolute inset-0 h-full w-full object-cover ${activeFilter && activeFilter !== 'blur' ? 'block' : 'hidden'}`}
         />
         
-        {/* Semi-transparent Overlay */}
         <div className="absolute inset-0 bg-black/20" />
         
-        {/* Comments Display */}
         <div className="absolute left-0 top-20 right-0 bottom-20 overflow-hidden pointer-events-none">
           {comments.map((comment) => (
             <LiveComment 
@@ -332,7 +315,6 @@ const GoLive = () => {
           ))}
         </div>
 
-        {/* Gifts Display */}
         <div className="absolute right-20 top-20 bottom-20 overflow-hidden pointer-events-none flex flex-col items-end">
           {receivedGifts.map((gift) => (
             <div 
@@ -344,9 +326,7 @@ const GoLive = () => {
           ))}
         </div>
         
-        {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
-          {/* Creator Info */}
           <div className="flex items-center">
             <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
               <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
@@ -361,7 +341,6 @@ const GoLive = () => {
             )}
           </div>
           
-          {/* Viewers & Tokens */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-1" />
@@ -377,7 +356,6 @@ const GoLive = () => {
           </div>
         </div>
         
-        {/* Filters Scrolling List - Horizontal Scroll at Bottom */}
         <div className="absolute bottom-20 left-0 right-0 overflow-x-auto hide-scrollbar pb-2">
           <div className="flex space-x-2 px-4">
             {filters.map(filter => (
@@ -391,11 +369,9 @@ const GoLive = () => {
           </div>
         </div>
         
-        {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
           {isLive ? (
             <div className="flex flex-col space-y-4">
-              {/* Comment Input */}
               <form onSubmit={handleSubmitComment} className="flex space-x-2">
                 <Input 
                   type="text" 
@@ -412,7 +388,6 @@ const GoLive = () => {
                 </Button>
               </form>
               
-              {/* Live Controls */}
               <div className="flex justify-between">
                 <Button 
                   variant="ghost" 
@@ -453,8 +428,8 @@ const GoLive = () => {
         </div>
       </div>
 
-      {/* CSS for animations */}
-      <style jsx>{`
+      <style>
+        {`
         @keyframes gift-animation {
           0% {
             transform: translateX(100px);
@@ -485,7 +460,8 @@ const GoLive = () => {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };

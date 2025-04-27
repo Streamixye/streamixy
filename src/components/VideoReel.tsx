@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import VoteButton from "./VoteButton";
 import CreatorInfo from "./CreatorInfo";
 import { useToast } from "@/hooks/use-toast";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -501,7 +502,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
       />
 
       {/* CSS for animations */}
-      <style jsx>{`
+      <style>
+        {`
         @keyframes float {
           0% {
             transform: translateY(0);
@@ -528,7 +530,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
