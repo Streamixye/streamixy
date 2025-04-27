@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -144,10 +143,6 @@ const NFTs = () => {
     <div className="min-h-screen bg-black text-white p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">NFTs Gallery</h1>
-        <div className="text-sm">
-          <span className="text-white/70">Balance: </span>
-          <span className="font-bold">{userBalance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></span>
-        </div>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Card, 
@@ -101,48 +100,31 @@ const Stake = () => {
     <div className="min-h-screen bg-black text-white p-4 pb-20">
       <h1 className="text-2xl font-bold mb-4 text-white">Stake SYX</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <Card className="bg-black border border-white/10">
+      {showPerformance && (
+        <Card className="bg-black border border-white/10 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
-              <Coins className="h-5 w-5 text-streamixy-primary" />
-              Available Balance
+              <TrendingUp className="h-5 w-5 text-streamixy-primary" />
+              Staking Performance 
             </CardTitle>
             <CardDescription className="text-white">
-              Your available SYX tokens
+              Your current earnings
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-white">{balance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
+            <div className="space-y-4">
+              <p className="text-3xl font-bold text-white">{earnings.toFixed(4)} <span className="text-streamixy-primary">SYX</span></p>
+              <Progress className="mt-2" value={progress} />
+              <Button 
+                className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
+                onClick={handleWithdraw}
+              >
+                Withdraw All ({stakedAmount.toFixed(2)} SYX)
+              </Button>
+            </div>
           </CardContent>
         </Card>
-        
-        {showPerformance && (
-          <Card className="bg-black border border-white/10">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <TrendingUp className="h-5 w-5 text-streamixy-primary" />
-                Staking Performance 
-              </CardTitle>
-              <CardDescription className="text-white">
-                Your current earnings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-3xl font-bold text-white">{earnings.toFixed(4)} <span className="text-streamixy-primary">SYX</span></p>
-                <Progress className="mt-2" value={progress} />
-                <Button 
-                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
-                  onClick={handleWithdraw}
-                >
-                  Withdraw All ({stakedAmount.toFixed(2)} SYX)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      )}
       
       <Card className="bg-black border border-white/10">
         <CardHeader>
