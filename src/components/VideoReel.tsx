@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Play, Gift, Share, Vote, MessageSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -177,15 +176,15 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         )}
 
-        {/* Creator Info with Name in rectangular style */}
-        <div className="absolute bottom-24 left-4 animate-slide-up flex items-center">
-          <div className="flex items-center bg-black/50 backdrop-blur-md rounded-full py-1 pr-3 pl-1 border border-white/10">
-            <Avatar className="h-10 w-10 border-2 border-streamixy-primary">
+        {/* Creator Info with rectangular style */}
+        <div className="absolute bottom-24 left-4 animate-slide-up">
+          <div className="flex items-center bg-black/50 backdrop-blur-md rounded-lg py-1.5 px-3 border border-white/10">
+            <span className="text-white text-sm font-medium mr-2">{creator.name}</span>
+            <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
               <AvatarImage src={creator.avatar} alt={creator.name} />
               <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="ml-2">
-              <p className="text-white text-sm font-semibold">{creator.name}</p>
               <div className="flex items-center">
                 <span className="text-streamixy-primary text-xs font-bold">SYX:</span>
                 <span className="ml-1 text-white text-xs">{creatorTokens}</span>
@@ -206,17 +205,16 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         )}
 
-        {/* Interaction Buttons - Updated to improve mobile responsiveness */}
+        {/* Interaction Buttons with adjusted spacing */}
         <div 
-          className={`absolute ${isMobile ? 'right-2' : 'right-4'} bottom-1/3 flex flex-col space-y-4`} 
+          className="absolute right-2 bottom-1/4 flex flex-col space-y-1"
           onClick={stopAllPropagation}
         >
-          {/* Search Button */}
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Search className="h-7 w-7 md:h-6 md:w-6" />}
+                  icon={<Search className="h-5 w-5" />}
                   label="Search"
                 />
               </div>
@@ -232,12 +230,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
             </DialogContent>
           </Dialog>
           
-          {/* Vote Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Vote className="h-7 w-7 md:h-6 md:w-6" />}
+                  icon={<Vote className="h-5 w-5" />}
                   label="Vote"
                 />
               </div>
@@ -289,12 +286,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
             </DialogContent>
           </Dialog>
           
-          {/* Gift Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Gift className="h-7 w-7 md:h-6 md:w-6" />}
+                  icon={<Gift className="h-5 w-5" />}
                   label="Gift"
                 />
               </div>
@@ -328,12 +324,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
             </DialogContent>
           </Dialog>
           
-          {/* Share Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Share className="h-7 w-7 md:h-6 md:w-6" />}
+                  icon={<Share className="h-5 w-5" />}
                   label="Share"
                 />
               </div>
@@ -369,12 +364,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
             </DialogContent>
           </Dialog>
           
-          {/* Comment Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<MessageSquare className="h-7 w-7 md:h-6 md:w-6" />}
+                  icon={<MessageSquare className="h-5 w-5" />}
                   label="Comment"
                 />
               </div>
