@@ -40,6 +40,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
+import CreateNFTForm from "@/components/CreateNFTForm";
 
 interface Transaction {
   id: number;
@@ -467,6 +468,8 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+              
+              <CreateNFTForm />
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
