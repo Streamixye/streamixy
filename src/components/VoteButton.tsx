@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 interface VoteButtonProps {
   icon: React.ReactNode;
-  count: number;
   label: string;
   onClick?: () => void;
   active?: boolean;
@@ -12,7 +11,6 @@ interface VoteButtonProps {
 
 const VoteButton: React.FC<VoteButtonProps> = ({
   icon,
-  count,
   label,
   onClick,
   active = false,
@@ -30,9 +28,6 @@ const VoteButton: React.FC<VoteButtonProps> = ({
       >
         {icon}
       </div>
-      <span className="text-xs font-semibold text-white">
-        {count > 999 ? `${(count / 1000).toFixed(1)}K` : count}
-      </span>
       <span className="text-[10px] text-white/70">{label}</span>
     </button>
   );

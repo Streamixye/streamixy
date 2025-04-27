@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
+import ReelNavigation from "@/components/ReelNavigation";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -82,7 +85,9 @@ const MOCK_REELS = [
 
 const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
+  const isMobile = useIsMobile();
 
+  // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
     if (e.deltaY > 0) {
       // Scrolling down
@@ -97,11 +102,68 @@ const Index = () => {
     }
   };
 
+  // Handle touch events for mobile
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 50) {
+      // Swipe up - go to next reel
+      setCurrentReelIndex((prevIndex) =>
+        prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
+      );
+    } else if (touchEnd - touchStart > 50) {
+      // Swipe down - go to previous reel
+      setCurrentReelIndex((prevIndex) =>
+        prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
+      );
+    }
+  };
+
+  const handleNext = () => {
+    setCurrentReelIndex((prevIndex) =>
+      prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePrevious = () => {
+    setCurrentReelIndex((prevIndex) =>
+      prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Add keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown") {
+        handleNext();
+      } else if (e.key === "ArrowUp") {
+        handlePrevious();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div 
         className="h-screen w-full overflow-hidden"
         onWheel={handleScroll}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div 
           className="w-full h-full transition-transform duration-300"
@@ -116,6 +178,7 @@ const Index = () => {
           ))}
         </div>
       </div>
+      {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
     </div>
   );
 };
