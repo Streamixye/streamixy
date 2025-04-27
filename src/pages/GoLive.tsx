@@ -28,6 +28,9 @@ const GoLive = () => {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<{ id: number; text: string; username: string; }[]>([]);
   const [commentCounter, setCommentCounter] = useState(0);
+  const [receivedGifts, setReceivedGifts] = useState<{ id: number; emoji: string; }[]>([]);
+  const [giftCounter, setGiftCounter] = useState(0);
+  const [totalTokens, setTotalTokens] = useState(0);
   const { toast } = useToast();
   
   const mockUser = {
@@ -62,10 +65,24 @@ const GoLive = () => {
       }
     }, 3000);
 
+    // Simulate receiving gifts
+    const giftInterval = setInterval(() => {
+      if (isLive && Math.random() > 0.8) {
+        const giftItems = ["🌹", "🦁", "👑", "💎"];
+        const randomGift = giftItems[Math.floor(Math.random() * giftItems.length)];
+        const giftValues = {"🌹": 5, "🦁": 50, "👑": 100, "💎": 500};
+        const giftValue = giftValues[randomGift as keyof typeof giftValues];
+        
+        addGift(randomGift);
+        setTotalTokens(prev => prev + giftValue);
+      }
+    }, 5000);
+
     return () => {
       stopCamera();
       clearInterval(viewerInterval);
       clearInterval(commentInterval);
+      clearInterval(giftInterval);
     };
   }, [isLive]);
 
@@ -114,6 +131,9 @@ const GoLive = () => {
     if (isLive) {
       setIsLive(false);
       setViewerCount(0);
+      setTotalTokens(0);
+      setComments([]);
+      setReceivedGifts([]);
       toast({
         title: "Stream Ended",
         description: "Your live stream has ended"
@@ -238,6 +258,21 @@ const GoLive = () => {
     }, 5000);
   };
 
+  const addGift = (emoji: string) => {
+    const newGift = {
+      id: giftCounter,
+      emoji
+    };
+    
+    setReceivedGifts(prev => [...prev, newGift]);
+    setGiftCounter(prev => prev + 1);
+    
+    // Remove gift after 3 seconds
+    setTimeout(() => {
+      setReceivedGifts(prev => prev.filter(gift => gift.id !== newGift.id));
+    }, 3000);
+  };
+
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (comment.trim()) {
@@ -296,6 +331,18 @@ const GoLive = () => {
             />
           ))}
         </div>
+
+        {/* Gifts Display */}
+        <div className="absolute right-20 top-20 bottom-20 overflow-hidden pointer-events-none flex flex-col items-end">
+          {receivedGifts.map((gift) => (
+            <div 
+              key={gift.id} 
+              className="text-4xl animate-gift mb-4"
+            >
+              {gift.emoji}
+            </div>
+          ))}
+        </div>
         
         {/* Top Bar */}
         <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
@@ -314,13 +361,20 @@ const GoLive = () => {
             )}
           </div>
           
-          {/* Viewers */}
-          {isLive && (
+          {/* Viewers & Tokens */}
+          <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-1" />
               <span className="text-sm">{viewerCount}</span>
             </div>
-          )}
+            
+            {isLive && (
+              <div className="flex items-center bg-black/40 backdrop-blur-sm py-1 px-2 rounded-full">
+                <span className="text-streamixy-primary text-xs font-bold mr-1">SYX:</span>
+                <span className="text-sm">{totalTokens}</span>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Filters Scrolling List - Horizontal Scroll at Bottom */}
@@ -398,6 +452,40 @@ const GoLive = () => {
           )}
         </div>
       </div>
+
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes gift-animation {
+          0% {
+            transform: translateX(100px);
+            opacity: 0;
+          }
+          10% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          90% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-20px);
+            opacity: 0;
+          }
+        }
+        
+        .animate-gift {
+          animation: gift-animation 3s ease-out forwards;
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };

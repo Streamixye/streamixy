@@ -45,6 +45,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [nextCommentId, setNextCommentId] = useState(1);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [requestText, setRequestText] = useState("");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -101,8 +103,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
     
     // Close dialog after voting
-    const closeButton = document.querySelector("[data-vote-dialog] .close-dialog") as HTMLButtonElement;
-    if (closeButton) closeButton.click();
+    const closeVoteDialog = document.querySelector("[data-vote-dialog] button[data-dialog-close]") as HTMLButtonElement;
+    if (closeVoteDialog) closeVoteDialog.click();
   };
 
   const handleCustomVote = () => {
@@ -140,8 +142,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
     
     // Close dialog after gifting
-    const closeButton = document.querySelector("[data-gift-dialog] .close-dialog") as HTMLButtonElement;
-    if (closeButton) closeButton.click();
+    const closeGiftDialog = document.querySelector("[data-gift-dialog] button[data-dialog-close]") as HTMLButtonElement;
+    if (closeGiftDialog) closeGiftDialog.click();
   };
 
   const shareOptions = [
@@ -152,7 +154,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   ];
 
   const handleShare = (platform: string) => {
-    // Simulate share functionality
+    // Implement share functionality
     const shareUrl = `https://streamixy.com/watch/${streamId}`;
     let shareEndpoint = "";
     
@@ -181,17 +183,18 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
     
     // Close dialog after sharing
-    const closeButton = document.querySelector("[data-share-dialog] .close-dialog") as HTMLButtonElement;
-    if (closeButton) closeButton.click();
+    const closeShareDialog = document.querySelector("[data-share-dialog] button[data-dialog-close]") as HTMLButtonElement;
+    if (closeShareDialog) closeShareDialog.click();
   };
 
-  const handleComment = (text: string) => {
-    if (!text.trim()) return;
+  const handleComment = () => {
+    if (!commentText.trim()) return;
     
-    const newComment = { text, id: nextCommentId };
+    const newComment = { text: commentText, id: nextCommentId };
     setNextCommentId(prev => prev + 1);
     setComments(prev => [...prev, newComment]);
     setActiveComment(newComment);
+    setCommentText("");
     
     setTimeout(() => {
       setActiveComment(null);
@@ -203,17 +206,19 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
   };
 
-  const handleRequest = (request: string) => {
-    if (!request.trim()) return;
+  const handleRequest = () => {
+    if (!requestText.trim()) return;
     
     toast({
       title: "Request Sent",
       description: `Your request to join ${creator.name} live has been sent!`,
     });
     
+    setRequestText("");
+    
     // Close dialog after sending request
-    const closeButton = document.querySelector("[data-request-dialog] .close-dialog") as HTMLButtonElement;
-    if (closeButton) closeButton.click();
+    const closeRequestDialog = document.querySelector("[data-request-dialog] button[data-dialog-close]") as HTMLButtonElement;
+    if (closeRequestDialog) closeRequestDialog.click();
   };
 
   const stopAllPropagation = (e: React.MouseEvent) => {
@@ -282,6 +287,42 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 <div onClick={stopAllPropagation}>
                   <VoteButton
                     icon={<MessagesSquare className="h-7 w-7" />}
+                    label="Comment"
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent data-comment-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
+                <DialogHeader>
+                  <DialogTitle>Add Comment</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Leave a comment on {creator.name}'s stream
+                  </p>
+                  <div className="flex space-x-2 items-center">
+                    <Input 
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder="Type your comment..." 
+                      className="flex-1 bg-white/10 border-white/20 text-white"
+                    />
+                    <Button 
+                      onClick={handleComment}
+                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </div>
+                <DialogPrimitive.Close className="hidden" data-dialog-close />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <div onClick={stopAllPropagation}>
+                  <VoteButton
+                    icon={<MessagesSquare className="h-7 w-7" />}
                     label="Vote"
                   />
                 </div>
@@ -312,19 +353,20 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     <Input 
                       type="number" 
                       placeholder="Custom amount" 
-                      className="flex-1" 
+                      className="flex-1 bg-white/10 border-white/20 text-white" 
                       min={1}
                       value={voteAmount}
                       onChange={(e) => setVoteAmount(e.target.value)}
                     />
                     <Button 
-                      onClick={() => handleCustomVote()}
+                      onClick={handleCustomVote}
+                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
                     >
                       Send
                     </Button>
                   </div>
                 </div>
-                <Button className="close-dialog hidden" />
+                <DialogPrimitive.Close className="hidden" data-dialog-close />
               </DialogContent>
             </Dialog>
             
@@ -363,7 +405,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     ))}
                   </div>
                 </div>
-                <Button className="close-dialog hidden" />
+                <DialogPrimitive.Close className="hidden" data-dialog-close />
               </DialogContent>
             </Dialog>
             
@@ -404,7 +446,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     ))}
                   </div>
                 </div>
-                <Button className="close-dialog hidden" />
+                <DialogPrimitive.Close className="hidden" data-dialog-close />
               </DialogContent>
             </Dialog>
 
@@ -436,20 +478,17 @@ const VideoReel: React.FC<VideoReelProps> = ({
                   <Textarea 
                     placeholder="Type your request here..."
                     className="min-h-[100px] bg-white/10 border-white/20 text-white"
-                    id="request-input"
+                    value={requestText}
+                    onChange={(e) => setRequestText(e.target.value)}
                   />
                   <Button 
-                    onClick={() => {
-                      const textarea = document.getElementById('request-input') as HTMLTextAreaElement;
-                      handleRequest(textarea.value);
-                      textarea.value = '';
-                    }}
+                    onClick={handleRequest}
                     className="bg-streamixy-primary hover:bg-streamixy-primary/80"
                   >
                     Send Request
                   </Button>
                 </div>
-                <Button className="close-dialog hidden" />
+                <DialogPrimitive.Close className="hidden" data-dialog-close />
               </DialogContent>
             </Dialog>
           </div>
@@ -460,6 +499,36 @@ const VideoReel: React.FC<VideoReelProps> = ({
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />
+
+      {/* CSS for animations */}
+      <style jsx>{`
+        @keyframes float {
+          0% {
+            transform: translateY(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(-100px);
+            opacity: 0;
+          }
+        }
+        
+        .animate-float {
+          animation: float 3s ease-out forwards;
+        }
+        
+        .glass {
+          background: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
+      `}</style>
     </div>
   );
 };
