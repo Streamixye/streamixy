@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, Share, MessagesSquare, Search } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -45,6 +46,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [comments, setComments] = useState<{text: string, id: number}[]>([]);
   const [activeComment, setActiveComment] = useState<{text: string, id: number} | null>(null);
   const [nextCommentId, setNextCommentId] = useState(1);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
   const isMobile = useIsMobile();
