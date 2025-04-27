@@ -45,10 +45,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [comments, setComments] = useState<{text: string, id: number}[]>([]);
   const [activeComment, setActiveComment] = useState<{text: string, id: number} | null>(null);
   const [nextCommentId, setNextCommentId] = useState(1);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
-  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
-  const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
   const isMobile = useIsMobile();
@@ -84,7 +80,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
     if (handleTransaction(transaction)) {
       setCreatorTokens(prev => prev + transaction.amount);
       
-      // Create animated element for token sending
       const element = document.createElement("div");
       element.innerText = `+${transaction.amount}`;
       element.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
@@ -113,7 +108,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const handleVote = (amount: number) => {
     setCreatorTokens(prev => prev + amount);
     
-    // Show animation for token sending
     const tokenElement = document.createElement("div");
     tokenElement.innerText = `+${amount}`;
     tokenElement.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
@@ -130,7 +124,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
       description: `You voted ${amount} SYX tokens to ${creator.name}`,
     });
     
-    // Close dialog after voting
     const closeVoteDialog = document.querySelector("[data-vote-dialog] button[data-dialog-close]") as HTMLButtonElement;
     if (closeVoteDialog) closeVoteDialog.click();
   };
@@ -152,7 +145,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const handleGift = (gift: { name: string; value: number; emoji: string }) => {
     setCreatorTokens(prev => prev + gift.value);
     
-    // Create animated gift element
     const giftElement = document.createElement("div");
     giftElement.innerText = gift.emoji;
     giftElement.className = "fixed text-4xl z-50 animate-float";
@@ -169,7 +161,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
       description: `You gifted a ${gift.name} (${gift.value} SYX) to ${creator.name}`,
     });
     
-    // Close dialog after gifting
     const closeGiftDialog = document.querySelector("[data-gift-dialog] button[data-dialog-close]") as HTMLButtonElement;
     if (closeGiftDialog) closeGiftDialog.click();
   };
@@ -182,7 +173,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
   ];
 
   const handleShare = (platform: string) => {
-    // Implement share functionality
     const shareUrl = `https://streamixy.com/watch/${streamId}`;
     let shareEndpoint = "";
     
@@ -197,7 +187,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
         shareEndpoint = `https://twitter.com/intent/tweet?text=Check out this amazing stream&url=${shareUrl}`;
         break;
       case "instagram":
-        // Instagram doesn't have a direct share URL, so we'll just show a toast
         break;
     }
     
@@ -210,7 +199,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
       description: `Sharing to ${platform}...`,
     });
     
-    // Close dialog after sharing
     const closeShareDialog = document.querySelector("[data-share-dialog] button[data-dialog-close]") as HTMLButtonElement;
     if (closeShareDialog) closeShareDialog.click();
   };
@@ -244,7 +232,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
     
     setRequestText("");
     
-    // Close dialog after sending request
     const closeRequestDialog = document.querySelector("[data-request-dialog] button[data-dialog-close]") as HTMLButtonElement;
     if (closeRequestDialog) closeRequestDialog.click();
   };
@@ -341,21 +328,21 @@ const VideoReel: React.FC<VideoReelProps> = ({
               </DialogContent>
             </Dialog>
 
-          <div onClick={(e) => e.stopPropagation()}>
-            <VoteButton
-              icon={<MessagesSquare className="h-7 w-7" />}
-              label="Vote"
-              onClick={() => setIsVoteDialogOpen(true)}
-            />
-          </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <VoteButton
+                icon={<MessagesSquare className="h-7 w-7" />}
+                label="Vote"
+                onClick={() => setIsVoteDialogOpen(true)}
+              />
+            </div>
 
-          <div onClick={(e) => e.stopPropagation()}>
-            <VoteButton
-              icon={<Gift className="h-7 w-7" />}
-              label="Gift"
-              onClick={() => setIsGiftDialogOpen(true)}
-            />
-          </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <VoteButton
+                icon={<Gift className="h-7 w-7" />}
+                label="Gift"
+                onClick={() => setIsGiftDialogOpen(true)}
+              />
+            </div>
 
             <button 
               className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
@@ -423,7 +410,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
         onClose={() => setIsSearchOpen(false)}
       />
 
-      {/* CSS for animations */}
       <style>
         {`
         @keyframes float {
