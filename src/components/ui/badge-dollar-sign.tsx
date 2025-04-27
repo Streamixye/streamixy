@@ -13,7 +13,7 @@ const BadgeDollarSign = React.forwardRef<
   BadgeDollarSignProps
 >(({ className, ...props }, ref) => {
   return (
-    <Badge className={cn("flex items-center", className)}>
+    <Badge className={cn("flex items-center", className)} {...props}>
       <DollarSign className="h-4 w-4" />
     </Badge>
   )

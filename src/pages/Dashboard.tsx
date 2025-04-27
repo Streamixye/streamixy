@@ -33,7 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   Dialog,
   DialogContent, 
@@ -79,7 +79,6 @@ const Dashboard = () => {
   const [followers, setFollowers] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
-  const { toast } = useToast();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
@@ -484,8 +483,8 @@ const Dashboard = () => {
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium flex items-center text-white">
-                      <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
-                      Earnings (SYX)
+                      <BadgeDollarSign className="mr-1 text-streamixy-primary" />
+                      Creator Earnings (SYX)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -841,7 +840,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-2 gap-4">
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
               onClick={handleCreatorToolsClick}
             >
               <Settings className="mr-2 h-4 w-4" />
@@ -849,7 +848,7 @@ const Dashboard = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
               onClick={handleEcosystemClick}
             >
               <TrendingUp className="mr-2 h-4 w-4" />
@@ -857,7 +856,7 @@ const Dashboard = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
               onClick={handleTokenEarningsClick}
             >
               <DollarSign className="mr-2 h-4 w-4" />
@@ -865,7 +864,7 @@ const Dashboard = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
               onClick={handleFollowerAnalyticsClick}
             >
               <Users className="mr-2 h-4 w-4" />
@@ -873,14 +872,14 @@ const Dashboard = () => {
             </Button>
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
             >
               <TrendingUp className="mr-2 h-4 w-4" />
               Pools
             </Button>
             <Button 
               variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
             >
               <Video className="mr-2 h-4 w-4" />
               Cinema
