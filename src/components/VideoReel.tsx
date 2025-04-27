@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface VideoReelProps {
   streamId: string;
@@ -142,6 +143,12 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
   };
   
+  // This function stops event propagation completely to prevent any sliding
+  const stopAllPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
@@ -170,21 +177,20 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         )}
 
-        {/* Creator Avatar and Tokens Only */}
+        {/* Creator Info with Name in rectangular style */}
         <div className="absolute bottom-24 left-4 animate-slide-up flex items-center">
-          <div className="relative">
-            <img
-              src={creator.avatar}
-              alt={creator.name}
-              className="h-12 w-12 rounded-full border-2 border-streamixy-primary"
-            />
-            <div className="absolute -bottom-1 -right-1 bg-streamixy-primary text-xs text-white rounded-full px-1">
-              SYX
+          <div className="flex items-center bg-black/50 backdrop-blur-md rounded-full py-1 pr-3 pl-1 border border-white/10">
+            <Avatar className="h-10 w-10 border-2 border-streamixy-primary">
+              <AvatarImage src={creator.avatar} alt={creator.name} />
+              <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="ml-2">
+              <p className="text-white text-sm font-semibold">{creator.name}</p>
+              <div className="flex items-center">
+                <span className="text-streamixy-primary text-xs font-bold">SYX:</span>
+                <span className="ml-1 text-white text-xs">{creatorTokens}</span>
+              </div>
             </div>
-          </div>
-          {/* Real-time token display */}
-          <div className="ml-2 bg-streamixy-primary/50 rounded-full px-3 py-1 text-xs text-white inline-flex items-center">
-            <span className="font-bold mr-1">SYX:</span> {creatorTokens}
           </div>
         </div>
 
@@ -200,31 +206,43 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         )}
 
-        {/* Interaction Buttons */}
-        <div className={`absolute ${isMobile ? 'right-2' : 'right-4'} bottom-1/3 flex flex-col space-y-6`}>
+        {/* Interaction Buttons - Updated to improve mobile responsiveness */}
+        <div 
+          className={`absolute ${isMobile ? 'right-2' : 'right-4'} bottom-1/3 flex flex-col space-y-4`} 
+          onClick={stopAllPropagation}
+        >
           {/* Search Button */}
-          <VoteButton
-            icon={<Search className="h-6 w-6" />}
-            label="Search"
-            onClick={() => {
-              toast({
-                title: "Search",
-                description: "Search functionality coming soon...",
-              });
-            }}
-          />
+          <Dialog>
+            <DialogTrigger asChild>
+              <div onClick={stopAllPropagation}>
+                <VoteButton
+                  icon={<Search className="h-7 w-7 md:h-6 md:w-6" />}
+                  label="Search"
+                />
+              </div>
+            </DialogTrigger>
+            <DialogContent onClick={stopAllPropagation} className="dialog-content">
+              <DialogHeader>
+                <DialogTitle>Search Content</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4 py-4">
+                <Input type="text" placeholder="Search creators or content..." />
+                <Button>Search</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           
           {/* Vote Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
-              <div>
+              <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Vote className="h-6 w-6" />}
+                  icon={<Vote className="h-7 w-7 md:h-6 md:w-6" />}
                   label="Vote"
                 />
               </div>
             </DialogTrigger>
-            <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogContent onClick={stopAllPropagation} className="dialog-content">
               <DialogHeader>
                 <DialogTitle>Vote SYX Tokens</DialogTitle>
               </DialogHeader>
@@ -274,14 +292,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
           {/* Gift Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
-              <div>
+              <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Gift className="h-6 w-6" />}
+                  icon={<Gift className="h-7 w-7 md:h-6 md:w-6" />}
                   label="Gift"
                 />
               </div>
             </DialogTrigger>
-            <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogContent onClick={stopAllPropagation} className="dialog-content">
               <DialogHeader>
                 <DialogTitle>Send Gifts</DialogTitle>
               </DialogHeader>
@@ -313,14 +331,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
           {/* Share Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
-              <div>
+              <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Share className="h-6 w-6" />}
+                  icon={<Share className="h-7 w-7 md:h-6 md:w-6" />}
                   label="Share"
                 />
               </div>
             </DialogTrigger>
-            <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogContent onClick={stopAllPropagation} className="dialog-content">
               <DialogHeader>
                 <DialogTitle>Share Stream</DialogTitle>
               </DialogHeader>
@@ -354,14 +372,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
           {/* Comment Button - Opens Dialog */}
           <Dialog>
             <DialogTrigger asChild>
-              <div>
+              <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<MessageSquare className="h-6 w-6" />}
+                  icon={<MessageSquare className="h-7 w-7 md:h-6 md:w-6" />}
                   label="Comment"
                 />
               </div>
             </DialogTrigger>
-            <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogContent onClick={stopAllPropagation} className="dialog-content">
               <DialogHeader>
                 <DialogTitle>Add Comment</DialogTitle>
               </DialogHeader>
@@ -374,9 +392,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 <Button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    const input = document.getElementById('comment-input') as HTMLTextAreaElement;
-                    handleComment(input.value);
-                    input.value = '';
+                    handleComment((document.getElementById('comment-input') as HTMLTextAreaElement).value);
+                    (document.getElementById('comment-input') as HTMLTextAreaElement).value = '';
                   }}
                   className="bg-streamixy-primary hover:bg-streamixy-primary/80"
                 >

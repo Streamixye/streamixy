@@ -121,3 +121,21 @@
 .comment-animation {
   animation: comment-appear 3s forwards;
 }
+
+/* Make sure dialog content doesn't cause navigation */
+.dialog-content {
+  z-index: 100;
+  isolation: isolate;
+}
+
+/* Make buttons more visible on mobile */
+@media (max-width: 768px) {
+  .video-container button svg {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .video-container button {
+    padding: 12px;
+  }
+}

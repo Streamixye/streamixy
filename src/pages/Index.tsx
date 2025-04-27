@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import Navbar from "@/components/Navbar";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -92,7 +93,8 @@ const Index = () => {
     e.stopPropagation();
     
     // Only change reels if not interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content")) {
+    if ((e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button")) {
       return;
     }
     
@@ -115,19 +117,26 @@ const Index = () => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     // Don't handle touch if interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content")) {
+    if ((e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button")) {
       return;
     }
     setTouchStart(e.targetTouches[0].clientY);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Don't handle touch if interacting with controls
+    if ((e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button")) {
+      return;
+    }
     setTouchEnd(e.targetTouches[0].clientY);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     // Don't handle touch end if interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content")) {
+    if ((e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button")) {
       return;
     }
     
@@ -174,6 +183,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Navbar />
       <div 
         className="h-screen w-full overflow-hidden"
         onWheel={handleScroll}

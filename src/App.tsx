@@ -26,6 +26,7 @@ const App = () => (
           <Route path="/nfts" element={<NFTs />} />
           <Route path="/stake" element={<Stake />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leaderboard" element={<NotFound />} /> {/* Temporarily using NotFound for Leaderboard */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNav />

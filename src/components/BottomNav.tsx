@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Video, List, NfcIcon, BarChart3 } from "lucide-react";
+import { Home, Video, List, BarChart3, Trophy } from "lucide-react";
 
 const BottomNav = () => {
   const location = useLocation();
@@ -21,6 +21,10 @@ const BottomNav = () => {
           <Video className="h-6 w-6" />
           <span className="text-xs mt-1">Go Live</span>
         </Link>
+        <Link to="/leaderboard" className={`flex flex-col items-center ${isActive('/leaderboard') ? 'text-streamixy-primary' : 'text-white/70'}`}>
+          <Trophy className="h-6 w-6" />
+          <span className="text-xs mt-1">Leaderboard</span>
+        </Link>
         <Link to="/nfts" className={`flex flex-col items-center ${isActive('/nfts') ? 'text-streamixy-primary' : 'text-white/70'}`}>
           <List className="h-6 w-6" />
           <span className="text-xs mt-1">NFTs</span>
@@ -28,10 +32,6 @@ const BottomNav = () => {
         <Link to="/stake" className={`flex flex-col items-center ${isActive('/stake') ? 'text-streamixy-primary' : 'text-white/70'}`}>
           <BarChart3 className="h-6 w-6" />
           <span className="text-xs mt-1">Stake</span>
-        </Link>
-        <Link to="/dashboard" className={`flex flex-col items-center ${isActive('/dashboard') ? 'text-streamixy-primary' : 'text-white/70'}`}>
-          <BarChart3 className="h-6 w-6" />
-          <span className="text-xs mt-1">Dashboard</span>
         </Link>
       </div>
     </div>
