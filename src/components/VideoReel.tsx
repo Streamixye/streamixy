@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Play, Gift, Share, Vote, MessageSquare, Search, MessagesSquare } from "lucide-react";
+import { Play, Gift, Share, Vote, Search, MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VoteButton from "./VoteButton";
 import CreatorInfo from "./CreatorInfo";
@@ -111,7 +111,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     { name: "WhatsApp", icon: "whatsapp", color: "#25D366" },
     { name: "Facebook", icon: "facebook", color: "#1877F2" },
     { name: "Instagram", icon: "instagram", color: "#E4405F" },
-    { name: "Telegram", icon: "telegram", color: "#0088cc" }
+    { name: "Twitter", icon: "twitter", color: "#1DA1F2" }
   ];
 
   const handleShare = (platform: string) => {
@@ -136,6 +136,15 @@ const VideoReel: React.FC<VideoReelProps> = ({
     toast({
       title: "Comment Posted!",
       description: "Your comment is now visible on stream",
+    });
+  };
+
+  const handleRequest = (request: string) => {
+    if (!request.trim()) return;
+    
+    toast({
+      title: "Request Sent",
+      description: `Your request to join ${creator.name} live has been sent!`,
     });
   };
 
@@ -196,17 +205,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
         )}
 
         <div 
-          className="absolute right-4 bottom-1/4 flex flex-col space-y-6"
+          className="absolute right-4 bottom-32 flex flex-col space-y-6"
           onClick={stopAllPropagation}
         >
-          <button 
-            className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
-            onClick={() => setIsSearchOpen(true)}
-          >
-            <Search className="h-7 w-7 text-white" />
-          </button>
-          
-          <div className="flex flex-col space-y-6 mt-2">
+          <div className="flex flex-col items-center space-y-6">
             <Dialog>
               <DialogTrigger asChild>
                 <div onClick={stopAllPropagation}>
@@ -216,7 +218,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Vote SYX Tokens</DialogTitle>
                 </DialogHeader>
@@ -272,7 +274,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Send Gifts</DialogTitle>
                 </DialogHeader>
@@ -310,7 +312,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Share Stream</DialogTitle>
                 </DialogHeader>
@@ -340,40 +342,15 @@ const VideoReel: React.FC<VideoReelProps> = ({
                 </div>
               </DialogContent>
             </Dialog>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
-                  <VoteButton
-                    icon={<MessageSquare className="h-7 w-7" />}
-                    label="Comment"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content">
-                <DialogHeader>
-                  <DialogTitle>Add Comment</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <Textarea 
-                    placeholder="Type your comment here..."
-                    className="min-h-[100px]"
-                    id="comment-input"
-                  />
-                  <Button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleComment((document.getElementById('comment-input') as HTMLTextAreaElement).value);
-                      (document.getElementById('comment-input') as HTMLTextAreaElement).value = '';
-                    }}
-                    className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                  >
-                    Post Comment
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
 
+            <button 
+              className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
+              onClick={() => setIsSearchOpen(true)}
+            >
+              <Search className="h-7 w-7 text-white" />
+              <span className="text-[8px] text-white/70 mt-0.5">Search</span>
+            </button>
+            
             <Dialog>
               <DialogTrigger asChild>
                 <div onClick={stopAllPropagation}>
@@ -383,23 +360,25 @@ const VideoReel: React.FC<VideoReelProps> = ({
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content">
+              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Send Request</DialogTitle>
                 </DialogHeader>
                 <div className="flex flex-col space-y-4 py-4">
+                  <p className="text-sm text-muted-foreground">
+                    Send a request to join {creator.name}'s live stream
+                  </p>
                   <Textarea 
                     placeholder="Type your request here..."
-                    className="min-h-[100px]"
+                    className="min-h-[100px] bg-white/10 border-white/20 text-white"
                     id="request-input"
                   />
                   <Button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      toast({
-                        title: "Request Sent",
-                        description: "Your request has been sent to the creator",
-                      });
+                      const textarea = document.getElementById('request-input') as HTMLTextAreaElement;
+                      handleRequest(textarea.value);
+                      textarea.value = '';
                     }}
                     className="bg-streamixy-primary hover:bg-streamixy-primary/80"
                   >
