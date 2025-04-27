@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Video, Trophy, BarChart3 } from "lucide-react";
+import { Home, Video, Trophy, Coins, LayoutDashboard } from "lucide-react";
 
 const BottomNav = () => {
   const location = useLocation();
@@ -12,7 +12,7 @@ const BottomNav = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-white/10 py-2 px-2 z-50">
-      <div className="flex justify-around items-center">
+      <div className="flex justify-between items-center px-4">
         <Link to="/" className={`flex flex-col items-center ${isActive('/') ? 'text-streamixy-primary' : 'text-white/70'}`}>
           <Home className="h-5 w-5" />
           <span className="text-[10px] mt-0.5">Home</span>
@@ -25,9 +25,13 @@ const BottomNav = () => {
           <Trophy className="h-5 w-5" />
           <span className="text-[10px] mt-0.5">Rank</span>
         </Link>
+        <Link to="/stake" className={`flex flex-col items-center ${isActive('/stake') ? 'text-streamixy-primary' : 'text-white/70'}`}>
+          <Coins className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5">Stake</span>
+        </Link>
         <Link to="/dashboard" className={`flex flex-col items-center ${isActive('/dashboard') ? 'text-streamixy-primary' : 'text-white/70'}`}>
-          <BarChart3 className="h-5 w-5" />
-          <span className="text-[10px] mt-0.5">Stats</span>
+          <LayoutDashboard className="h-5 w-5" />
+          <span className="text-[10px] mt-0.5">Dashboard</span>
         </Link>
       </div>
     </div>
