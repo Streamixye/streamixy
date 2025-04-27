@@ -27,12 +27,13 @@ import {
   Check,
   Settings,
   Music,
-  Video
+  Video,
+  DollarSign
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Dialog,
   DialogContent, 
@@ -42,7 +43,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import CreateNFTForm from "@/components/CreateNFTForm";
-import { BadgeDollarSign } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 interface Transaction {
   id: number;
@@ -77,7 +78,6 @@ const Dashboard = () => {
   const [followers, setFollowers] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
-  const { toast } = useToast();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
@@ -858,7 +858,7 @@ const Dashboard = () => {
               className="flex items-center justify-start bg-black text-white hover:bg-white/10"
               onClick={handleTokenEarningsClick}
             >
-              <BadgeDollarSign className="mr-2 h-4 w-4" />
+              <DollarSign className="mr-2 h-4 w-4" />
               Token Earnings
             </Button>
             <Button 
