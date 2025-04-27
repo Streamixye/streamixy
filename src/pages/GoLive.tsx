@@ -1,15 +1,402 @@
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { 
+  Camera, 
+  Share, 
+  MessageSquare, 
+  Users, 
+  Play,
+  Volume2,
+  VolumeX,
+  User,
+  Filter
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import LiveFilter from "@/components/LiveFilter";
+import LiveComment from "@/components/LiveComment";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 const GoLive = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isLive, setIsLive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [viewerCount, setViewerCount] = useState(0);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<{ id: number; text: string; username: string; }[]>([]);
+  const [commentCounter, setCommentCounter] = useState(0);
+  const { toast } = useToast();
+  
+  const mockUser = {
+    name: "JaneDoe",
+    avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb"
+  };
+
+  // Start camera when component mounts
+  useEffect(() => {
+    startCamera();
+
+    // Simulate viewer count increasing
+    const viewerInterval = setInterval(() => {
+      if (isLive) {
+        setViewerCount(prev => Math.min(prev + Math.floor(Math.random() * 5), 999));
+      }
+    }, 5000);
+    
+    // Simulate random comments
+    const commentInterval = setInterval(() => {
+      if (isLive && Math.random() > 0.6) {
+        const randomComments = [
+          { username: "alex88", text: "Love your content!" },
+          { username: "sarah_j", text: "Hi from NYC!" },
+          { username: "tech_guy", text: "What camera are you using?" },
+          { username: "travel_lover", text: "Where are you?" },
+          { username: "music_fan", text: "The lighting is perfect!" },
+        ];
+        
+        const randomComment = randomComments[Math.floor(Math.random() * randomComments.length)];
+        addComment(randomComment.text, randomComment.username);
+      }
+    }, 3000);
+
+    return () => {
+      stopCamera();
+      clearInterval(viewerInterval);
+      clearInterval(commentInterval);
+    };
+  }, [isLive]);
+
+  // Apply filter effect in real-time
+  useEffect(() => {
+    if (isLive && videoRef.current && canvasRef.current && activeFilter) {
+      const interval = setInterval(() => {
+        applyFilterToVideo();
+      }, 33); // ~30fps
+      
+      return () => clearInterval(interval);
+    }
+  }, [activeFilter, isLive]);
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: !isMuted
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast({
+        title: "Camera Error",
+        description: "Could not access your camera. Please check permissions.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const toggleLive = () => {
+    if (isLive) {
+      setIsLive(false);
+      setViewerCount(0);
+      toast({
+        title: "Stream Ended",
+        description: "Your live stream has ended"
+      });
+    } else {
+      setIsLive(true);
+      toast({
+        title: "Stream Started",
+        description: "You're now live! People can join your stream."
+      });
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const audioTracks = stream.getAudioTracks();
+      audioTracks.forEach(track => {
+        track.enabled = isMuted;
+      });
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const applyFilterToVideo = () => {
+    if (!canvasRef.current || !videoRef.current) return;
+    
+    const context = canvasRef.current.getContext('2d');
+    if (!context) return;
+    
+    // Draw the current video frame
+    context.drawImage(
+      videoRef.current, 
+      0, 0, 
+      canvasRef.current.width, 
+      canvasRef.current.height
+    );
+    
+    // Apply filter effects based on activeFilter
+    const imageData = context.getImageData(
+      0, 0, 
+      canvasRef.current.width, 
+      canvasRef.current.height
+    );
+    
+    switch (activeFilter) {
+      case 'grayscale':
+        applyGrayscale(imageData.data);
+        break;
+      case 'sepia':
+        applySepia(imageData.data);
+        break;
+      case 'invert':
+        applyInvert(imageData.data);
+        break;
+      case 'blur':
+        // Blur is applied using CSS filter
+        break;
+      case 'brightness':
+        applyBrightness(imageData.data, 1.3);
+        break;
+      default:
+        // No filter
+        break;
+    }
+    
+    // Put the modified image data back
+    context.putImageData(imageData, 0, 0);
+  };
+
+  // Filter effect functions
+  const applyGrayscale = (data: Uint8ClampedArray) => {
+    for (let i = 0; i < data.length; i += 4) {
+      const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+      data[i] = avg;     // red
+      data[i + 1] = avg; // green
+      data[i + 2] = avg; // blue
+    }
+  };
+  
+  const applySepia = (data: Uint8ClampedArray) => {
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+      data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+      data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+    }
+  };
+  
+  const applyInvert = (data: Uint8ClampedArray) => {
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = 255 - data[i];         // red
+      data[i + 1] = 255 - data[i + 1]; // green
+      data[i + 2] = 255 - data[i + 2]; // blue
+    }
+  };
+  
+  const applyBrightness = (data: Uint8ClampedArray, factor: number) => {
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = Math.min(255, data[i] * factor);         // red
+      data[i + 1] = Math.min(255, data[i + 1] * factor); // green
+      data[i + 2] = Math.min(255, data[i + 2] * factor); // blue
+    }
+  };
+
+  const addComment = (text: string, username: string = mockUser.name) => {
+    const newComment = {
+      id: commentCounter,
+      text,
+      username
+    };
+    
+    setComments(prev => [...prev, newComment]);
+    setCommentCounter(prev => prev + 1);
+    
+    // Remove comment after 5 seconds
+    setTimeout(() => {
+      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+    }, 5000);
+  };
+
+  const handleSubmitComment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (comment.trim()) {
+      addComment(comment);
+      setComment("");
+    }
+  };
+
+  const handleShare = () => {
+    toast({
+      title: "Share",
+      description: "Sharing options opened"
+    });
+  };
+
+  const filters = [
+    { id: 'normal', name: 'Normal', class: '' },
+    { id: 'grayscale', name: 'Grayscale', class: 'grayscale' },
+    { id: 'sepia', name: 'Sepia', class: 'sepia' },
+    { id: 'invert', name: 'Invert', class: 'invert' },
+    { id: 'blur', name: 'Blur', class: 'blur-sm' },
+    { id: 'brightness', name: 'Bright', class: 'brightness-125' }
+  ];
+
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <h1 className="text-2xl font-bold mb-4">Go Live</h1>
-      <div className="glass p-6 rounded-lg">
-        <p className="text-streamixy-light mb-4">Start your live stream</p>
-        <button className="bg-streamixy-primary px-6 py-2 rounded-full hover:bg-streamixy-primary/80 transition-colors">
-          Start Streaming
-        </button>
+    <div className="min-h-screen bg-black text-white">
+      {/* Camera View (Full Screen) */}
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* Video Element */}
+        <video 
+          ref={videoRef}
+          autoPlay 
+          playsInline
+          muted={isMuted}
+          className={`absolute inset-0 h-full w-full object-cover ${!activeFilter || activeFilter === 'normal' ? '' : filters.find(f => f.id === activeFilter)?.class || ''}`}
+        />
+        
+        {/* Canvas for filter processing */}
+        <canvas 
+          ref={canvasRef} 
+          width="640" 
+          height="480" 
+          className={`absolute inset-0 h-full w-full object-cover ${activeFilter && activeFilter !== 'blur' ? 'block' : 'hidden'}`}
+        />
+        
+        {/* Semi-transparent Overlay */}
+        <div className="absolute inset-0 bg-black/20" />
+        
+        {/* Comments Display */}
+        <div className="absolute left-0 top-20 right-0 bottom-20 overflow-hidden pointer-events-none">
+          {comments.map((comment) => (
+            <LiveComment 
+              key={comment.id} 
+              username={comment.username} 
+              text={comment.text} 
+            />
+          ))}
+        </div>
+        
+        {/* Top Bar */}
+        <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
+          {/* Creator Info */}
+          <div className="flex items-center">
+            <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
+              <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
+              <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
+            </Avatar>
+            <span className="ml-2 font-semibold">{mockUser.name}</span>
+            {isLive && (
+              <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center">
+                <span className="h-1.5 w-1.5 bg-white rounded-full mr-1"></span>
+                LIVE
+              </span>
+            )}
+          </div>
+          
+          {/* Viewers */}
+          {isLive && (
+            <div className="flex items-center">
+              <Users className="h-4 w-4 mr-1" />
+              <span className="text-sm">{viewerCount}</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Filters Scrolling List - Horizontal Scroll at Bottom */}
+        <div className="absolute bottom-20 left-0 right-0 overflow-x-auto hide-scrollbar pb-2">
+          <div className="flex space-x-2 px-4">
+            {filters.map(filter => (
+              <LiveFilter 
+                key={filter.id} 
+                name={filter.name} 
+                isActive={activeFilter === filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+              />
+            ))}
+          </div>
+        </div>
+        
+        {/* Bottom Controls */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+          {isLive ? (
+            <div className="flex flex-col space-y-4">
+              {/* Comment Input */}
+              <form onSubmit={handleSubmitComment} className="flex space-x-2">
+                <Input 
+                  type="text" 
+                  className="flex-1 bg-white/20 border-0 text-white placeholder:text-white/70"
+                  placeholder="Add a comment..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+                <Button type="submit" variant="ghost" size="icon">
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
+                <Button type="button" variant="ghost" size="icon" onClick={handleShare}>
+                  <Share className="h-5 w-5" />
+                </Button>
+              </form>
+              
+              {/* Live Controls */}
+              <div className="flex justify-between">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleMute}
+                >
+                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                </Button>
+                
+                <Button 
+                  variant="default" 
+                  className="bg-red-500 hover:bg-red-600"
+                  onClick={toggleLive}
+                >
+                  End Stream
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => setActiveFilter(activeFilter === null ? 'normal' : null)}
+                >
+                  <Filter className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <Button 
+                className="bg-streamixy-primary hover:bg-streamixy-primary/80 px-8"
+                onClick={toggleLive}
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Go Live
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
