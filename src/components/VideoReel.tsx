@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useEffect } from "react";
-import { Play, Gift, Share, MessagesSquare, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Gift, Share, MessagesSquare, Search } from "lucide-react";
 import VoteButton from "./VoteButton";
-import CreatorInfo from "./CreatorInfo";
 import { useToast } from "@/hooks/use-toast";
+import { useTokens } from "@/hooks/use-tokens";
+import TokenVoteDialog from "./TokenVoteDialog";
+import GiftDialog from "./GiftDialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -38,16 +38,19 @@ const VideoReel: React.FC<VideoReelProps> = ({
   thumbnailUrl,
 }) => {
   const { toast } = useToast();
+  const { tokenBalance, handleTransaction } = useTokens(creator.name);
   const [creatorTokens, setCreatorTokens] = useState(0);
-  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [comments, setComments] = useState<{text: string, id: number}[]>([]);
   const [activeComment, setActiveComment] = useState<{text: string, id: number} | null>(null);
   const [nextCommentId, setNextCommentId] = useState(1);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
+  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -75,6 +78,29 @@ const VideoReel: React.FC<VideoReelProps> = ({
       }
     };
   }, []);
+
+  const handleTokenTransaction = (transaction: TokenTransaction) => {
+    if (handleTransaction(transaction)) {
+      setCreatorTokens(prev => prev + transaction.amount);
+      
+      // Create animated element for token sending
+      const element = document.createElement("div");
+      element.innerText = `+${transaction.amount}`;
+      element.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
+      element.style.left = `${Math.random() * 80 + 10}%`;
+      element.style.bottom = "0";
+      document.body.appendChild(element);
+      
+      setTimeout(() => {
+        document.body.removeChild(element);
+      }, 3000);
+    }
+  };
+
+  const stopAllPropagation = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const giftItems = [
     { id: 1, name: "Flower", value: 5, emoji: "🌹" },
@@ -222,11 +248,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
     if (closeRequestDialog) closeRequestDialog.click();
   };
 
-  const stopAllPropagation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
@@ -319,137 +340,21 @@ const VideoReel: React.FC<VideoReelProps> = ({
               </DialogContent>
             </Dialog>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
-                  <VoteButton
-                    icon={<MessagesSquare className="h-7 w-7" />}
-                    label="Vote"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent data-vote-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-                <DialogHeader>
-                  <DialogTitle>Vote SYX Tokens</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Send SYX tokens to support {creator.name}
-                  </p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {[10, 50, 100, 500, 1000].map((amount) => (
-                      <Button 
-                        key={amount} 
-                        className="bg-streamixy-highlight hover:bg-streamixy-highlight/80"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVote(amount);
-                        }}
-                      >
-                        {amount} SYX
-                      </Button>
-                    ))}
-                  </div>
-                  <div className="flex space-x-2 items-center mt-4">
-                    <Input 
-                      type="number" 
-                      placeholder="Custom amount" 
-                      className="flex-1 bg-white/10 border-white/20 text-white" 
-                      min={1}
-                      value={voteAmount}
-                      onChange={(e) => setVoteAmount(e.target.value)}
-                    />
-                    <Button 
-                      onClick={handleCustomVote}
-                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                    >
-                      Send
-                    </Button>
-                  </div>
-                </div>
-                <DialogPrimitive.Close className="hidden" data-dialog-close />
-              </DialogContent>
-            </Dialog>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
-                  <VoteButton
-                    icon={<Gift className="h-7 w-7" />}
-                    label="Gift"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent data-gift-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-                <DialogHeader>
-                  <DialogTitle>Send Gifts</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Send gifts to {creator.name}
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {giftItems.map((gift) => (
-                      <Button 
-                        key={gift.id} 
-                        variant="outline" 
-                        className="h-auto flex flex-col p-4 items-center"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGift(gift);
-                        }}
-                      >
-                        <span className="text-3xl mb-2">{gift.emoji}</span>
-                        <span className="text-sm">{gift.name}</span>
-                        <span className="text-xs text-muted-foreground mt-1">{gift.value} SYX</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <DialogPrimitive.Close className="hidden" data-dialog-close />
-              </DialogContent>
-            </Dialog>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
-                  <VoteButton
-                    icon={<Share className="h-7 w-7" />}
-                    label="Share"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent data-share-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-                <DialogHeader>
-                  <DialogTitle>Share Stream</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Share {creator.name}'s stream
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {shareOptions.map((option) => (
-                      <Button 
-                        key={option.name} 
-                        variant="outline" 
-                        className="h-auto flex flex-col p-4 items-center"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShare(option.name);
-                        }}
-                        style={{ 
-                          borderColor: option.color,
-                          color: option.color 
-                        }}
-                      >
-                        <span className="text-sm">{option.name}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <DialogPrimitive.Close className="hidden" data-dialog-close />
-              </DialogContent>
-            </Dialog>
+          <div onClick={(e) => e.stopPropagation()}>
+            <VoteButton
+              icon={<MessagesSquare className="h-7 w-7" />}
+              label="Vote"
+              onClick={() => setIsVoteDialogOpen(true)}
+            />
+          </div>
+
+          <div onClick={(e) => e.stopPropagation()}>
+            <VoteButton
+              icon={<Gift className="h-7 w-7" />}
+              label="Gift"
+              onClick={() => setIsGiftDialogOpen(true)}
+            />
+          </div>
 
             <button 
               className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
@@ -495,6 +400,22 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         </div>
       </div>
+
+      <TokenVoteDialog
+        isOpen={isVoteDialogOpen}
+        onClose={() => setIsVoteDialogOpen(false)}
+        onVote={handleTokenTransaction}
+        creatorName={creator.name}
+        tokenBalance={tokenBalance}
+      />
+
+      <GiftDialog
+        isOpen={isGiftDialogOpen}
+        onClose={() => setIsGiftDialogOpen(false)}
+        onGift={handleTokenTransaction}
+        creatorName={creator.name}
+        tokenBalance={tokenBalance}
+      />
 
       <SearchDialog 
         isOpen={isSearchOpen}
