@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -289,17 +288,17 @@ const Dashboard = () => {
     const newTransaction: Transaction = {
       id: Date.now(),
       type: "referral",
-      amount: 300,
+      amount: 200,
       date: new Date(),
       details: "Referral bonus claimed"
     };
     setTransactions(prev => [newTransaction, ...prev]);
     
-    setEarnings(prev => prev + 300);
+    setEarnings(prev => prev + 200);
     
     toast({
       title: "Referral Bonus Claimed",
-      description: "300 SYX tokens have been added to your balance.",
+      description: "200 SYX tokens have been added to your balance.",
       duration: 3000,
     });
   };
@@ -422,28 +421,17 @@ const Dashboard = () => {
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="creator" className="space-y-4 animate-fade-in">
-          {!walletConnected ? (
-            <Card className="bg-black border border-white/10">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center text-white">
-                  <Wallet className="h-4 w-4 mr-2 text-streamixy-primary" />
-                  Connect Wallet
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-white mb-4">Connect your wallet to start your creator journey</p>
-                <Button 
-                  onClick={connectWallet}
-                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
-                >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
+        {!walletConnected ? (
+          <Button 
+            onClick={connectWallet}
+            className="w-full mt-4 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+          >
+            <Wallet className="mr-2 h-4 w-4" />
+            Connect Wallet
+          </Button>
+        ) : (
+          <>
+            <TabsContent value="creator" className="space-y-4 animate-fade-in">
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
@@ -507,13 +495,13 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <p className="text-xs text-white">Share this link and earn SYX for each referral</p>
+                    <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
                     <Button 
                       size="sm" 
                       onClick={() => claimReferralBonus()}
                       className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
                     >
-                      Claim 300 SYX
+                      Claim 200 SYX
                     </Button>
                   </div>
                   
@@ -588,32 +576,9 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="audience" className="space-y-4 animate-fade-in">
-          {!walletConnected ? (
-            <Card className="bg-black border border-white/10">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center text-white">
-                  <Wallet className="h-4 w-4 mr-2 text-streamixy-primary" />
-                  Connect Wallet
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-white mb-4">Connect your wallet to support creators and earn rewards</p>
-                <Button 
-                  onClick={connectWallet}
-                  className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
-                >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  Connect Wallet
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
+            </TabsContent>
+            
+            <TabsContent value="audience" className="space-y-4 animate-fade-in">
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
@@ -747,13 +712,13 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <p className="text-xs text-white">Share with friends and earn 300 SYX per referral</p>
+                    <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
                     <Button 
                       size="sm" 
                       onClick={() => claimReferralBonus()}
                       className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
                     >
-                      Claim 300 SYX
+                      Claim 200 SYX
                     </Button>
                   </div>
                   
@@ -828,9 +793,9 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-            </>
-          )}
-        </TabsContent>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
 
       <Card className="bg-black border border-white/10 mb-6">
