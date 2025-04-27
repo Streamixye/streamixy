@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -303,6 +304,24 @@ const Dashboard = () => {
     });
   };
 
+  const handleNFTCreated = () => {
+    const newTransaction: Transaction = {
+      id: Date.now(),
+      type: "stake",
+      amount: 15,
+      date: new Date(),
+      details: "Created NFT"
+    };
+    
+    setTransactions(prev => [newTransaction, ...prev]);
+    
+    toast({
+      title: "NFT Created",
+      description: "Your NFT is now visible in the marketplace.",
+      duration: 3000,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
@@ -322,7 +341,7 @@ const Dashboard = () => {
           <DialogContent className="bg-black border border-white/10 text-white">
             <DialogHeader>
               <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription className="text-white/70">
+              <DialogDescription className="text-white">
                 Update your profile information
               </DialogDescription>
             </DialogHeader>
@@ -344,7 +363,7 @@ const Dashboard = () => {
                 </Button>
               </div>
               <div className="space-y-2">
-                <label htmlFor="nickname" className="text-sm text-white/70">
+                <label htmlFor="nickname" className="text-sm text-white">
                   Nickname
                 </label>
                 <Input 
@@ -383,7 +402,7 @@ const Dashboard = () => {
         </Avatar>
         <div className="ml-4">
           <h2 className="text-xl font-bold text-white">{profile.nickname}</h2>
-          <p className="text-white/70 text-sm">
+          <p className="text-white text-sm">
             {walletConnected 
               ? `Wallet: 0x...${Math.random().toString(36).substring(2, 8)}` 
               : 'Wallet Not Connected'}
@@ -406,8 +425,14 @@ const Dashboard = () => {
         <TabsContent value="creator" className="space-y-4 animate-fade-in">
           {!walletConnected ? (
             <Card className="bg-black border border-white/10">
-              <CardContent className="pt-6">
-                <p className="text-white/70 mb-4">Connect your wallet to start your creator journey</p>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center text-white">
+                  <Wallet className="h-4 w-4 mr-2 text-streamixy-primary" />
+                  Connect Wallet
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-white mb-4">Connect your wallet to start your creator journey</p>
                 <Button 
                   onClick={connectWallet}
                   className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
@@ -429,7 +454,7 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-white">{followers.toLocaleString()}</div>
-                    <div className="text-xs text-white/70">+{(followers * 0.05).toFixed(0)} this week</div>
+                    <div className="text-xs text-white">+{(followers * 0.05).toFixed(0)} this week</div>
                   </CardContent>
                 </Card>
                 
@@ -453,7 +478,7 @@ const Dashboard = () => {
                 </Card>
               </div>
               
-              <CreateNFTForm />
+              <CreateNFTForm onSuccess={handleNFTCreated} />
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
@@ -482,7 +507,7 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <p className="text-xs text-white/70">Share this link and earn SYX for each referral</p>
+                    <p className="text-xs text-white">Share this link and earn SYX for each referral</p>
                     <Button 
                       size="sm" 
                       onClick={() => claimReferralBonus()}
@@ -551,7 +576,7 @@ const Dashboard = () => {
                             {transaction.type === "withdraw" && "Withdrawal"}
                             {transaction.type === "referral" && "Referral Bonus"}
                           </div>
-                          <div className="text-xs text-white/70">
+                          <div className="text-xs text-white">
                             {transaction.date.toLocaleString()} • {transaction.details}
                           </div>
                         </div>
@@ -570,8 +595,14 @@ const Dashboard = () => {
         <TabsContent value="audience" className="space-y-4 animate-fade-in">
           {!walletConnected ? (
             <Card className="bg-black border border-white/10">
-              <CardContent className="pt-6">
-                <p className="text-white/70 mb-4">Connect your wallet to support creators and earn rewards</p>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center text-white">
+                  <Wallet className="h-4 w-4 mr-2 text-streamixy-primary" />
+                  Connect Wallet
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-white mb-4">Connect your wallet to support creators and earn rewards</p>
                 <Button 
                   onClick={connectWallet}
                   className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
@@ -644,7 +675,7 @@ const Dashboard = () => {
                             <Button 
                               size="sm" 
                               variant="ghost"
-                              className="h-6 text-xs text-white/80 hover:text-white"
+                              className="h-6 text-xs text-white hover:text-white"
                               onClick={() => window.location.href = '/nfts'}
                             >
                               Details
@@ -654,17 +685,17 @@ const Dashboard = () => {
                         </div>
                         <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
                           <div>
-                            <div className="text-white/70 text-xs">Staked</div>
+                            <div className="text-white text-xs">Staked</div>
                             <div className="font-medium text-white">{nft.amount.toFixed(2)} SYX</div>
                           </div>
                           <div>
-                            <div className="text-white/70 text-xs">ROI</div>
+                            <div className="text-white text-xs">ROI</div>
                             <div className={`font-medium ${nft.roi > 0 ? 'text-green-500' : 'text-red-400'}`}>
                               {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                             </div>
                           </div>
                           <div>
-                            <div className="text-white/70 text-xs">P&L</div>
+                            <div className="text-white text-xs">P&L</div>
                             <div className={`font-medium ${nft.pnl > 0 ? 'text-green-500' : 'text-red-400'}`}>
                               {nft.pnl > 0 ? '+' : ''}{nft.pnl.toFixed(2)} SYX
                             </div>
@@ -674,7 +705,7 @@ const Dashboard = () => {
                     ))}
                     
                     {stakedNFTs.length === 0 && (
-                      <div className="text-center py-6 text-white/60">
+                      <div className="text-center py-6 text-white">
                         <p>You haven't staked on any NFTs yet.</p>
                         <Button 
                           variant="link" 
@@ -716,7 +747,7 @@ const Dashboard = () => {
                   </div>
                   
                   <div className="flex justify-between">
-                    <p className="text-xs text-white/70">Share with friends and earn 300 SYX per referral</p>
+                    <p className="text-xs text-white">Share with friends and earn 300 SYX per referral</p>
                     <Button 
                       size="sm" 
                       onClick={() => claimReferralBonus()}
@@ -785,7 +816,7 @@ const Dashboard = () => {
                             {transaction.type === "withdraw" && "Withdrawal"}
                             {transaction.type === "referral" && "Referral Bonus"}
                           </div>
-                          <div className="text-xs text-white/70">
+                          <div className="text-xs text-white">
                             {transaction.date.toLocaleString()} • {transaction.details}
                           </div>
                         </div>

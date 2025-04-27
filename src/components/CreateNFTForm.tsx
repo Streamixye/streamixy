@@ -39,7 +39,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
   return (
     <Card className="bg-black border border-white/10">
       <CardHeader>
-        <CardTitle className="text-base flex items-center">
+        <CardTitle className="text-base flex items-center text-white">
           <ImageIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
           Create NFT
         </CardTitle>
@@ -47,7 +47,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm text-white/70 mb-1.5 block">NFT Name</label>
+            <label className="text-sm text-white mb-1.5 block">NFT Name</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -58,7 +58,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
           </div>
           
           <div>
-            <label className="text-sm text-white/70 mb-1.5 block">Image URL</label>
+            <label className="text-sm text-white mb-1.5 block">Image URL</label>
             <Input
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
@@ -69,7 +69,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
           </div>
           
           <div>
-            <label className="text-sm text-white/70 mb-1.5 block">Description</label>
+            <label className="text-sm text-white mb-1.5 block">Description</label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
