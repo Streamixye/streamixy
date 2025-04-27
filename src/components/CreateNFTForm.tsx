@@ -53,7 +53,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter NFT name"
               required
-              className="bg-transparent border-white/20"
+              className="bg-transparent border-white/20 text-white"
             />
           </div>
           
@@ -64,7 +64,7 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Enter image URL"
               required
-              className="bg-transparent border-white/20"
+              className="bg-transparent border-white/20 text-white"
             />
           </div>
           
@@ -75,14 +75,14 @@ const CreateNFTForm: React.FC<CreateNFTFormProps> = ({ onSuccess }) => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter NFT description"
               required
-              className="bg-transparent border-white/20 min-h-[100px]"
+              className="bg-transparent border-white/20 min-h-[100px] text-white"
             />
           </div>
           
           <div className="flex justify-end">
             <Button 
               type="submit"
-              className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+              className="bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
             >
               Create NFT (15 SYX)
             </Button>

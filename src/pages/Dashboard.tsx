@@ -36,6 +36,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { 
   Dialog,
   DialogContent, 
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -311,7 +312,7 @@ const Dashboard = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="border-white/20 hover:bg-white/10"
+              className="border-white/20 hover:bg-white/10 text-white"
               onClick={startEditProfile}
             >
               <Edit className="h-4 w-4 mr-2" />
@@ -321,6 +322,9 @@ const Dashboard = () => {
           <DialogContent className="bg-black border border-white/10 text-white">
             <DialogHeader>
               <DialogTitle>Edit Profile</DialogTitle>
+              <DialogDescription className="text-white/70">
+                Update your profile information
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex flex-col items-center space-y-4">
@@ -333,7 +337,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="text-xs border-white/20"
+                  className="text-xs border-white/20 text-white"
                 >
                   <ImageIcon className="h-3 w-3 mr-1" /> 
                   Upload Photo
@@ -347,20 +351,20 @@ const Dashboard = () => {
                   id="nickname"
                   value={editProfile.nickname}
                   onChange={(e) => setEditProfile({...editProfile, nickname: e.target.value})}
-                  className="bg-transparent border-white/20"
+                  className="bg-transparent border-white/20 text-white"
                 />
               </div>
               <div className="flex justify-end space-x-2 pt-2">
                 <Button 
                   variant="outline" 
                   onClick={() => setIsEditingProfile(false)}
-                  className="border-white/20"
+                  className="border-white/20 text-white"
                 >
                   Cancel
                 </Button>
                 <Button 
                   onClick={saveProfile}
-                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  className="bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
                 >
                   Save Changes
                 </Button>
@@ -389,11 +393,11 @@ const Dashboard = () => {
 
       <Tabs defaultValue="creator" className="mb-6" onValueChange={(value) => setMode(value as "creator" | "audience")}>
         <TabsList className="grid w-full grid-cols-2 bg-black border border-white/10">
-          <TabsTrigger value="creator" className="data-[state=active]:bg-streamixy-primary">
+          <TabsTrigger value="creator" className="data-[state=active]:bg-streamixy-primary text-white">
             <User className="h-4 w-4 mr-2" />
             Creator Mode
           </TabsTrigger>
-          <TabsTrigger value="audience" className="data-[state=active]:bg-streamixy-primary">
+          <TabsTrigger value="audience" className="data-[state=active]:bg-streamixy-primary text-white">
             <Users className="h-4 w-4 mr-2" />
             Audience Mode
           </TabsTrigger>
@@ -418,29 +422,29 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center">
+                    <CardTitle className="text-sm font-medium flex items-center text-white">
                       <Users className="h-4 w-4 mr-1.5 text-streamixy-primary" />
                       Followers
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{followers.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-white">{followers.toLocaleString()}</div>
                     <div className="text-xs text-white/70">+{(followers * 0.05).toFixed(0)} this week</div>
                   </CardContent>
                 </Card>
                 
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center">
+                    <CardTitle className="text-sm font-medium flex items-center text-white">
                       <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
                       Earnings (SYX)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{earnings.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
                     <Button 
                       size="sm" 
-                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
                       onClick={withdrawTokens}
                     >
                       Withdraw
@@ -453,7 +457,7 @@ const Dashboard = () => {
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center">
+                  <CardTitle className="text-base flex items-center text-white">
                     <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
                     Referral Link
                   </CardTitle>
@@ -463,7 +467,7 @@ const Dashboard = () => {
                     <Input 
                       readOnly 
                       value={`https://streamixy.io/ref/${profile.nickname}`} 
-                      className="bg-transparent border-white/20"
+                      className="bg-transparent border-white/20 text-white"
                     />
                     <Button 
                       variant="outline" 
@@ -473,7 +477,7 @@ const Dashboard = () => {
                     >
                       {referralCopied ? 
                         <Check className="h-4 w-4 text-green-500" /> : 
-                        <Copy className="h-4 w-4" />}
+                        <Copy className="h-4 w-4 text-white" />}
                     </Button>
                   </div>
                   
@@ -492,7 +496,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("whatsapp")}
                     >
                       <Share className="h-3 w-3 mr-1" /> WhatsApp
@@ -500,7 +504,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("telegram")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Telegram
@@ -508,7 +512,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("facebook")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Facebook
@@ -516,7 +520,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("instagram")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Instagram
@@ -527,7 +531,7 @@ const Dashboard = () => {
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center">
+                  <CardTitle className="text-base flex items-center text-white">
                     <History className="h-4 w-4 mr-2 text-streamixy-primary" />
                     Transaction History
                   </CardTitle>
@@ -540,7 +544,7 @@ const Dashboard = () => {
                         className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
                       >
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-white">
                             {transaction.type === "earn" && "Stream Earnings"}
                             {transaction.type === "gift" && "Gift Received"}
                             {transaction.type === "stake" && "Tokens Staked"}
@@ -582,16 +586,16 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center">
+                    <CardTitle className="text-sm font-medium flex items-center text-white">
                       <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
                       Balance (SYX)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{earnings.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
                     <Button 
                       size="sm" 
-                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
                       onClick={withdrawTokens}
                     >
                       Withdraw
@@ -601,17 +605,17 @@ const Dashboard = () => {
                 
                 <Card className="bg-black border border-white/10 overflow-hidden">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center">
+                    <CardTitle className="text-sm font-medium flex items-center text-white">
                       <TrendingUp className="h-4 w-4 mr-1.5 text-streamixy-primary" />
                       NFTs Staked
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stakedNFTs.length}</div>
+                    <div className="text-2xl font-bold text-white">{stakedNFTs.length}</div>
                     <Button 
                       size="sm" 
                       variant="outline"
-                      className="mt-2 text-xs border-white/20 hover:bg-white/5"
+                      className="mt-2 text-xs border-white/20 hover:bg-white/5 text-white"
                       onClick={() => window.location.href = '/nfts'}
                     >
                       View NFTs
@@ -622,7 +626,7 @@ const Dashboard = () => {
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center">
+                  <CardTitle className="text-base flex items-center text-white">
                     <TrendingUp className="h-4 w-4 mr-2 text-streamixy-primary" />
                     Your Staked NFTs
                   </CardTitle>
@@ -635,7 +639,7 @@ const Dashboard = () => {
                         className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
                       >
                         <div className="flex justify-between items-center">
-                          <div className="font-medium">{nft.name}</div>
+                          <div className="font-medium text-white">{nft.name}</div>
                           <div className="flex items-center">
                             <Button 
                               size="sm" 
@@ -651,7 +655,7 @@ const Dashboard = () => {
                         <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
                           <div>
                             <div className="text-white/70 text-xs">Staked</div>
-                            <div className="font-medium">{nft.amount.toFixed(2)} SYX</div>
+                            <div className="font-medium text-white">{nft.amount.toFixed(2)} SYX</div>
                           </div>
                           <div>
                             <div className="text-white/70 text-xs">ROI</div>
@@ -687,7 +691,7 @@ const Dashboard = () => {
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center">
+                  <CardTitle className="text-base flex items-center text-white">
                     <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
                     Referral Link
                   </CardTitle>
@@ -697,7 +701,7 @@ const Dashboard = () => {
                     <Input 
                       readOnly 
                       value={`https://streamixy.io/ref/${profile.nickname}`} 
-                      className="bg-transparent border-white/20"
+                      className="bg-transparent border-white/20 text-white"
                     />
                     <Button 
                       variant="outline" 
@@ -707,7 +711,7 @@ const Dashboard = () => {
                     >
                       {referralCopied ? 
                         <Check className="h-4 w-4 text-green-500" /> : 
-                        <Copy className="h-4 w-4" />}
+                        <Copy className="h-4 w-4 text-white" />}
                     </Button>
                   </div>
                   
@@ -726,7 +730,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("whatsapp")}
                     >
                       <Share className="h-3 w-3 mr-1" /> WhatsApp
@@ -734,7 +738,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("telegram")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Telegram
@@ -742,7 +746,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("facebook")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Facebook
@@ -750,7 +754,7 @@ const Dashboard = () => {
                     <Button 
                       variant="outline"
                       size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5"
+                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
                       onClick={() => shareReferral("instagram")}
                     >
                       <Share className="h-3 w-3 mr-1" /> Instagram
@@ -761,7 +765,7 @@ const Dashboard = () => {
               
               <Card className="bg-black border border-white/10">
                 <CardHeader>
-                  <CardTitle className="text-base flex items-center">
+                  <CardTitle className="text-base flex items-center text-white">
                     <History className="h-4 w-4 mr-2 text-streamixy-primary" />
                     Transaction History
                   </CardTitle>
@@ -774,7 +778,7 @@ const Dashboard = () => {
                         className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
                       >
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-white">
                             {transaction.type === "earn" && "Stream Earnings"}
                             {transaction.type === "gift" && "Gift Sent"}
                             {transaction.type === "stake" && "Tokens Staked"}
@@ -800,31 +804,31 @@ const Dashboard = () => {
 
       <Card className="bg-black border border-white/10 mb-6">
         <CardHeader>
-          <CardTitle className="text-base">Features</CardTitle>
+          <CardTitle className="text-base text-white">Features</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <Settings className="mr-2 h-4 w-4" />
               Creator Tools
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <TrendingUp className="mr-2 h-4 w-4" />
               Ecosystem
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <Music className="mr-2 h-4 w-4" />
               Podcast
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <Music className="mr-2 h-4 w-4" />
               Playlist
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <TrendingUp className="mr-2 h-4 w-4" />
               Pools
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
+            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
               <Video className="mr-2 h-4 w-4" />
               Cinema
             </Button>
