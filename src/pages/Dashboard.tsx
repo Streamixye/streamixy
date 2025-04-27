@@ -25,10 +25,9 @@ import {
   TrendingUp,
   Copy,
   Check,
-  Tools,
-  Podcast,
-  Playlist,
-  Cinema
+  Settings,
+  Music,
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -825,7 +824,7 @@ const Dashboard = () => {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
-              <Tools className="mr-2 h-4 w-4" />
+              <Settings className="mr-2 h-4 w-4" />
               Creator Tools
             </Button>
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
@@ -833,11 +832,11 @@ const Dashboard = () => {
               Ecosystem
             </Button>
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
-              <Podcast className="mr-2 h-4 w-4" />
+              <Music className="mr-2 h-4 w-4" />
               Podcast
             </Button>
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
-              <Playlist className="mr-2 h-4 w-4" />
+              <Music className="mr-2 h-4 w-4" />
               Playlist
             </Button>
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
@@ -845,7 +844,7 @@ const Dashboard = () => {
               Pools
             </Button>
             <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5">
-              <Cinema className="mr-2 h-4 w-4" />
+              <Video className="mr-2 h-4 w-4" />
               Cinema
             </Button>
           </div>
