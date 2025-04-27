@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/dialog";
 import CreateNFTForm from "@/components/CreateNFTForm";
 import { Badge } from "@/components/ui/badge";
+import { BadgeDollarSign } from "@/components/ui/badge-dollar-sign";
 
 interface Transaction {
   id: number;
@@ -78,6 +79,7 @@ const Dashboard = () => {
   const [followers, setFollowers] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
