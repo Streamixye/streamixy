@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Play, Gift, Share, Vote, MessageSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -151,7 +152,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
-        {/* Video Element (Autoplay) */}
+        {/* Video Element */}
         <video
           ref={videoRef}
           className="absolute inset-0 object-cover w-full h-full"
@@ -207,14 +208,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
 
         {/* Interaction Buttons with adjusted spacing */}
         <div 
-          className="absolute right-2 bottom-1/4 flex flex-col space-y-1"
+          className="absolute right-3 bottom-1/3 flex flex-col space-y-3"
           onClick={stopAllPropagation}
         >
           <Dialog>
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Search className="h-5 w-5" />}
+                  icon={<Search className="h-4 w-4" />}
                   label="Search"
                 />
               </div>
@@ -234,7 +235,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Vote className="h-5 w-5" />}
+                  icon={<Vote className="h-4 w-4" />}
                   label="Vote"
                 />
               </div>
@@ -290,7 +291,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Gift className="h-5 w-5" />}
+                  icon={<Gift className="h-4 w-4" />}
                   label="Gift"
                 />
               </div>
@@ -328,7 +329,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Share className="h-5 w-5" />}
+                  icon={<Share className="h-4 w-4" />}
                   label="Share"
                 />
               </div>
@@ -368,7 +369,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<MessageSquare className="h-5 w-5" />}
+                  icon={<MessageSquare className="h-4 w-4" />}
                   label="Comment"
                 />
               </div>
