@@ -42,6 +42,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import CreateNFTForm from "@/components/CreateNFTForm";
+import { BadgeDollarSign } from "@/components/ui/badge";
 
 interface Transaction {
   id: number;
@@ -317,6 +318,38 @@ const Dashboard = () => {
     toast({
       title: "NFT Created",
       description: "Your NFT is now visible in the marketplace.",
+      duration: 3000,
+    });
+  };
+
+  const handleCreatorToolsClick = () => {
+    toast({
+      title: "Creator Tools",
+      description: "Opening creator tools panel...",
+      duration: 3000,
+    });
+  };
+
+  const handleEcosystemClick = () => {
+    toast({
+      title: "Ecosystem",
+      description: "Exploring ecosystem features...",
+      duration: 3000,
+    });
+  };
+
+  const handleTokenEarningsClick = () => {
+    toast({
+      title: "Token Earnings",
+      description: `You've earned ${earnings.toFixed(2)} SYX tokens from creator activities`,
+      duration: 3000,
+    });
+  };
+
+  const handleFollowerAnalyticsClick = () => {
+    toast({
+      title: "Follower Analytics",
+      description: `You have ${followers} followers with a growth rate of +${(followers * 0.05).toFixed(0)} this week`,
       duration: 3000,
     });
   };
@@ -804,27 +837,49 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              onClick={handleCreatorToolsClick}
+            >
               <Settings className="mr-2 h-4 w-4" />
               Creator Tools
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              onClick={handleEcosystemClick}
+            >
               <TrendingUp className="mr-2 h-4 w-4" />
               Ecosystem
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
-              <Music className="mr-2 h-4 w-4" />
-              Podcast
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              onClick={handleTokenEarningsClick}
+            >
+              <BadgeDollarSign className="mr-2 h-4 w-4" />
+              Token Earnings
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
-              <Music className="mr-2 h-4 w-4" />
-              Playlist
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+              onClick={handleFollowerAnalyticsClick}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Followers
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+            >
               <TrendingUp className="mr-2 h-4 w-4" />
               Pools
             </Button>
-            <Button variant="outline" className="flex items-center justify-start border-white/20 hover:bg-white/5 text-white">
+            <Button 
+              variant="outline" 
+              className="flex items-center justify-start bg-black text-white hover:bg-white/10"
+            >
               <Video className="mr-2 h-4 w-4" />
               Cinema
             </Button>
