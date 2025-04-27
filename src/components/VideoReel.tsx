@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Play, Gift, Share, Vote, MessageSquare, Search, Request } from "lucide-react";
+import { Play, Gift, Share, Vote, MessageSquare, Search, MessagesSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VoteButton from "./VoteButton";
 import CreatorInfo from "./CreatorInfo";
@@ -376,7 +376,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             <DialogTrigger asChild>
               <div onClick={stopAllPropagation}>
                 <VoteButton
-                  icon={<Request className="h-6 w-6" />}
+                  icon={<MessagesSquare className="h-6 w-6" />}
                   label="Request"
                 />
               </div>
