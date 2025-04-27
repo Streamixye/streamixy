@@ -1,25 +1,799 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { 
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from "@/components/ui/tabs";
+import { 
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import {
+  User,
+  Users,
+  Wallet,
+  Link as LinkIcon,
+  Share,
+  ArrowUpRight,
+  History,
+  Image as ImageIcon,
+  Edit,
+  ArrowRight,
+  TrendingUp,
+  Copy,
+  Check
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
+import { 
+  Dialog,
+  DialogContent, 
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+
+interface Transaction {
+  id: number;
+  type: "stake" | "withdraw" | "earn" | "gift" | "referral";
+  amount: number;
+  date: Date;
+  details: string;
+}
+
+interface StakedNFT {
+  id: number;
+  name: string;
+  amount: number;
+  roi: number;
+  pnl: number;
+}
 
 const Dashboard = () => {
+  const [mode, setMode] = useState<"creator" | "audience">("creator");
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [profile, setProfile] = useState({
+    nickname: "StreamerXYZ",
+    avatar: ""
+  });
+  const [editProfile, setEditProfile] = useState({
+    nickname: "",
+    avatar: ""
+  });
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [earnings, setEarnings] = useState(0);
+  const [referralCopied, setReferralCopied] = useState(false);
+  const [followers, setFollowers] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
+  const { toast } = useToast();
+
+  // Generate sample data on load
+  useEffect(() => {
+    // Generate random earnings
+    const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
+    setEarnings(randomEarnings);
+    
+    // Generate random followers count
+    const randomFollowers = Math.floor(Math.random() * 5000) + 500;
+    setFollowers(randomFollowers);
+    
+    // Generate sample transactions
+    const sampleTransactions: Transaction[] = [
+      {
+        id: 1,
+        type: "earn",
+        amount: 250,
+        date: new Date(Date.now() - 3600000),
+        details: "Stream earnings"
+      },
+      {
+        id: 2,
+        type: "gift",
+        amount: 150,
+        date: new Date(Date.now() - 7200000),
+        details: "Gift from @viewer123"
+      },
+      {
+        id: 3,
+        type: "stake",
+        amount: 500,
+        date: new Date(Date.now() - 86400000),
+        details: "Staked for 3 weeks"
+      },
+      {
+        id: 4,
+        type: "withdraw",
+        amount: -200,
+        date: new Date(Date.now() - 172800000),
+        details: "Withdrawal to wallet"
+      },
+      {
+        id: 5,
+        type: "referral",
+        amount: 300,
+        date: new Date(Date.now() - 259200000),
+        details: "Referral bonus: @newuser1"
+      }
+    ];
+    setTransactions(sampleTransactions);
+    
+    // Generate sample staked NFTs
+    const sampleStakedNFTs: StakedNFT[] = [
+      {
+        id: 1,
+        name: "Streamixy Genesis",
+        amount: 250,
+        roi: 12.5,
+        pnl: 31.25
+      },
+      {
+        id: 2,
+        name: "Digital Dreamscape",
+        amount: 180,
+        roi: -4.2,
+        pnl: -7.56
+      },
+      {
+        id: 3,
+        name: "Virtual Reality",
+        amount: 320,
+        roi: 6.8,
+        pnl: 21.76
+      }
+    ];
+    setStakedNFTs(sampleStakedNFTs);
+
+  }, []);
+
+  // Simulate real-time earnings updates
+  useEffect(() => {
+    if (!walletConnected) return;
+    
+    const interval = setInterval(() => {
+      // Random small changes to earnings
+      setEarnings(prev => {
+        const change = Math.random() * 10 - 3; // -3 to +7
+        return Math.max(0, prev + change);
+      });
+      
+      // Random changes to followers (occasionally)
+      if (Math.random() > 0.7) {
+        setFollowers(prev => {
+          const change = Math.floor(Math.random() * 3); // 0, 1, or 2
+          return prev + change;
+        });
+        
+        // Show toast for new followers
+        if (mode === "creator") {
+          toast({
+            title: "New Follower!",
+            description: "Someone just followed your channel.",
+            duration: 2000,
+          });
+        }
+      }
+      
+      // Update NFT ROIs and PNLs
+      setStakedNFTs(prev => 
+        prev.map(nft => {
+          const roiChange = (Math.random() * 2) - 1; // -1 to +1
+          const newRoi = nft.roi + roiChange;
+          const newPnl = (nft.amount * newRoi) / 100;
+          return {
+            ...nft,
+            roi: newRoi,
+            pnl: newPnl
+          };
+        })
+      );
+      
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [walletConnected, mode, toast]);
+
+  const connectWallet = () => {
+    setWalletConnected(true);
+    toast({
+      title: "Wallet Connected",
+      description: "Your wallet has been successfully connected.",
+      duration: 3000,
+    });
+  };
+
+  const startEditProfile = () => {
+    setEditProfile({
+      nickname: profile.nickname,
+      avatar: profile.avatar
+    });
+    setIsEditingProfile(true);
+  };
+
+  const saveProfile = () => {
+    setProfile({
+      nickname: editProfile.nickname,
+      avatar: editProfile.avatar
+    });
+    setIsEditingProfile(false);
+    toast({
+      title: "Profile Updated",
+      description: "Your profile has been successfully updated.",
+      duration: 3000,
+    });
+  };
+
+  const copyReferralLink = () => {
+    navigator.clipboard.writeText(`https://streamixy.io/ref/${profile.nickname}`);
+    setReferralCopied(true);
+    toast({
+      title: "Referral Link Copied",
+      description: "Referral link copied to clipboard.",
+      duration: 3000,
+    });
+    setTimeout(() => setReferralCopied(false), 2000);
+  };
+
+  const shareReferral = (platform: string) => {
+    const referralLink = `https://streamixy.io/ref/${profile.nickname}`;
+    let shareUrl = "";
+    
+    switch(platform) {
+      case "whatsapp":
+        shareUrl = `https://wa.me/?text=Join%20me%20on%20Streamixy!%20${encodeURIComponent(referralLink)}`;
+        break;
+      case "telegram":
+        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=Join%20me%20on%20Streamixy!`;
+        break;
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`;
+        break;
+      case "instagram":
+        // Instagram doesn't have a direct share URL, but we'll open Instagram
+        shareUrl = `https://instagram.com`;
+        toast({
+          title: "Instagram",
+          description: "Copy the link and paste it in your Instagram story or DMs.",
+          duration: 3000,
+        });
+        break;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, "_blank");
+    }
+  };
+
+  const withdrawTokens = () => {
+    if (earnings > 0) {
+      // Add withdrawal transaction
+      const newTransaction: Transaction = {
+        id: Date.now(),
+        type: "withdraw",
+        amount: -earnings,
+        date: new Date(),
+        details: "Withdrawal to wallet"
+      };
+      setTransactions(prev => [newTransaction, ...prev]);
+      
+      // Reset earnings
+      setEarnings(0);
+      
+      toast({
+        title: "Withdrawal Successful",
+        description: `${earnings.toFixed(2)} SYX tokens have been sent to your wallet.`,
+        duration: 3000,
+      });
+    }
+  };
+
+  const claimReferralBonus = () => {
+    // Add referral bonus transaction
+    const newTransaction: Transaction = {
+      id: Date.now(),
+      type: "referral",
+      amount: 300,
+      date: new Date(),
+      details: "Referral bonus claimed"
+    };
+    setTransactions(prev => [newTransaction, ...prev]);
+    
+    // Update earnings
+    setEarnings(prev => prev + 300);
+    
+    toast({
+      title: "Referral Bonus Claimed",
+      description: "300 SYX tokens have been added to your balance.",
+      duration: 3000,
+    });
+  };
+
+  // If wallet is not connected, show connect wallet UI
+  if (!walletConnected) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+        <Card className="max-w-md w-full bg-black border border-white/10">
+          <CardHeader>
+            <CardTitle className="text-xl text-center">Connect Wallet</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-white/70 text-center">Connect your wallet to access your dashboard</p>
+            <Button 
+              onClick={connectWallet}
+              className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <h1 className="text-2xl font-bold mb-4">Creator Dashboard</h1>
-      <div className="grid gap-4">
-        <div className="glass p-4 rounded-lg">
-          <h2 className="font-semibold mb-2">Statistics</h2>
-          <p className="text-streamixy-light">Views: 1.2K</p>
-          <p className="text-streamixy-light">Followers: 500</p>
-          <p className="text-streamixy-light">SYX Earned: 2,500</p>
-        </div>
-        <div className="glass p-4 rounded-lg">
-          <h2 className="font-semibold mb-2">Recent Activity</h2>
-          <div className="space-y-2">
-            <p className="text-sm text-streamixy-light">New follower: @user123</p>
-            <p className="text-sm text-streamixy-light">100 SYX received from @fan456</p>
-          </div>
+    <div className="min-h-screen bg-black text-white p-4 pb-20">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
+          <DialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-white/20 hover:bg-white/10"
+              onClick={startEditProfile}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="bg-black border border-white/10 text-white">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex flex-col items-center space-y-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={profile.avatar} alt={profile.nickname} />
+                  <AvatarFallback className="bg-streamixy-primary/20 text-streamixy-primary text-xl">
+                    {profile.nickname.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs border-white/20"
+                >
+                  <ImageIcon className="h-3 w-3 mr-1" /> 
+                  Upload Photo
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="nickname" className="text-sm text-white/70">
+                  Nickname
+                </label>
+                <Input 
+                  id="nickname"
+                  value={editProfile.nickname}
+                  onChange={(e) => setEditProfile({...editProfile, nickname: e.target.value})}
+                  className="bg-transparent border-white/20"
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsEditingProfile(false)}
+                  className="border-white/20"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={saveProfile}
+                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="flex items-center mb-6">
+        <Avatar className="h-14 w-14 border-2 border-streamixy-primary">
+          <AvatarImage src={profile.avatar} alt={profile.nickname} />
+          <AvatarFallback className="bg-streamixy-primary/20 text-streamixy-primary text-xl">
+            {profile.nickname.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <div className="ml-4">
+          <h2 className="text-xl font-bold">{profile.nickname}</h2>
+          <p className="text-white/70 text-sm">Wallet: 0x...{Math.random().toString(36).substring(2, 8)}</p>
         </div>
       </div>
+
+      <Tabs defaultValue="creator" className="mb-6" onValueChange={(value) => setMode(value as "creator" | "audience")}>
+        <TabsList className="grid w-full grid-cols-2 bg-black border border-white/10">
+          <TabsTrigger value="creator" className="data-[state=active]:bg-streamixy-primary">
+            <User className="h-4 w-4 mr-2" />
+            Creator Mode
+          </TabsTrigger>
+          <TabsTrigger value="audience" className="data-[state=active]:bg-streamixy-primary">
+            <Users className="h-4 w-4 mr-2" />
+            Audience Mode
+          </TabsTrigger>
+        </TabsList>
+        
+        {/* Creator Mode Content */}
+        <TabsContent value="creator" className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Users className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  Followers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{followers.toLocaleString()}</div>
+                <div className="text-xs text-white/70">+{(followers * 0.05).toFixed(0)} this week</div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  Earnings (SYX)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{earnings.toFixed(2)}</div>
+                <Button 
+                  size="sm" 
+                  className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  onClick={withdrawTokens}
+                >
+                  Withdraw
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Referral Link
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex">
+                <Input 
+                  readOnly 
+                  value={`https://streamixy.io/ref/${profile.nickname}`} 
+                  className="bg-transparent border-white/20"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={copyReferralLink}
+                  className="ml-2 border-white/20"
+                >
+                  {referralCopied ? 
+                    <Check className="h-4 w-4 text-green-500" /> : 
+                    <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              <div className="flex justify-between">
+                <p className="text-xs text-white/70">Share this link and earn SYX for each referral</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => claimReferralBonus()}
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                >
+                  Claim 300 SYX
+                </Button>
+              </div>
+              
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("whatsapp")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> WhatsApp
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("telegram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Telegram
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("facebook")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Facebook
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("instagram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Instagram
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <History className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Transaction History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {transactions.map(transaction => (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        {transaction.type === "earn" && "Stream Earnings"}
+                        {transaction.type === "gift" && "Gift Received"}
+                        {transaction.type === "stake" && "Tokens Staked"}
+                        {transaction.type === "withdraw" && "Withdrawal"}
+                        {transaction.type === "referral" && "Referral Bonus"}
+                      </div>
+                      <div className="text-xs text-white/70">
+                        {transaction.date.toLocaleString()} • {transaction.details}
+                      </div>
+                    </div>
+                    <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Audience Mode Content */}
+        <TabsContent value="audience" className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  Balance (SYX)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{earnings.toFixed(2)}</div>
+                <Button 
+                  size="sm" 
+                  className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  onClick={withdrawTokens}
+                >
+                  Withdraw
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <TrendingUp className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  NFTs Staked
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stakedNFTs.length}</div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="mt-2 text-xs border-white/20 hover:bg-white/5"
+                  onClick={() => window.location.href = '/nfts'}
+                >
+                  View NFTs
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <TrendingUp className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Your Staked NFTs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {stakedNFTs.map(nft => (
+                  <div 
+                    key={nft.id}
+                    className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium">{nft.name}</div>
+                      <div className="flex items-center">
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          className="h-6 text-xs text-white/80 hover:text-white"
+                          onClick={() => window.location.href = '/nfts'}
+                        >
+                          Details
+                          <ArrowRight className="ml-1 h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
+                      <div>
+                        <div className="text-white/70 text-xs">Staked</div>
+                        <div className="font-medium">{nft.amount.toFixed(2)} SYX</div>
+                      </div>
+                      <div>
+                        <div className="text-white/70 text-xs">ROI</div>
+                        <div className={`font-medium ${nft.roi > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                          {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-white/70 text-xs">P&L</div>
+                        <div className={`font-medium ${nft.pnl > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                          {nft.pnl > 0 ? '+' : ''}{nft.pnl.toFixed(2)} SYX
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {stakedNFTs.length === 0 && (
+                  <div className="text-center py-6 text-white/60">
+                    <p>You haven't staked on any NFTs yet.</p>
+                    <Button 
+                      variant="link" 
+                      className="text-streamixy-primary mt-2"
+                      onClick={() => window.location.href = '/nfts'}
+                    >
+                      Browse NFT marketplace
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Referral Link
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex">
+                <Input 
+                  readOnly 
+                  value={`https://streamixy.io/ref/${profile.nickname}`} 
+                  className="bg-transparent border-white/20"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={copyReferralLink}
+                  className="ml-2 border-white/20"
+                >
+                  {referralCopied ? 
+                    <Check className="h-4 w-4 text-green-500" /> : 
+                    <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              <div className="flex justify-between">
+                <p className="text-xs text-white/70">Share with friends and earn 300 SYX per referral</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => claimReferralBonus()}
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                >
+                  Claim 300 SYX
+                </Button>
+              </div>
+              
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("whatsapp")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> WhatsApp
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("telegram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Telegram
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("facebook")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Facebook
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5"
+                  onClick={() => shareReferral("instagram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Instagram
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center">
+                <History className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Transaction History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {transactions.map(transaction => (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
+                  >
+                    <div>
+                      <div className="font-medium">
+                        {transaction.type === "earn" && "Stream Earnings"}
+                        {transaction.type === "gift" && "Gift Sent"}
+                        {transaction.type === "stake" && "Tokens Staked"}
+                        {transaction.type === "withdraw" && "Withdrawal"}
+                        {transaction.type === "referral" && "Referral Bonus"}
+                      </div>
+                      <div className="text-xs text-white/70">
+                        {transaction.date.toLocaleString()} • {transaction.details}
+                      </div>
+                    </div>
+                    <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

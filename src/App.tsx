@@ -9,6 +9,7 @@ import GoLive from "./pages/GoLive";
 import NFTs from "./pages/NFTs";
 import Stake from "./pages/Stake";
 import Dashboard from "./pages/Dashboard";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 
@@ -26,7 +27,7 @@ const App = () => (
           <Route path="/nfts" element={<NFTs />} />
           <Route path="/stake" element={<Stake />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/leaderboard" element={<NotFound />} /> {/* Temporarily using NotFound for Leaderboard */}
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNav />
