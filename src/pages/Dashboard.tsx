@@ -321,9 +321,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 pb-20">
+    <div className="min-h-screen bg-black text-white p-2 sm:p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-white">Dashboard</h1>
         <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
           <DialogTrigger asChild>
             <Button 
@@ -392,15 +392,15 @@ const Dashboard = () => {
       </div>
 
       <div className="flex items-center mb-6">
-        <Avatar className="h-14 w-14 border-2 border-streamixy-primary">
+        <Avatar className="h-12 w-12 sm:h-14 sm:w-14 border-2 border-streamixy-primary">
           <AvatarImage src={profile.avatar} alt={profile.nickname} />
           <AvatarFallback className="bg-streamixy-primary/20 text-streamixy-primary text-xl">
             {profile.nickname.slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div className="ml-4">
-          <h2 className="text-xl font-bold text-white">{profile.nickname}</h2>
-          <p className="text-white text-sm">
+          <h2 className="text-lg sm:text-xl font-bold text-white">{profile.nickname}</h2>
+          <p className="text-sm text-white">
             {walletConnected 
               ? `Wallet: 0x...${Math.random().toString(36).substring(2, 8)}` 
               : 'Wallet Not Connected'}
@@ -421,7 +421,7 @@ const Dashboard = () => {
         </TabsList>
         
         <TabsContent value="creator" className="space-y-4 animate-fade-in">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card className="bg-black border border-white/10 overflow-hidden">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center text-white">
@@ -475,17 +475,17 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input 
                   readOnly 
                   value={`https://streamixy.io/ref/${profile.nickname}`} 
-                  className="bg-transparent border-white/20 text-white"
+                  className="bg-transparent border-white/20 text-white text-sm"
                 />
                 <Button 
                   variant="outline" 
                   size="icon"
                   onClick={copyReferralLink}
-                  className="ml-2 border-white/20"
+                  className="sm:ml-2 border-white/20"
                 >
                   {referralCopied ? 
                     <Check className="h-4 w-4 text-green-500" /> : 
@@ -493,22 +493,22 @@ const Dashboard = () => {
                 </Button>
               </div>
               
-              <div className="flex justify-between">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
                 <Button 
                   size="sm" 
                   onClick={() => claimReferralBonus()}
-                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary w-full sm:w-auto"
                 >
                   Claim 200 SYX
                 </Button>
               </div>
               
-              <div className="flex space-x-2 pt-2">
+              <div className="flex flex-col space-y-2">
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
                   onClick={() => shareReferral("whatsapp")}
                 >
                   <Share className="h-3 w-3 mr-1" /> WhatsApp
@@ -516,7 +516,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
                   onClick={() => shareReferral("telegram")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Telegram
@@ -524,7 +524,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
                   onClick={() => shareReferral("facebook")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Facebook
@@ -532,7 +532,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
                   onClick={() => shareReferral("instagram")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Instagram
