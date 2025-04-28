@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -152,12 +151,9 @@ const Dashboard = () => {
       }
     ];
     setStakedNFTs(sampleStakedNFTs);
-
   }, []);
 
   useEffect(() => {
-    if (!walletConnected) return;
-    
     const interval = setInterval(() => {
       setEarnings(prev => {
         const change = Math.random() * 10 - 3;
@@ -191,11 +187,10 @@ const Dashboard = () => {
           };
         })
       );
-      
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [walletConnected, mode, showToast]);
+  }, [mode, showToast]);
 
   const connectWallet = () => {
     setWalletConnected(true);
@@ -425,381 +420,389 @@ const Dashboard = () => {
           </TabsTrigger>
         </TabsList>
         
-        {!walletConnected ? (
-          <Button 
-            onClick={connectWallet}
-            className="w-full mt-4 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
-          >
-            <Wallet className="mr-2 h-4 w-4" />
-            Connect Wallet
-          </Button>
-        ) : (
-          <>
-            <TabsContent value="creator" className="space-y-4 animate-fade-in">
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="bg-black border border-white/10 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center text-white">
-                      <Users className="h-4 w-4 mr-1.5 text-streamixy-primary" />
-                      Followers
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{followers.toLocaleString()}</div>
-                    <div className="text-xs text-white">+{(followers * 0.05).toFixed(0)} this week</div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-black border border-white/10 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center text-white">
-                      <BadgeDollarSign className="mr-1 text-streamixy-primary" />
-                      Creator Earnings (SYX)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
-                    <Button 
-                      size="sm" 
-                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
-                      onClick={withdrawTokens}
-                    >
-                      Withdraw
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <CreateNFTForm onSuccess={handleNFTCreated} />
-              
-              <Card className="bg-black border border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center text-white">
-                    <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
-                    Referral Link
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex">
-                    <Input 
-                      readOnly 
-                      value={`https://streamixy.io/ref/${profile.nickname}`} 
-                      className="bg-transparent border-white/20 text-white"
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={copyReferralLink}
-                      className="ml-2 border-white/20"
-                    >
-                      {referralCopied ? 
-                        <Check className="h-4 w-4 text-green-500" /> : 
-                        <Copy className="h-4 w-4 text-white" />}
-                    </Button>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
-                    <Button 
-                      size="sm" 
-                      onClick={() => claimReferralBonus()}
-                      className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
-                    >
-                      Claim 200 SYX
-                    </Button>
-                  </div>
-                  
-                  <div className="flex space-x-2 pt-2">
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("whatsapp")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> WhatsApp
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("telegram")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Telegram
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("facebook")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Facebook
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("instagram")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Instagram
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-black border border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center text-white">
-                    <History className="h-4 w-4 mr-2 text-streamixy-primary" />
-                    Transaction History
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {transactions.map(transaction => (
-                      <div 
-                        key={transaction.id} 
-                        className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
-                      >
-                        <div>
-                          <div className="font-medium text-white">
-                            {transaction.type === "earn" && "Stream Earnings"}
-                            {transaction.type === "gift" && "Gift Received"}
-                            {transaction.type === "stake" && "Tokens Staked"}
-                            {transaction.type === "withdraw" && "Withdrawal"}
-                            {transaction.type === "referral" && "Referral Bonus"}
-                          </div>
-                          <div className="text-xs text-white">
-                            {transaction.date.toLocaleString()} • {transaction.details}
-                          </div>
-                        </div>
-                        <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
-                          {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+        <TabsContent value="creator" className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center text-white">
+                  <Users className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  Followers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{followers.toLocaleString()}</div>
+                <div className="text-xs text-white">+{(followers * 0.05).toFixed(0)} this week</div>
+              </CardContent>
+            </Card>
             
-            <TabsContent value="audience" className="space-y-4 animate-fade-in">
-              <div className="grid grid-cols-2 gap-4">
-                <Card className="bg-black border border-white/10 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center text-white">
-                      <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
-                      Balance (SYX)
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
-                    <Button 
-                      size="sm" 
-                      className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
-                      onClick={withdrawTokens}
-                    >
-                      Withdraw
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-black border border-white/10 overflow-hidden">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center text-white">
-                      <TrendingUp className="h-4 w-4 mr-1.5 text-streamixy-primary" />
-                      NFTs Staked
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-white">{stakedNFTs.length}</div>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="mt-2 text-xs border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => window.location.href = '/nfts'}
-                    >
-                      View NFTs
-                    </Button>
-                  </CardContent>
-                </Card>
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center text-white">
+                  <BadgeDollarSign className="mr-1 text-streamixy-primary" />
+                  Creator Earnings (SYX)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
+                <Button 
+                  size="sm" 
+                  className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
+                  onClick={withdrawTokens}
+                >
+                  Withdraw
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {!walletConnected && (
+            <Button 
+              onClick={connectWallet}
+              className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </Button>
+          )}
+          
+          <CreateNFTForm onSuccess={handleNFTCreated} />
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center text-white">
+                <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Referral Link
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex">
+                <Input 
+                  readOnly 
+                  value={`https://streamixy.io/ref/${profile.nickname}`} 
+                  className="bg-transparent border-white/20 text-white"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={copyReferralLink}
+                  className="ml-2 border-white/20"
+                >
+                  {referralCopied ? 
+                    <Check className="h-4 w-4 text-green-500" /> : 
+                    <Copy className="h-4 w-4 text-white" />}
+                </Button>
               </div>
               
-              <Card className="bg-black border border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center text-white">
-                    <TrendingUp className="h-4 w-4 mr-2 text-streamixy-primary" />
-                    Your Staked NFTs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {stakedNFTs.map(nft => (
-                      <div 
-                        key={nft.id}
-                        className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div className="font-medium text-white">{nft.name}</div>
-                          <div className="flex items-center">
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              className="h-6 text-xs text-white hover:text-white"
-                              onClick={() => window.location.href = '/nfts'}
-                            >
-                              Details
-                              <ArrowRight className="ml-1 h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
-                          <div>
-                            <div className="text-white text-xs">Staked</div>
-                            <div className="font-medium text-white">{nft.amount.toFixed(2)} SYX</div>
-                          </div>
-                          <div>
-                            <div className="text-white text-xs">ROI</div>
-                            <div className={`font-medium ${nft.roi > 0 ? 'text-green-500' : 'text-red-400'}`}>
-                              {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-white text-xs">P&L</div>
-                            <div className={`font-medium ${nft.pnl > 0 ? 'text-green-500' : 'text-red-400'}`}>
-                              {nft.pnl > 0 ? '+' : ''}{nft.pnl.toFixed(2)} SYX
-                            </div>
-                          </div>
-                        </div>
+              <div className="flex justify-between">
+                <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => claimReferralBonus()}
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                >
+                  Claim 200 SYX
+                </Button>
+              </div>
+              
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("whatsapp")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> WhatsApp
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("telegram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Telegram
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("facebook")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Facebook
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("instagram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Instagram
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center text-white">
+                <History className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Transaction History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {transactions.map(transaction => (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
+                  >
+                    <div>
+                      <div className="font-medium text-white">
+                        {transaction.type === "earn" && "Stream Earnings"}
+                        {transaction.type === "gift" && "Gift Received"}
+                        {transaction.type === "stake" && "Tokens Staked"}
+                        {transaction.type === "withdraw" && "Withdrawal"}
+                        {transaction.type === "referral" && "Referral Bonus"}
                       </div>
-                    ))}
-                    
-                    {stakedNFTs.length === 0 && (
-                      <div className="text-center py-6 text-white">
-                        <p>You haven't staked on any NFTs yet.</p>
+                      <div className="text-xs text-white">
+                        {transaction.date.toLocaleString()} • {transaction.details}
+                      </div>
+                    </div>
+                    <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="audience" className="space-y-4 animate-fade-in">
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center text-white">
+                  <Wallet className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  Balance (SYX)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
+                <Button 
+                  size="sm" 
+                  className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
+                  onClick={withdrawTokens}
+                >
+                  Withdraw
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black border border-white/10 overflow-hidden">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center text-white">
+                  <TrendingUp className="h-4 w-4 mr-1.5 text-streamixy-primary" />
+                  NFTs Staked
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{stakedNFTs.length}</div>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="mt-2 text-xs border-white/20 hover:bg-white/5 text-white"
+                  onClick={() => window.location.href = '/nfts'}
+                >
+                  View NFTs
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {!walletConnected && (
+            <Button 
+              onClick={connectWallet}
+              className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              Connect Wallet
+            </Button>
+          )}
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center text-white">
+                <TrendingUp className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Your Staked NFTs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {stakedNFTs.map(nft => (
+                  <div 
+                    key={nft.id}
+                    className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="font-medium text-white">{nft.name}</div>
+                      <div className="flex items-center">
                         <Button 
-                          variant="link" 
-                          className="text-streamixy-primary mt-2"
+                          size="sm" 
+                          variant="ghost"
+                          className="h-6 text-xs text-white hover:text-white"
                           onClick={() => window.location.href = '/nfts'}
                         >
-                          Browse NFT marketplace
+                          Details
+                          <ArrowRight className="ml-1 h-3 w-3" />
                         </Button>
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-black border border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center text-white">
-                    <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
-                    Referral Link
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex">
-                    <Input 
-                      readOnly 
-                      value={`https://streamixy.io/ref/${profile.nickname}`} 
-                      className="bg-transparent border-white/20 text-white"
-                    />
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={copyReferralLink}
-                      className="ml-2 border-white/20"
-                    >
-                      {referralCopied ? 
-                        <Check className="h-4 w-4 text-green-500" /> : 
-                        <Copy className="h-4 w-4 text-white" />}
-                    </Button>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
-                    <Button 
-                      size="sm" 
-                      onClick={() => claimReferralBonus()}
-                      className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
-                    >
-                      Claim 200 SYX
-                    </Button>
-                  </div>
-                  
-                  <div className="flex space-x-2 pt-2">
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("whatsapp")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> WhatsApp
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("telegram")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Telegram
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("facebook")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Facebook
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 border-white/20 hover:bg-white/5 text-white"
-                      onClick={() => shareReferral("instagram")}
-                    >
-                      <Share className="h-3 w-3 mr-1" /> Instagram
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-black border border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center text-white">
-                    <History className="h-4 w-4 mr-2 text-streamixy-primary" />
-                    Transaction History
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {transactions.map(transaction => (
-                      <div 
-                        key={transaction.id} 
-                        className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
-                      >
-                        <div>
-                          <div className="font-medium text-white">
-                            {transaction.type === "earn" && "Stream Earnings"}
-                            {transaction.type === "gift" && "Gift Sent"}
-                            {transaction.type === "stake" && "Tokens Staked"}
-                            {transaction.type === "withdraw" && "Withdrawal"}
-                            {transaction.type === "referral" && "Referral Bonus"}
-                          </div>
-                          <div className="text-xs text-white">
-                            {transaction.date.toLocaleString()} • {transaction.details}
-                          </div>
-                        </div>
-                        <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
-                          {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 mt-2 text-sm">
+                      <div>
+                        <div className="text-white text-xs">Staked</div>
+                        <div className="font-medium text-white">{nft.amount.toFixed(2)} SYX</div>
+                      </div>
+                      <div>
+                        <div className="text-white text-xs">ROI</div>
+                        <div className={`font-medium ${nft.roi > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                          {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                         </div>
                       </div>
-                    ))}
+                      <div>
+                        <div className="text-white text-xs">P&L</div>
+                        <div className={`font-medium ${nft.pnl > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                          {nft.pnl > 0 ? '+' : ''}{nft.pnl.toFixed(2)} SYX
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </>
-        )}
+                ))}
+                
+                {stakedNFTs.length === 0 && (
+                  <div className="text-center py-6 text-white">
+                    <p>You haven't staked on any NFTs yet.</p>
+                    <Button 
+                      variant="link" 
+                      className="text-streamixy-primary mt-2"
+                      onClick={() => window.location.href = '/nfts'}
+                    >
+                      Browse NFT marketplace
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center text-white">
+                <LinkIcon className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Referral Link
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex">
+                <Input 
+                  readOnly 
+                  value={`https://streamixy.io/ref/${profile.nickname}`} 
+                  className="bg-transparent border-white/20 text-white"
+                />
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={copyReferralLink}
+                  className="ml-2 border-white/20"
+                >
+                  {referralCopied ? 
+                    <Check className="h-4 w-4 text-green-500" /> : 
+                    <Copy className="h-4 w-4 text-white" />}
+                </Button>
+              </div>
+              
+              <div className="flex justify-between">
+                <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
+                <Button 
+                  size="sm" 
+                  onClick={() => claimReferralBonus()}
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                >
+                  Claim 200 SYX
+                </Button>
+              </div>
+              
+              <div className="flex space-x-2 pt-2">
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("whatsapp")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> WhatsApp
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("telegram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Telegram
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("facebook")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Facebook
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  onClick={() => shareReferral("instagram")}
+                >
+                  <Share className="h-3 w-3 mr-1" /> Instagram
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-black border border-white/10">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center text-white">
+                <History className="h-4 w-4 mr-2 text-streamixy-primary" />
+                Transaction History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {transactions.map(transaction => (
+                  <div 
+                    key={transaction.id} 
+                    className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
+                  >
+                    <div>
+                      <div className="font-medium text-white">
+                        {transaction.type === "earn" && "Stream Earnings"}
+                        {transaction.type === "gift" && "Gift Sent"}
+                        {transaction.type === "stake" && "Tokens Staked"}
+                        {transaction.type === "withdraw" && "Withdrawal"}
+                        {transaction.type === "referral" && "Referral Bonus"}
+                      </div>
+                      <div className="text-xs text-white">
+                        {transaction.date.toLocaleString()} • {transaction.details}
+                      </div>
+                    </div>
+                    <div className={`font-semibold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-400'}`}>
+                      {transaction.amount > 0 ? '+' : ''}{transaction.amount.toFixed(2)} SYX
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
