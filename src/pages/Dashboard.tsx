@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -25,15 +26,15 @@ import {
   TrendingUp,
   Copy,
   Check,
-  Settings,
+  DollarSign,
   Music,
-  Video,
-  DollarSign
+  Video
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { 
   Dialog,
   DialogContent, 
@@ -79,6 +80,7 @@ const Dashboard = () => {
   const [followers, setFollowers] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
+  const { toast: showToast } = useToast();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
@@ -169,7 +171,7 @@ const Dashboard = () => {
         });
         
         if (mode === "creator") {
-          toast({
+          showToast({
             title: "New Follower!",
             description: "Someone just followed your channel.",
             duration: 2000,
@@ -193,11 +195,11 @@ const Dashboard = () => {
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [walletConnected, mode, toast]);
+  }, [walletConnected, mode, showToast]);
 
   const connectWallet = () => {
     setWalletConnected(true);
-    toast({
+    showToast({
       title: "Wallet Connected",
       description: "Your wallet has been successfully connected.",
       duration: 3000,
@@ -218,7 +220,7 @@ const Dashboard = () => {
       avatar: editProfile.avatar
     });
     setIsEditingProfile(false);
-    toast({
+    showToast({
       title: "Profile Updated",
       description: "Your profile has been successfully updated.",
       duration: 3000,
@@ -228,7 +230,7 @@ const Dashboard = () => {
   const copyReferralLink = () => {
     navigator.clipboard.writeText(`https://streamixy.io/ref/${profile.nickname}`);
     setReferralCopied(true);
-    toast({
+    showToast({
       title: "Referral Link Copied",
       description: "Referral link copied to clipboard.",
       duration: 3000,
@@ -252,7 +254,7 @@ const Dashboard = () => {
         break;
       case "instagram":
         shareUrl = `https://instagram.com`;
-        toast({
+        showToast({
           title: "Instagram",
           description: "Copy the link and paste it in your Instagram story or DMs.",
           duration: 3000,
@@ -278,7 +280,7 @@ const Dashboard = () => {
       
       setEarnings(0);
       
-      toast({
+      showToast({
         title: "Withdrawal Successful",
         description: `${earnings.toFixed(2)} SYX tokens have been sent to your wallet.`,
         duration: 3000,
@@ -298,7 +300,7 @@ const Dashboard = () => {
     
     setEarnings(prev => prev + 200);
     
-    toast({
+    showToast({
       title: "Referral Bonus Claimed",
       description: "200 SYX tokens have been added to your balance.",
       duration: 3000,
@@ -316,41 +318,9 @@ const Dashboard = () => {
     
     setTransactions(prev => [newTransaction, ...prev]);
     
-    toast({
+    showToast({
       title: "NFT Created",
       description: "Your NFT is now visible in the marketplace.",
-      duration: 3000,
-    });
-  };
-
-  const handleCreatorToolsClick = () => {
-    toast({
-      title: "Creator Tools",
-      description: "Opening creator tools panel...",
-      duration: 3000,
-    });
-  };
-
-  const handleEcosystemClick = () => {
-    toast({
-      title: "Ecosystem",
-      description: "Exploring ecosystem features...",
-      duration: 3000,
-    });
-  };
-
-  const handleTokenEarningsClick = () => {
-    toast({
-      title: "Token Earnings",
-      description: `You've earned ${earnings.toFixed(2)} SYX tokens from creator activities`,
-      duration: 3000,
-    });
-  };
-
-  const handleFollowerAnalyticsClick = () => {
-    toast({
-      title: "Follower Analytics",
-      description: `You have ${followers} followers with a growth rate of +${(followers * 0.05).toFixed(0)} this week`,
       duration: 3000,
     });
   };
@@ -831,62 +801,6 @@ const Dashboard = () => {
           </>
         )}
       </Tabs>
-
-      <Card className="bg-black border border-white/10 mb-6">
-        <CardHeader>
-          <CardTitle className="text-base text-white">Features</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-              onClick={handleCreatorToolsClick}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Creator Tools
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-              onClick={handleEcosystemClick}
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Ecosystem
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-              onClick={handleTokenEarningsClick}
-            >
-              <DollarSign className="mr-2 h-4 w-4" />
-              Token Earnings
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-              onClick={handleFollowerAnalyticsClick}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Followers
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-            >
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Pools
-            </Button>
-            <Button 
-              variant="outline" 
-              className="flex items-center justify-start bg-black text-white hover:bg-white/10 text-xs"
-            >
-              <Video className="mr-2 h-4 w-4" />
-              Cinema
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
