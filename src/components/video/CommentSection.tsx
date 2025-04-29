@@ -3,12 +3,15 @@ import React, { useState } from "react";
 import LiveComment from "../LiveComment";
 import { MessageCircle, Heart, UserPlus, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CommentSectionProps {
   comments: {text: string, id: number, username: string}[];
   activeComment: {text: string, id: number, username: string} | null;
   onLike?: () => void;
   onFollow?: (followed: boolean) => void;
+  onComment?: (text: string) => void;
   creatorName?: string;
 }
 
@@ -16,20 +19,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   comments, 
   onLike, 
   onFollow,
+  onComment,
   creatorName = "Creator" 
 }) => {
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isCommentBoxOpen, setIsCommentBoxOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onLike) onLike();
-    
-    toast({
-      title: "Liked!",
-      description: `You liked ${creatorName}'s stream`,
-    });
+    // Like notification removed as requested
   };
   
   // Handle follow button click
@@ -45,6 +47,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         ? `You unfollowed ${creatorName}` 
         : `You are now following ${creatorName}`,
     });
+  };
+
+  // Handle comment box toggle
+  const handleCommentToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsCommentBoxOpen(!isCommentBoxOpen);
+  };
+
+  // Handle comment submission
+  const handleCommentSubmit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (commentText.trim() && onComment) {
+      onComment(commentText);
+      setCommentText("");
+      setIsCommentBoxOpen(false);
+    }
   };
   
   return (
@@ -72,7 +90,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
         
         {/* Comment icon - at bottom */}
-        <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
+        <div 
+          className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/30 transition-colors"
+          onClick={handleCommentToggle}
+        >
           <MessageCircle className="h-6 w-6 text-white" />
         </div>
       </div>
@@ -88,6 +109,40 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           />
         ))}
       </div>
+
+      {/* Comment box popup */}
+      {isCommentBoxOpen && (
+        <div className="absolute bottom-32 left-4 right-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/10 z-20">
+          <div className="flex flex-col space-y-3">
+            <Textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Add a comment..."
+              className="bg-transparent border-white/20 text-white resize-none"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCommentBoxOpen(false);
+                }}
+                className="border-white/20 text-white hover:bg-white/10"
+              >
+                Cancel
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={handleCommentSubmit}
+                className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

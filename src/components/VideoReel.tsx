@@ -225,6 +225,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setIsShareDialogOpen(false);
   };
 
+  // Updated comment handler to display for 1 second
   const handleComment = (text: string) => {
     if (!text.trim()) return;
     
@@ -234,17 +235,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setComments(prev => [...prev, newComment]);
     setActiveComment(newComment);
     
-    // Show the comment in the UI
-    toast({
-      title: "Comment Posted!",
-      description: "Your comment is now visible on stream",
-    });
-    
-    // Remove the comment after a while
+    // Remove the comment after 1 second (changed from 5 seconds)
     setTimeout(() => {
       setActiveComment(null);
       setComments(prev => prev.filter(comment => comment.id !== newComment.id));
-    }, 5000);
+    }, 1000); // Changed to 1 second as requested
   };
 
   const handleRequest = () => {
@@ -299,7 +294,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
   };
 
-  // Implement manual like function
+  // Implement manual like function - removed toast notification
   const handleManualLike = () => {
     // Increment likes count
     setLikesCount(prev => prev + 1);
@@ -308,11 +303,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
     const centerX = 50;
     const centerY = 50;
     createLikeAnimation(centerX, centerY);
-    
-    toast({
-      title: "Liked!",
-      description: `You liked ${creator.name}'s stream`,
-    });
   };
 
   // Enhanced double-tap like handler
@@ -339,7 +329,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }
   };
   
-  // Handle direct double click for desktop users
+  // Handle direct double click for desktop users - removed toast notification
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (!videoRef.current) return;
     
@@ -398,6 +388,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
           activeComment={activeComment}
           onLike={handleManualLike}
           onFollow={handleFollow}
+          onComment={handleComment}
           creatorName={creator.name}
         />
 

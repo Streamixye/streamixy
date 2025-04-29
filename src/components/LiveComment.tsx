@@ -24,10 +24,10 @@ const LiveComment: React.FC<LiveCommentProps> = ({
       setVisible(true);
     }, 10); // Small delay to ensure DOM is ready
     
-    // After 4.5 seconds, start fading out
+    // After 1 second (changed from 4.5 seconds), start fading out
     const hideTimeout = setTimeout(() => {
       setVisible(false);
-    }, 4500);
+    }, 1000);
     
     return () => {
       clearTimeout(showTimeout);
@@ -38,7 +38,7 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   return (
     <div 
       className={cn(
-        "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-opacity duration-500",
+        "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-opacity duration-300",
         position === "left" ? "ml-4" : "mr-4 self-end",
         visible ? "opacity-100" : "opacity-0",
         "animate-fade-in"
