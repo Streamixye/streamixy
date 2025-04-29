@@ -17,7 +17,9 @@ interface NFT {
   price: number;
   previousPrice: number;
   marketCap: number;
+  previousMarketCap: number;
   roi: number;
+  previousRoi: number;
   stakedAmount: number;
   pnl: number;
 }
@@ -54,7 +56,9 @@ const CreatorProfile = () => {
         price: 1000,
         previousPrice: 950,
         marketCap: 45000,
+        previousMarketCap: 44000,
         roi: 12,
+        previousRoi: 10,
         stakedAmount: 0,
         pnl: 0,
       }
@@ -86,10 +90,14 @@ const CreatorProfile = () => {
         const priceChange = (Math.random() * 10) - 5;
         nft.previousPrice = nft.price;
         nft.price = Math.max(10, nft.price + priceChange);
-        nft.roi = ((nft.price - nft.previousPrice) / nft.previousPrice) * 100;
         
         const capChange = Math.random() < 0.5 ? -1 : 1;
+        nft.previousMarketCap = nft.marketCap;
         nft.marketCap = nft.marketCap + (capChange * Math.random() * 1000);
+        
+        const roiChange = (Math.random() * 3) - 1;
+        nft.previousRoi = nft.roi;
+        nft.roi = nft.roi + roiChange;
         
         if (nft.stakedAmount > 0) {
           nft.pnl = nft.stakedAmount * ((nft.price - nft.previousPrice) / nft.previousPrice);
@@ -251,21 +259,21 @@ const CreatorProfile = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm mb-4">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold text-white ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className={`font-bold text-white ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.marketCap > nft.previousMarketCap ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.marketCap.toLocaleString()} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold text-white ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.roi > nft.previousRoi ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
