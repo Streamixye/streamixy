@@ -55,6 +55,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [displayedViewers, setDisplayedViewers] = useState(viewers);
   const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
   const [likeCounter, setLikeCounter] = useState(0);
+  const [lastTap, setLastTap] = useState<number>(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -286,8 +287,39 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }, 3000);
   };
 
-  // Handle double like
-  const handleDoubleLike = (e: React.MouseEvent) => {
+  // Enhanced double-tap like handler
+  const handleDoubleTap = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!videoRef.current) return;
+    
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    const isDoubleTap = tapLength < 300 && tapLength > 0;
+    
+    setLastTap(currentTime);
+    
+    if (isDoubleTap) {
+      // Calculate position for like animation
+      let x, y;
+      
+      if ('touches' in e) {
+        // Touch event
+        const touch = e.touches[0] || e.changedTouches[0];
+        const rect = videoRef.current.getBoundingClientRect();
+        x = ((touch.clientX - rect.left) / rect.width) * 100;
+        y = ((touch.clientY - rect.top) / rect.height) * 100;
+      } else {
+        // Mouse event
+        const rect = videoRef.current.getBoundingClientRect();
+        x = ((e.clientX - rect.left) / rect.width) * 100;
+        y = ((e.clientY - rect.top) / rect.height) * 100;
+      }
+      
+      createLikeAnimation(x, y);
+    }
+  };
+  
+  // Handle direct double click for desktop users
+  const handleDoubleClick = (e: React.MouseEvent) => {
     if (!videoRef.current) return;
     
     // Get position relative to the video element
@@ -295,6 +327,10 @@ const VideoReel: React.FC<VideoReelProps> = ({
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
     
+    createLikeAnimation(x, y);
+  };
+  
+  const createLikeAnimation = (x: number, y: number) => {
     // Generate a new like animation at this position
     const newLike = {
       id: likeCounter,
@@ -317,7 +353,9 @@ const VideoReel: React.FC<VideoReelProps> = ({
         <video
           ref={videoRef}
           className="absolute inset-0 object-cover w-full h-full"
-          onClick={handleDoubleLike}
+          onClick={(e) => handleDoubleTap(e)}
+          onDoubleClick={handleDoubleClick}
+          onTouchStart={(e) => handleDoubleTap(e)}
           muted
           loop
           playsInline
