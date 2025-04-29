@@ -49,6 +49,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
@@ -238,8 +239,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   };
 
   const handleRequest = () => {
-    if (!requestText.trim()) return;
-    
+    // Simplified request without needing text input
     setRequestStatus("pending");
     
     toast({
@@ -247,7 +247,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
       description: `Your request to join ${creator.name}'s live has been sent!`,
     });
     
-    setRequestText("");
+    // Close the dialog if it's open
+    setIsRequestDialogOpen(false);
     
     // Simulate creator responding after a delay
     setTimeout(() => {
@@ -385,40 +386,13 @@ const VideoReel: React.FC<VideoReelProps> = ({
               label="Request"
               onClick={() => {
                 if (requestStatus === "idle") {
-                  // Open request dialog
-                  const dialog = document.getElementById("request-dialog") as HTMLDialogElement;
-                  if (dialog) dialog.showModal();
+                  // Directly send request when clicked
+                  handleRequest();
                 }
               }}
             />
             
-            {/* Request Dialog */}
-            <Dialog open={requestStatus === "idle" && document.getElementById("request-dialog")?.open}>
-              <DialogContent id="request-dialog" onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-                <DialogHeader>
-                  <DialogTitle>Send Request</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Send a request to join {creator.name}'s live stream
-                  </p>
-                  <Textarea 
-                    placeholder="Type your request here..."
-                    className="min-h-[100px] bg-white/10 border-white/20 text-white"
-                    value={requestText}
-                    onChange={(e) => setRequestText(e.target.value)}
-                  />
-                  <Button 
-                    onClick={handleRequest}
-                    className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                  >
-                    Send Request
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-            
-            {/* Request status display - separate from the dialog */}
+            {/* Request status display */}
             {requestStatus !== "idle" && (
               <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
                 <div className="bg-black/90 p-6 rounded-lg border border-white/10 max-w-md w-full">

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -7,7 +8,6 @@ import {
   Play,
   Volume2,
   VolumeX,
-  User,
   Filter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,11 +80,27 @@ const GoLive = () => {
       }
     }, 5000);
 
+    // Simulate join requests
+    const requestInterval = setInterval(() => {
+      if (isLive && Math.random() > 0.9) {
+        const randomUsers = [
+          { username: "FanUser1", message: "Can I join your stream?" },
+          { username: "MusicLover", message: "Let me show you something!" },
+          { username: "GamingFan", message: "I'd like to join if possible" },
+          { username: "ArtistViewer", message: "Would love to collaborate!" },
+        ];
+        
+        const randomUser = randomUsers[Math.floor(Math.random() * randomUsers.length)];
+        handleJoinRequest(randomUser);
+      }
+    }, 15000);
+
     return () => {
       stopCamera();
       clearInterval(viewerInterval);
       clearInterval(commentInterval);
       clearInterval(giftInterval);
+      clearInterval(requestInterval);
     };
   }, [isLive]);
 
@@ -257,6 +273,7 @@ const GoLive = () => {
       });
     }
     
+    // Remove the comment after a timeout
     setTimeout(() => {
       setComments(prev => prev.filter(comment => comment.id !== newComment.id));
     }, 5000);
