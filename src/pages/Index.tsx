@@ -213,7 +213,7 @@ const Index = () => {
           {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
         
-        <style jsx global>{`
+        <style>{`
           @keyframes heart-float {
             0% {
               opacity: 0;
