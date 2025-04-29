@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -178,15 +177,17 @@ const NFTs = () => {
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className="font-bold text-white">{nft.marketCap.toLocaleString()} SYX</div>
-                    <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
+                    <div className={`font-bold ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                      {nft.marketCap.toLocaleString()} SYX
+                    </div>
+                    <div className="mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
                       <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
@@ -234,28 +235,23 @@ const NFTs = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-white/70 mb-1 block">NFT Price</label>
-                <p className="text-xl font-bold">{selectedNft.price.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
+                <label className="text-sm text-white mb-1 block">NFT Price</label>
+                <p className="text-xl font-bold text-white">{selectedNft.price.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
               </div>
               
               <div>
-                <label className="text-sm text-white/70 mb-1 block">Your Balance</label>
-                <p className="text-xl font-bold">{userBalance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
-              </div>
-              
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Amount to Stake</label>
+                <label className="text-sm text-white mb-1 block">Amount to Stake</label>
                 <Input
                   type="number"
                   placeholder="Enter amount"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
-                  className="bg-transparent border-white/20"
+                  className="bg-transparent border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
               
               <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
-                <p className="text-white/70">
+                <p className="text-white">
                   Staking SYX on this NFT will give you exposure to its price movements. Your P&L will change based on the NFT's performance.
                 </p>
               </div>
@@ -275,7 +271,7 @@ const NFTs = () => {
               <Button 
                 className="w-1/2 bg-streamixy-primary hover:bg-streamixy-primary/80"
                 onClick={handleStake}
-                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance}
+                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0}
               >
                 Confirm Stake
               </Button>

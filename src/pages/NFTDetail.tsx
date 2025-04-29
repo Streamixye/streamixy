@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { 
@@ -120,10 +119,6 @@ const NFTDetail = () => {
     <div className="min-h-screen bg-black text-white p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">{nft.name}</h1>
-        <div className="text-sm">
-          <span className="text-white">Balance: </span>
-          <span className="font-bold">{userBalance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></span>
-        </div>
       </div>
 
       <Card className="bg-black border border-white/10 overflow-hidden">
@@ -155,15 +150,17 @@ const NFTDetail = () => {
             
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">Market Cap</div>
-              <div className="font-bold text-white">{nft.marketCap.toLocaleString()} SYX</div>
-              <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
+              <div className={`font-bold text-white ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                {nft.marketCap.toLocaleString()} SYX
+              </div>
+              <div className="mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
                 <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
               </div>
             </div>
             
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">ROI</div>
-              <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
+              <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                 {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
               </div>
             </div>
@@ -221,7 +218,7 @@ const NFTDetail = () => {
                   placeholder="Enter amount"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
-                  className="bg-transparent border-white/20"
+                  className="bg-transparent border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
               
@@ -245,7 +242,7 @@ const NFTDetail = () => {
               <Button 
                 className="w-1/2 bg-streamixy-primary hover:bg-streamixy-primary/80"
                 onClick={handleStake}
-                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance}
+                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0}
               >
                 Confirm Stake
               </Button>

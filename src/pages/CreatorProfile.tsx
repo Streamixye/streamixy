@@ -35,7 +35,6 @@ const CreatorProfile = () => {
   const { username } = useParams();
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
-  const [userBalance, setUserBalance] = useState(1000);
   const [stakeAmount, setStakeAmount] = useState("");
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
@@ -56,6 +55,17 @@ const CreatorProfile = () => {
         previousPrice: 950,
         marketCap: 45000,
         roi: 12,
+        stakedAmount: 0,
+        pnl: 0,
+      },
+      {
+        id: "2",
+        name: "Digital Dreamscape",
+        image: "https://source.unsplash.com/featured/400x400?digital",
+        price: 750,
+        previousPrice: 780,
+        marketCap: 32000,
+        roi: -3.8,
         stakedAmount: 0,
         pnl: 0,
       }
@@ -95,6 +105,9 @@ const CreatorProfile = () => {
         if (nft.stakedAmount > 0) {
           nft.pnl = nft.stakedAmount * ((nft.price - nft.previousPrice) / nft.previousPrice);
         }
+        
+        // Force component re-render to show animation changes
+        setIsFollowing(prev => prev);
       });
     }, 3000);
     
@@ -117,10 +130,9 @@ const CreatorProfile = () => {
   };
   
   const handleStake = () => {
-    if (!selectedNft || !stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance) return;
+    if (!selectedNft || !stakeAmount || parseFloat(stakeAmount) <= 0) return;
     
     const amount = parseFloat(stakeAmount);
-    setUserBalance(prev => prev - amount);
     
     // Update the NFT's staked amount
     creator.nfts.forEach(nft => {
@@ -142,8 +154,6 @@ const CreatorProfile = () => {
   const handleWithdraw = (nft: NFT) => {
     if (nft.stakedAmount <= 0) return;
     
-    setUserBalance(prev => prev + nft.stakedAmount);
-    
     toast({
       title: "Withdrawal Successful",
       description: `You've withdrawn ${nft.stakedAmount.toFixed(2)} SYX tokens from ${nft.name}`,
@@ -151,9 +161,34 @@ const CreatorProfile = () => {
     
     nft.stakedAmount = 0;
     nft.pnl = 0;
+    
+    // Force re-render
+    setIsFollowing(prev => prev);
   };
 
   const handleShareStream = (stream: Stream, platform: string) => {
+    // Create share URLs based on platform
+    let shareUrl = "";
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(`Check out this stream: ${stream.title}`);
+    
+    switch(platform) {
+      case "WhatsApp":
+        shareUrl = `https://wa.me/?text=${text}%20${url}`;
+        break;
+      case "Facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+        break;
+      case "Twitter":
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        break;
+      default:
+        shareUrl = `https://wa.me/?text=${text}%20${url}`;
+    }
+    
+    // Open in new window
+    window.open(shareUrl, "_blank");
+    
     toast({
       title: "Shared Successfully",
       description: `Shared "${stream.title}" to ${platform}`,
@@ -197,14 +232,6 @@ const CreatorProfile = () => {
         </Button>
       </div>
 
-      {/* Balance Display */}
-      <div className="mb-4 p-2 bg-black/50 border border-white/10 rounded-md">
-        <div className="text-sm">
-          <span>Your Balance: </span>
-          <span className="font-bold">{userBalance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></span>
-        </div>
-      </div>
-
       {/* NFTs Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">NFTs</h2>
@@ -232,19 +259,21 @@ const CreatorProfile = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm mb-4">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className="font-bold text-white">{nft.marketCap.toLocaleString()} SYX</div>
+                    <div className={`font-bold text-white ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                      {nft.marketCap.toLocaleString()} SYX
+                    </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
@@ -303,7 +332,8 @@ const CreatorProfile = () => {
                     className="w-full h-40 object-cover rounded-md mb-2"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-streamixy-primary/80 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-streamixy-primary/80 rounded-full flex items-center justify-center cursor-pointer"
+                         onClick={() => window.open(stream.videoUrl, "_blank")}>
                       <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                       </svg>
@@ -346,6 +376,12 @@ const CreatorProfile = () => {
                         >
                           Facebook
                         </div>
+                        <div 
+                          className="p-2 hover:bg-white/10 cursor-pointer"
+                          onClick={() => handleShareStream(stream, "Twitter")}
+                        >
+                          Twitter
+                        </div>
                       </div>
                     )}
                   </div>
@@ -361,32 +397,27 @@ const CreatorProfile = () => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <Card className="bg-black border border-white/10 w-full max-w-md">
             <CardHeader>
-              <CardTitle>Stake SYX on {selectedNft.name}</CardTitle>
+              <CardTitle className="text-white">Stake SYX on {selectedNft.name}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm text-white/70 mb-1 block">NFT Price</label>
-                <p className="text-xl font-bold">{selectedNft.price.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
+                <label className="text-sm text-white mb-1 block">NFT Price</label>
+                <p className="text-xl font-bold text-white">{selectedNft.price.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
               </div>
               
               <div>
-                <label className="text-sm text-white/70 mb-1 block">Your Balance</label>
-                <p className="text-xl font-bold">{userBalance.toFixed(2)} <span className="text-streamixy-primary">SYX</span></p>
-              </div>
-              
-              <div>
-                <label className="text-sm text-white/70 mb-1 block">Amount to Stake</label>
+                <label className="text-sm text-white mb-1 block">Amount to Stake</label>
                 <Input
                   type="number"
                   placeholder="Enter amount"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
-                  className="bg-transparent border-white/20"
+                  className="bg-transparent border-white/20 text-white placeholder:text-white/50"
                 />
               </div>
               
               <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
-                <p className="text-white/70">
+                <p className="text-white">
                   Staking SYX on this NFT will give you exposure to its price movements. Your P&L will change based on the NFT's performance.
                 </p>
               </div>
@@ -406,7 +437,7 @@ const CreatorProfile = () => {
               <Button 
                 className="w-1/2 bg-streamixy-primary hover:bg-streamixy-primary/80"
                 onClick={handleStake}
-                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance}
+                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0}
               >
                 Confirm Stake
               </Button>
