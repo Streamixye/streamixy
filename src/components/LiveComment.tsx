@@ -34,7 +34,8 @@ const LiveComment: React.FC<LiveCommentProps> = ({
       className={cn(
         "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-opacity duration-500",
         position === "left" ? "ml-4" : "mr-4 self-end",
-        visible ? "opacity-100" : "opacity-0"
+        visible ? "opacity-100" : "opacity-0",
+        "animate-fade-in"
       )}
     >
       <Avatar className="h-6 w-6 mr-2">
@@ -42,8 +43,8 @@ const LiveComment: React.FC<LiveCommentProps> = ({
         <AvatarFallback className="text-xs">{username[0]}</AvatarFallback>
       </Avatar>
       <div className="flex flex-col">
-        <span className="text-xs font-bold">{username}</span>
-        <span className="text-sm">{text}</span>
+        <span className="text-xs font-bold text-white">{username}</span>
+        <span className="text-sm text-white">{text}</span>
       </div>
     </div>
   );

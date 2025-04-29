@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from "react";
-import { Gift, MessageSquare, Search, Share } from "lucide-react";
+import { Gift, MessageSquare, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
@@ -49,11 +50,12 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
-  const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
-  const [requestText, setRequestText] = useState("");
   const [requestStatus, setRequestStatus] = useState<"idle" | "pending" | "accepted" | "rejected">("idle");
+  const [displayedViewers, setDisplayedViewers] = useState(viewers);
+  const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
+  const [likeCounter, setLikeCounter] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -82,6 +84,18 @@ const VideoReel: React.FC<VideoReelProps> = ({
       }
     };
   }, []);
+
+  // Animate viewer count
+  useEffect(() => {
+    if (isLive) {
+      const interval = setInterval(() => {
+        const increase = Math.floor(Math.random() * 3) + 1;
+        setDisplayedViewers(prev => prev + increase);
+      }, 5000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isLive]);
 
   const handleTokenTransaction = (transaction: TokenTransaction) => {
     if (handleTransaction(transaction)) {
@@ -239,16 +253,12 @@ const VideoReel: React.FC<VideoReelProps> = ({
   };
 
   const handleRequest = () => {
-    // Simplified request without needing text input
     setRequestStatus("pending");
     
     toast({
       title: "Request Sent",
       description: `Your request to join ${creator.name}'s live has been sent!`,
     });
-    
-    // Close the dialog if it's open
-    setIsRequestDialogOpen(false);
     
     // Simulate creator responding after a delay
     setTimeout(() => {
@@ -277,12 +287,38 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }, 3000);
   };
 
+  // Handle double like
+  const handleDoubleLike = (e: React.MouseEvent) => {
+    if (!videoRef.current) return;
+    
+    // Get position relative to the video element
+    const rect = videoRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Generate a new like animation at this position
+    const newLike = {
+      id: likeCounter,
+      x,
+      y
+    };
+    
+    setLikeAnimations(prev => [...prev, newLike]);
+    setLikeCounter(prev => prev + 1);
+    
+    // Remove the like animation after it completes
+    setTimeout(() => {
+      setLikeAnimations(prev => prev.filter(like => like.id !== newLike.id));
+    }, 1500);
+  };
+
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
         <video
           ref={videoRef}
           className="absolute inset-0 object-cover w-full h-full"
+          onClick={handleDoubleLike}
           muted
           loop
           playsInline
@@ -294,6 +330,21 @@ const VideoReel: React.FC<VideoReelProps> = ({
         </video>
         
         <div className="absolute inset-0 bg-black/20" />
+
+        {/* Like animations */}
+        {likeAnimations.map(like => (
+          <div 
+            key={like.id}
+            className="absolute animate-like-float"
+            style={{ 
+              left: `${like.x}%`,
+              top: `${like.y}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <Heart className="text-pink-500 h-12 w-12 fill-pink-500" />
+          </div>
+        ))}
 
         {isLive && (
           <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse">
@@ -319,7 +370,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
         </div>
 
         <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1">
-          <span className="text-xs text-white">{viewers} viewers</span>
+          <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
         </div>
 
         {/* Display comments in the stream */}
@@ -386,7 +437,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
               label="Request"
               onClick={() => {
                 if (requestStatus === "idle") {
-                  // Directly send request when clicked
                   handleRequest();
                 }
               }}
@@ -539,8 +589,27 @@ const VideoReel: React.FC<VideoReelProps> = ({
           }
         }
         
+        @keyframes like-float {
+          0% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+          50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -80%) scale(1);
+          }
+        }
+        
         .animate-float {
           animation: float 3s ease-out forwards;
+        }
+        
+        .animate-like-float {
+          animation: like-float 1.5s ease-out forwards;
         }
         
         .glass {

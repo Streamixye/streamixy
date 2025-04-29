@@ -8,7 +8,8 @@ import {
   Play,
   Volume2,
   VolumeX,
-  Filter
+  Filter,
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -37,6 +38,8 @@ const GoLive = () => {
     status: "pending" | "accepted" | "rejected";
   }[]>([]);
   const [requestCounter, setRequestCounter] = useState(0);
+  const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
+  const [likeCounter, setLikeCounter] = useState(0);
   const { toast } = useToast();
   
   const mockUser = {
@@ -49,7 +52,8 @@ const GoLive = () => {
 
     const viewerInterval = setInterval(() => {
       if (isLive) {
-        setViewerCount(prev => Math.min(prev + Math.floor(Math.random() * 5), 999));
+        // Animate viewer count with slightly randomized increases
+        setViewerCount(prev => Math.min(prev + Math.floor(Math.random() * 5) + 1, 999));
       }
     }, 5000);
     
@@ -345,6 +349,31 @@ const GoLive = () => {
     });
   };
 
+  // Handle double like feature
+  const handleDoubleLike = (e: React.MouseEvent) => {
+    if (!videoRef.current || !isLive) return;
+    
+    // Get position relative to the video element
+    const rect = videoRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Generate a new like animation at this position
+    const newLike = {
+      id: likeCounter,
+      x,
+      y
+    };
+    
+    setLikeAnimations(prev => [...prev, newLike]);
+    setLikeCounter(prev => prev + 1);
+    
+    // Remove the like animation after it completes
+    setTimeout(() => {
+      setLikeAnimations(prev => prev.filter(like => like.id !== newLike.id));
+    }, 1500);
+  };
+
   const filters = [
     { id: 'normal', name: 'Normal', class: '' },
     { id: 'grayscale', name: 'Grayscale', class: 'grayscale' },
@@ -363,6 +392,7 @@ const GoLive = () => {
           playsInline
           muted={isMuted}
           className={`absolute inset-0 h-full w-full object-cover ${!activeFilter || activeFilter === 'normal' ? '' : filters.find(f => f.id === activeFilter)?.class || ''}`}
+          onClick={handleDoubleLike}
         />
         
         <canvas 
@@ -373,6 +403,21 @@ const GoLive = () => {
         />
         
         <div className="absolute inset-0 bg-black/20" />
+        
+        {/* Double like animations */}
+        {likeAnimations.map(like => (
+          <div 
+            key={like.id}
+            className="absolute animate-like-float"
+            style={{ 
+              left: `${like.x}%`,
+              top: `${like.y}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <Heart className="text-pink-500 h-12 w-12 fill-pink-500" />
+          </div>
+        ))}
         
         <div className="absolute left-0 top-20 right-0 bottom-20 overflow-hidden pointer-events-none">
           {comments.map((comment) => (
@@ -413,7 +458,7 @@ const GoLive = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <Users className="h-4 w-4 mr-1" />
-              <span className="text-sm">{viewerCount}</span>
+              <span className="text-sm animate-pulse">{viewerCount}</span>
             </div>
             
             {isLive && (
@@ -558,8 +603,27 @@ const GoLive = () => {
           }
         }
         
+        @keyframes like-float {
+          0% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+          50% {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.2);
+          }
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -80%) scale(1);
+          }
+        }
+        
         .animate-gift {
           animation: gift-animation 3s ease-out forwards;
+        }
+        
+        .animate-like-float {
+          animation: like-float 1.5s ease-out forwards;
         }
         
         .hide-scrollbar::-webkit-scrollbar {
