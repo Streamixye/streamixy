@@ -1,6 +1,5 @@
-
 import React, { useState, useRef, useEffect } from "react";
-import { Gift, Share, MessagesSquare, Search } from "lucide-react";
+import { Gift, MessagesSquare, Search, Share } from "lucide-react";
 import VoteButton from "./VoteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
@@ -49,9 +48,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
+  const [requestStatus, setRequestStatus] = useState<"idle" | "pending" | "accepted" | "rejected">("idle");
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -172,8 +173,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
 
   const shareOptions = [
     { name: "WhatsApp", icon: "whatsapp", color: "#25D366" },
+    { name: "Telegram", icon: "telegram", color: "#0088cc" },
     { name: "Facebook", icon: "facebook", color: "#1877F2" },
-    { name: "Instagram", icon: "instagram", color: "#E4405F" },
     { name: "Twitter", icon: "twitter", color: "#1DA1F2" }
   ];
 
@@ -185,13 +186,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
       case "whatsapp":
         shareEndpoint = `https://api.whatsapp.com/send?text=Check out this amazing stream: ${shareUrl}`;
         break;
+      case "telegram":
+        shareEndpoint = `https://t.me/share/url?url=${shareUrl}&text=Check out this amazing stream`;
+        break;
       case "facebook":
         shareEndpoint = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
         break;
       case "twitter":
         shareEndpoint = `https://twitter.com/intent/tweet?text=Check out this amazing stream&url=${shareUrl}`;
-        break;
-      case "instagram":
         break;
     }
     
@@ -204,8 +206,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
       description: `Sharing to ${platform}...`,
     });
     
-    const closeShareDialog = document.querySelector("[data-share-dialog] button[data-dialog-close]") as HTMLButtonElement;
-    if (closeShareDialog) closeShareDialog.click();
+    setIsShareDialogOpen(false);
   };
 
   const handleComment = () => {
@@ -230,15 +231,40 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const handleRequest = () => {
     if (!requestText.trim()) return;
     
+    setRequestStatus("pending");
+    
     toast({
       title: "Request Sent",
-      description: `Your request to join ${creator.name} live has been sent!`,
+      description: `Your request to join ${creator.name}'s live has been sent!`,
     });
     
     setRequestText("");
     
-    const closeRequestDialog = document.querySelector("[data-request-dialog] button[data-dialog-close]") as HTMLButtonElement;
-    if (closeRequestDialog) closeRequestDialog.click();
+    // Simulate creator responding after a delay
+    setTimeout(() => {
+      const isAccepted = Math.random() > 0.5; // Randomly accept or reject for demo
+      
+      if (isAccepted) {
+        setRequestStatus("accepted");
+        toast({
+          title: "Request Accepted!",
+          description: `${creator.name} has accepted your request to join the stream!`,
+        });
+      } else {
+        setRequestStatus("rejected");
+        toast({
+          variant: "destructive",
+          title: "Request Rejected",
+          description: `${creator.name} has rejected your request to join the stream.`,
+        });
+      }
+      
+      // Reset status after notification
+      setTimeout(() => {
+        setRequestStatus("idle");
+      }, 5000);
+      
+    }, 3000);
   };
 
   return (
@@ -349,6 +375,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
               />
             </div>
 
+            <div onClick={(e) => e.stopPropagation()}>
+              <VoteButton
+                icon={<Share className="h-7 w-7" />}
+                label="Share"
+                onClick={() => setIsShareDialogOpen(true)}
+              />
+            </div>
+
             <button 
               className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
               onClick={() => setIsSearchOpen(true)}
@@ -379,12 +413,16 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     className="min-h-[100px] bg-white/10 border-white/20 text-white"
                     value={requestText}
                     onChange={(e) => setRequestText(e.target.value)}
+                    disabled={requestStatus !== "idle"}
                   />
                   <Button 
                     onClick={handleRequest}
                     className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                    disabled={requestStatus !== "idle"}
                   >
-                    Send Request
+                    {requestStatus === "pending" ? "Sending..." : 
+                     requestStatus === "accepted" ? "Accepted!" : 
+                     requestStatus === "rejected" ? "Rejected" : "Send Request"}
                   </Button>
                 </div>
                 <DialogPrimitive.Close className="hidden" data-dialog-close />
@@ -414,6 +452,34 @@ const VideoReel: React.FC<VideoReelProps> = ({
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
       />
+      
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent className="bg-black/90 border border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle>Share Stream</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 p-4">
+            {shareOptions.map((option) => (
+              <Button 
+                key={option.name}
+                variant="outline"
+                className="bg-transparent border border-white/20 text-white hover:bg-white/10"
+                onClick={() => handleShare(option.name)}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center" 
+                       style={{backgroundColor: option.color}}>
+                    <span className="text-xl">{option.icon === "whatsapp" ? "📱" : 
+                                                option.icon === "telegram" ? "✈️" : 
+                                                option.icon === "facebook" ? "👍" : "🐦"}</span>
+                  </div>
+                  <span>{option.name}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <style>
         {`
