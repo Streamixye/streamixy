@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { 
@@ -30,7 +31,6 @@ const NFTDetail = () => {
   const { id } = useParams();
   const [nft, setNft] = useState<NFT | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
-  const [userBalance, setUserBalance] = useState(1000);
   const [showStakeModal, setShowStakeModal] = useState(false);
 
   useEffect(() => {
@@ -82,10 +82,9 @@ const NFTDetail = () => {
   }, [nft]);
 
   const handleStake = () => {
-    if (!nft || !stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance) return;
+    if (!nft || !stakeAmount || parseFloat(stakeAmount) <= 0) return;
     
     const amount = parseFloat(stakeAmount);
-    setUserBalance(prev => prev - amount);
     
     setNft(prev => {
       if (!prev) return null;
@@ -102,7 +101,6 @@ const NFTDetail = () => {
   const handleWithdraw = () => {
     if (!nft || nft.staked <= 0) return;
     
-    setUserBalance(prev => prev + nft.staked);
     setNft(prev => {
       if (!prev) return null;
       return {
@@ -143,7 +141,7 @@ const NFTDetail = () => {
           <div className="grid grid-cols-3 gap-2 text-sm">
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">Price</div>
-              <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+              <div className={`font-bold text-white ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                 {nft.price.toFixed(2)} SYX
               </div>
             </div>
@@ -160,7 +158,7 @@ const NFTDetail = () => {
             
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">ROI</div>
-              <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+              <div className={`font-bold text-white ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                 {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
               </div>
             </div>

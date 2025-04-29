@@ -57,17 +57,6 @@ const CreatorProfile = () => {
         roi: 12,
         stakedAmount: 0,
         pnl: 0,
-      },
-      {
-        id: "2",
-        name: "Digital Dreamscape",
-        image: "https://source.unsplash.com/featured/400x400?digital",
-        price: 750,
-        previousPrice: 780,
-        marketCap: 32000,
-        roi: -3.8,
-        stakedAmount: 0,
-        pnl: 0,
       }
     ],
     pastStreams: [
@@ -182,6 +171,9 @@ const CreatorProfile = () => {
       case "Twitter":
         shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
         break;
+      case "Telegram":
+        shareUrl = `https://t.me/share/url?url=${url}&text=${text}`;
+        break;
       default:
         shareUrl = `https://wa.me/?text=${text}%20${url}`;
     }
@@ -235,7 +227,7 @@ const CreatorProfile = () => {
       {/* NFTs Section */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">NFTs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {creator.nfts.map((nft) => (
             <Card key={nft.id} className="bg-black/50 border border-white/10">
               <CardHeader>
@@ -259,7 +251,7 @@ const CreatorProfile = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm mb-4">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold text-white ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
@@ -273,7 +265,7 @@ const CreatorProfile = () => {
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold text-white ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
@@ -378,9 +370,9 @@ const CreatorProfile = () => {
                         </div>
                         <div 
                           className="p-2 hover:bg-white/10 cursor-pointer"
-                          onClick={() => handleShareStream(stream, "Twitter")}
+                          onClick={() => handleShareStream(stream, "Telegram")}
                         >
-                          Twitter
+                          Telegram
                         </div>
                       </div>
                     )}

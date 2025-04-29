@@ -122,11 +122,9 @@ const NFTs = () => {
   };
   
   const handleStake = () => {
-    if (!selectedNft || !stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > userBalance) return;
+    if (!selectedNft || !stakeAmount || parseFloat(stakeAmount) <= 0) return;
     
     const amount = parseFloat(stakeAmount);
-    
-    setUserBalance(userBalance - amount);
     
     setNfts(prevNfts => 
       prevNfts.map(nft => 
@@ -160,7 +158,7 @@ const NFTs = () => {
                   <span>{nft.name}</span>
                   <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
                     {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                    {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
+                    {Math.abs(((nft.price - nft.previousPrice) / previousPrice) * 100).toFixed(2)}%
                   </Badge>
                 </CardTitle>
                 <div className="text-sm text-white">Creator: {nft.creator}</div>
@@ -170,14 +168,14 @@ const NFTs = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold text-white ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className={`font-bold ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold text-white ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.marketCap.toLocaleString()} SYX
                     </div>
                     <div className="mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
@@ -187,7 +185,7 @@ const NFTs = () => {
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold text-white ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
@@ -231,7 +229,7 @@ const NFTs = () => {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <Card className="bg-black border border-white/10 w-full max-w-md">
             <CardHeader>
-              <CardTitle>Stake SYX on {selectedNft.name}</CardTitle>
+              <CardTitle className="text-white">Stake SYX on {selectedNft.name}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
