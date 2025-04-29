@@ -1,6 +1,7 @@
 
 import React from "react";
 import LiveComment from "../LiveComment";
+import { MessageCircle } from "lucide-react";
 
 interface CommentSectionProps {
   comments: {text: string, id: number, username: string}[];
@@ -9,16 +10,26 @@ interface CommentSectionProps {
 
 const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
   return (
-    <div className="absolute left-4 right-4 top-16 bottom-32 overflow-hidden pointer-events-none">
-      {comments.map((comment) => (
-        <LiveComment 
-          key={comment.id} 
-          username={comment.username} 
-          text={comment.text} 
-          position={comment.username === "You" ? "right" : "left"}
-        />
-      ))}
-    </div>
+    <>
+      {/* Comment icon at the left side */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+        <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
+          <MessageCircle className="h-6 w-6 text-white" />
+        </div>
+      </div>
+      
+      {/* Comments display */}
+      <div className="absolute left-4 right-4 top-16 bottom-32 overflow-hidden pointer-events-none">
+        {comments.map((comment) => (
+          <LiveComment 
+            key={comment.id} 
+            username={comment.username} 
+            text={comment.text} 
+            position={comment.username === "You" ? "right" : "left"}
+          />
+        ))}
+      </div>
+    </>
   );
 };
 
