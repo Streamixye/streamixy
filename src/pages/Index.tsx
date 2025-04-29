@@ -88,14 +88,18 @@ const MOCK_REELS = [
 const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const isMobile = useIsMobile();
+  const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
 
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
     e.stopPropagation();
     
-    // Only change reels if not interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content") || 
-        (e.target as HTMLElement).closest("button")) {
+    // Check if the user is interacting with any UI elements that should prevent scrolling
+    if (isInteractingWithUI ||
+        (e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest("textarea") ||
+        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
       return;
     }
     
@@ -118,8 +122,11 @@ const Index = () => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     // Don't handle touch if interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content") || 
-        (e.target as HTMLElement).closest("button")) {
+    if (isInteractingWithUI ||
+        (e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest("textarea") ||
+        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
       return;
     }
     setTouchStart(e.targetTouches[0].clientY);
@@ -127,8 +134,11 @@ const Index = () => {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     // Don't handle touch if interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content") || 
-        (e.target as HTMLElement).closest("button")) {
+    if (isInteractingWithUI ||
+        (e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest("textarea") ||
+        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
       return;
     }
     setTouchEnd(e.targetTouches[0].clientY);
@@ -136,8 +146,11 @@ const Index = () => {
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     // Don't handle touch end if interacting with controls
-    if ((e.target as HTMLElement).closest(".dialog-content") || 
-        (e.target as HTMLElement).closest("button")) {
+    if (isInteractingWithUI ||
+        (e.target as HTMLElement).closest(".dialog-content") || 
+        (e.target as HTMLElement).closest("button") ||
+        (e.target as HTMLElement).closest("textarea") ||
+        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
       return;
     }
     
@@ -179,6 +192,30 @@ const Index = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  // Set up global event listeners for UI interaction state
+  useEffect(() => {
+    const handleInteractionStart = () => setIsInteractingWithUI(true);
+    const handleInteractionEnd = () => setIsInteractingWithUI(false);
+
+    // Elements that might need interaction tracking
+    document.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button') || 
+          target.closest('textarea') || 
+          target.closest('input') || 
+          target.closest('[data-prevent-scroll]')) {
+        handleInteractionStart();
+      }
+    });
+    
+    document.addEventListener('mouseup', handleInteractionEnd);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleInteractionStart);
+      document.removeEventListener('mouseup', handleInteractionEnd);
     };
   }, []);
 

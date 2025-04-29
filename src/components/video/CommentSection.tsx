@@ -72,7 +72,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   return (
     <>
       {/* Icons at the left side in a vertical list */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4" onClick={e => e.stopPropagation()}>
         {/* Follow icon - at top */}
         <div 
           className={`${isFollowing ? 'bg-streamixy-primary/80' : 'bg-black/50'} backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/50 transition-colors`}
@@ -118,7 +118,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       {isCommentBoxOpen && (
         <div 
           className="absolute bottom-32 left-4 right-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/10 z-20"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           <div className="flex flex-col space-y-3">
             <Textarea
@@ -126,7 +129,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Add a comment..."
               className="bg-transparent border-white/20 text-white resize-none"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+              }}
             />
             <div className="flex justify-end space-x-2">
               <Button 
