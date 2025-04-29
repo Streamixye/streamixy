@@ -19,6 +19,7 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   const [visible, setVisible] = useState(false);
   
   useEffect(() => {
+    // Make the comment visible immediately after rendering
     setVisible(true);
     
     // After 4.5 seconds, start fading out

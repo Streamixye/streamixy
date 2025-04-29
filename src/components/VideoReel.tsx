@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, MessageSquare, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
