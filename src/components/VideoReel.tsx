@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, MessageSquare, Search, Share } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -6,12 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
 import TokenVoteDialog from "./TokenVoteDialog";
 import GiftDialog from "./GiftDialog";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import SearchDialog from "./SearchDialog";
@@ -383,19 +380,21 @@ const VideoReel: React.FC<VideoReelProps> = ({
               <span className="text-[8px] text-white/70 mt-0.5">Search</span>
             </button>
             
-            <Dialog open={requestStatus === "idle"}>
-              <DialogTrigger asChild>
-                <div onClick={(e) => {
-                  e.stopPropagation();
-                  // This will open the dialog automatically when clicked
-                }}>
-                  <VoteButton
-                    icon={<MessageSquare className="h-7 w-7" />}
-                    label="Request"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
+            <VoteButton
+              icon={<MessageSquare className="h-7 w-7" />}
+              label="Request"
+              onClick={() => {
+                if (requestStatus === "idle") {
+                  // Open request dialog
+                  const dialog = document.getElementById("request-dialog") as HTMLDialogElement;
+                  if (dialog) dialog.showModal();
+                }
+              }}
+            />
+            
+            {/* Request Dialog */}
+            <Dialog open={requestStatus === "idle" && document.getElementById("request-dialog")?.open}>
+              <DialogContent id="request-dialog" onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Send Request</DialogTitle>
                 </DialogHeader>
