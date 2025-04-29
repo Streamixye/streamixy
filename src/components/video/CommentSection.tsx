@@ -1,7 +1,7 @@
 
 import React from "react";
 import LiveComment from "../LiveComment";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Heart, UserPlus } from "lucide-react";
 
 interface CommentSectionProps {
   comments: {text: string, id: number, username: string}[];
@@ -11,8 +11,19 @@ interface CommentSectionProps {
 const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
   return (
     <>
-      {/* Comment icon at the left side */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+      {/* Icons at the left side in a vertical list */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4">
+        {/* Follow icon - at top */}
+        <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
+          <UserPlus className="h-6 w-6 text-white" />
+        </div>
+        
+        {/* Love icon - in middle */}
+        <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
+          <Heart className="h-6 w-6 text-white" />
+        </div>
+        
+        {/* Comment icon - at bottom */}
         <div className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10">
           <MessageCircle className="h-6 w-6 text-white" />
         </div>
