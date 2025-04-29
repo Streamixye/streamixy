@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import GoLive from "./pages/GoLive";
 import NFTs from "./pages/NFTs";
 import Stake from "./pages/Stake";
 import Dashboard from "./pages/Dashboard";
+import Features from "./pages/Features";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
@@ -37,6 +39,7 @@ const App = () => (
             <Route path="/nfts/:id" element={<NFTDetail />} />
             <Route path="/stake" element={<Stake />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/features" element={<Features />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/creator/:username" element={<CreatorProfile />} />
             <Route path="*" element={<NotFound />} />

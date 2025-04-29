@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -27,7 +28,8 @@ import {
   Check,
   DollarSign,
   Music,
-  Video
+  Video,
+  ListFilter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,8 @@ import {
 import CreateNFTForm from "@/components/CreateNFTForm";
 import { Badge } from "@/components/ui/badge";
 import { BadgeDollarSign } from "@/components/ui/badge-dollar-sign";
+import { useNavigate } from "react-router-dom";
+import EditProfileDialog from "@/components/EditProfileDialog";
 
 interface Transaction {
   id: number;
@@ -63,17 +67,14 @@ interface StakedNFT {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"creator" | "audience">("creator");
   const [walletConnected, setWalletConnected] = useState(false);
   const [profile, setProfile] = useState({
     nickname: "StreamerXYZ",
     avatar: ""
   });
-  const [editProfile, setEditProfile] = useState({
-    nickname: "",
-    avatar: ""
-  });
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [earnings, setEarnings] = useState(0);
   const [referralCopied, setReferralCopied] = useState(false);
   const [followers, setFollowers] = useState(0);
@@ -201,20 +202,8 @@ const Dashboard = () => {
     });
   };
 
-  const startEditProfile = () => {
-    setEditProfile({
-      nickname: profile.nickname,
-      avatar: profile.avatar
-    });
-    setIsEditingProfile(true);
-  };
-
-  const saveProfile = () => {
-    setProfile({
-      nickname: editProfile.nickname,
-      avatar: editProfile.avatar
-    });
-    setIsEditingProfile(false);
+  const handleProfileUpdate = (updatedProfile: { nickname: string, avatar: string }) => {
+    setProfile(updatedProfile);
     showToast({
       title: "Profile Updated",
       description: "Your profile has been successfully updated.",
@@ -246,14 +235,6 @@ const Dashboard = () => {
         break;
       case "facebook":
         shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`;
-        break;
-      case "instagram":
-        shareUrl = `https://instagram.com`;
-        showToast({
-          title: "Instagram",
-          description: "Copy the link and paste it in your Instagram story or DMs.",
-          duration: 3000,
-        });
         break;
     }
     
@@ -320,75 +301,30 @@ const Dashboard = () => {
     });
   };
 
+  const navigateToFeatures = () => {
+    navigate("/features");
+  };
+
   return (
     <div className="min-h-screen bg-black text-white p-2 sm:p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl sm:text-2xl font-bold text-white">Dashboard</h1>
-        <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-          <DialogTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="border-white/20 hover:bg-white/10 text-white"
-              onClick={startEditProfile}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-black border border-white/10 text-white">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription className="text-white">
-                Update your profile information
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="flex flex-col items-center space-y-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profile.avatar} alt={profile.nickname} />
-                  <AvatarFallback className="bg-streamixy-primary/20 text-streamixy-primary text-xl">
-                    {profile.nickname.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-xs border-white/20 text-white"
-                >
-                  <ImageIcon className="h-3 w-3 mr-1" /> 
-                  Upload Photo
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="nickname" className="text-sm text-white">
-                  Nickname
-                </label>
-                <Input 
-                  id="nickname"
-                  value={editProfile.nickname}
-                  onChange={(e) => setEditProfile({...editProfile, nickname: e.target.value})}
-                  className="bg-transparent border-white/20 text-white"
-                />
-              </div>
-              <div className="flex justify-end space-x-2 pt-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsEditingProfile(false)}
-                  className="border-white/20 text-white"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={saveProfile}
-                  className="bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <EditProfileDialog 
+          isOpen={isEditProfileOpen}
+          onOpenChange={setIsEditProfileOpen}
+          profile={profile}
+          onSave={handleProfileUpdate}
+        >
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-black bg-black hover:bg-black/80 text-white"
+            onClick={() => setIsEditProfileOpen(true)}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        </EditProfileDialog>
       </div>
 
       <div className="flex items-center mb-6">
@@ -455,7 +391,7 @@ const Dashboard = () => {
             </Card>
           </div>
           
-          {!walletConnected && (
+          <div className="grid grid-cols-1 gap-4">
             <Button 
               onClick={connectWallet}
               className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
@@ -463,7 +399,15 @@ const Dashboard = () => {
               <Wallet className="mr-2 h-4 w-4" />
               Connect Wallet
             </Button>
-          )}
+            
+            <Button 
+              onClick={navigateToFeatures}
+              className="w-full bg-black border border-white/20 hover:bg-black/80 flex items-center justify-center text-white"
+            >
+              <ListFilter className="mr-2 h-4 w-4" />
+              Features
+            </Button>
+          </div>
           
           <CreateNFTForm onSuccess={handleNFTCreated} />
           
@@ -508,7 +452,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("whatsapp")}
                 >
                   <Share className="h-3 w-3 mr-1" /> WhatsApp
@@ -516,7 +460,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("telegram")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Telegram
@@ -524,18 +468,10 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("facebook")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Facebook
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-white/20 hover:bg-white/5 text-white text-xs"
-                  onClick={() => shareReferral("instagram")}
-                >
-                  <Share className="h-3 w-3 mr-1" /> Instagram
                 </Button>
               </div>
             </CardContent>
@@ -610,7 +546,7 @@ const Dashboard = () => {
                 <Button 
                   size="sm" 
                   variant="outline"
-                  className="mt-2 text-xs border-white/20 hover:bg-white/5 text-white"
+                  className="mt-2 text-xs bg-black border-white/20 hover:bg-black/80 text-white"
                   onClick={() => window.location.href = '/nfts'}
                 >
                   View NFTs
@@ -619,7 +555,7 @@ const Dashboard = () => {
             </Card>
           </div>
           
-          {!walletConnected && (
+          <div className="grid grid-cols-1 gap-4">
             <Button 
               onClick={connectWallet}
               className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
@@ -627,7 +563,15 @@ const Dashboard = () => {
               <Wallet className="mr-2 h-4 w-4" />
               Connect Wallet
             </Button>
-          )}
+            
+            <Button 
+              onClick={navigateToFeatures}
+              className="w-full bg-black border border-white/20 hover:bg-black/80 flex items-center justify-center text-white"
+            >
+              <ListFilter className="mr-2 h-4 w-4" />
+              Features
+            </Button>
+          </div>
           
           <Card className="bg-black border border-white/10">
             <CardHeader>
@@ -702,7 +646,7 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input 
                   readOnly 
                   value={`https://streamixy.io/ref/${profile.nickname}`} 
@@ -712,7 +656,7 @@ const Dashboard = () => {
                   variant="outline" 
                   size="icon"
                   onClick={copyReferralLink}
-                  className="ml-2 border-white/20"
+                  className="sm:ml-2 border-white/20"
                 >
                   {referralCopied ? 
                     <Check className="h-4 w-4 text-green-500" /> : 
@@ -720,22 +664,22 @@ const Dashboard = () => {
                 </Button>
               </div>
               
-              <div className="flex justify-between">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <p className="text-xs text-white">Share with friends and earn 200 SYX per referral</p>
                 <Button 
                   size="sm" 
                   onClick={() => claimReferralBonus()}
-                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary"
+                  className="text-xs bg-streamixy-primary/20 hover:bg-streamixy-primary/30 text-streamixy-primary w-full sm:w-auto"
                 >
                   Claim 200 SYX
                 </Button>
               </div>
               
-              <div className="flex space-x-2 pt-2">
+              <div className="flex flex-col space-y-2">
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("whatsapp")}
                 >
                   <Share className="h-3 w-3 mr-1" /> WhatsApp
@@ -743,7 +687,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("telegram")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Telegram
@@ -751,18 +695,10 @@ const Dashboard = () => {
                 <Button 
                   variant="outline"
                   size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
+                  className="w-full bg-black border-white/20 hover:bg-black/80 text-white text-xs"
                   onClick={() => shareReferral("facebook")}
                 >
                   <Share className="h-3 w-3 mr-1" /> Facebook
-                </Button>
-                <Button 
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-white/20 hover:bg-white/5 text-white text-xs"
-                  onClick={() => shareReferral("instagram")}
-                >
-                  <Share className="h-3 w-3 mr-1" /> Instagram
                 </Button>
               </div>
             </CardContent>
