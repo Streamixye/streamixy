@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -6,13 +7,13 @@ import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
 import TokenVoteDialog from "./TokenVoteDialog";
 import GiftDialog from "./GiftDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import SearchDialog from "./SearchDialog";
-import LiveComment from "./LiveComment";
+import VideoContainer from "./video/VideoContainer";
+import CreatorDisplay from "./video/CreatorDisplay";
+import CommentSection from "./video/CommentSection";
+import ActionButtons from "./video/ActionButtons";
 
 interface VideoReelProps {
   streamId: string;
@@ -223,11 +224,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setIsShareDialogOpen(false);
   };
 
-  const handleComment = () => {
-    if (!commentText.trim()) return;
+  const handleComment = (text: string) => {
+    if (!text.trim()) return;
     
     // Add to local comments
-    const newComment = { text: commentText, id: nextCommentId, username: "You" };
+    const newComment = { text, id: nextCommentId, username: "You" };
     setNextCommentId(prev => prev + 1);
     setComments(prev => [...prev, newComment]);
     setActiveComment(newComment);
@@ -237,12 +238,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
       title: "Comment Posted!",
       description: "Your comment is now visible on stream",
     });
-    
-    // Clear the input field
-    setCommentText("");
-    
-    // Close the comment dialog
-    
     
     // Remove the comment after a while
     setTimeout(() => {
@@ -345,167 +340,37 @@ const VideoReel: React.FC<VideoReelProps> = ({
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
-        <video
-          ref={videoRef}
-          className="absolute inset-0 object-cover w-full h-full"
-          onDoubleClick={handleDoubleClick}
-          onTouchStart={handleTap}
-          muted
-          loop
-          playsInline
-          poster={thumbnailUrl}
-          preload="auto"
-        >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-        
-        <div className="absolute inset-0 bg-black/20" />
+        <VideoContainer 
+          videoRef={videoRef}
+          thumbnailUrl={thumbnailUrl}
+          handleDoubleClick={handleDoubleClick}
+          handleTap={handleTap}
+          isLive={isLive}
+          likeAnimations={likeAnimations}
+          displayedViewers={displayedViewers}
+        />
 
-        {/* Like animations */}
-        {likeAnimations.map(like => (
-          <div 
-            key={like.id}
-            className="absolute animate-like-float"
-            style={{ 
-              left: `${like.x}%`,
-              top: `${like.y}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <Heart className="text-pink-500 h-12 w-12 fill-pink-500" />
-          </div>
-        ))}
+        <CreatorDisplay 
+          creatorName={creator.name}
+          creatorAvatar={creator.avatar}
+          creatorTokens={creatorTokens}
+        />
 
-        {isLive && (
-          <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse">
-            <span className="h-2 w-2 bg-white rounded-full"></span>
-            <span>LIVE</span>
-          </div>
-        )}
+        <CommentSection 
+          comments={comments}
+          activeComment={activeComment}
+        />
 
-        <div className="absolute bottom-24 left-4 animate-slide-up">
-          <div className="flex items-center bg-black/50 backdrop-blur-md rounded-lg py-1.5 px-3 border border-white/10">
-            <span className="text-white text-sm font-medium mr-2">{creator.name}</span>
-            <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
-              <AvatarImage src={creator.avatar} alt={creator.name} />
-              <AvatarFallback>{creator.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-            <div className="ml-2">
-              <div className="flex items-center">
-                <span className="text-streamixy-primary text-xs font-bold">SYX:</span>
-                <span className="ml-1 text-white text-xs">{creatorTokens}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1">
-          <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
-        </div>
-
-        {/* Display comments in the stream */}
-        <div className="absolute left-4 right-4 top-16 bottom-32 overflow-hidden pointer-events-none">
-          {comments.map((comment) => (
-            <LiveComment 
-              key={comment.id} 
-              username={comment.username} 
-              text={comment.text} 
-              position={comment.username === "You" ? "right" : "left"}
-            />
-          ))}
-        </div>
-
-        <div 
-          className="absolute right-4 bottom-32 flex flex-col space-y-6"
-          onClick={stopAllPropagation}
-        >
-          <div className="flex flex-col items-center space-y-6">
-            <div onClick={(e) => e.stopPropagation()}>
-              <VoteButton
-                icon={<Heart className="h-7 w-7" />}
-                label="Vote"
-                onClick={() => setIsVoteDialogOpen(true)}
-              />
-            </div>
-
-            <div onClick={(e) => e.stopPropagation()}>
-              <VoteButton
-                icon={<Gift className="h-7 w-7" />}
-                label="Gift"
-                onClick={() => setIsGiftDialogOpen(true)}
-              />
-            </div>
-
-            <div onClick={(e) => e.stopPropagation()}>
-              <VoteButton
-                icon={<Share className="h-7 w-7" />}
-                label="Share"
-                onClick={() => setIsShareDialogOpen(true)}
-              />
-            </div>
-
-            <button 
-              className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
-              onClick={() => setIsSearchOpen(true)}
-            >
-              <Search className="h-7 w-7 text-white" />
-              <span className="text-[8px] text-white/70 mt-0.5">Search</span>
-            </button>
-            
-            <VoteButton
-              icon={<Heart className="h-7 w-7" />}
-              label="Request"
-              onClick={() => {
-                if (requestStatus === "idle") {
-                  handleRequest();
-                }
-              }}
-            />
-            
-            {/* Request status display */}
-            {requestStatus !== "idle" && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-                <div className="bg-black/90 p-6 rounded-lg border border-white/10 max-w-md w-full">
-                  <h2 className="text-xl font-bold mb-4">Request Status</h2>
-                  
-                  {requestStatus === "pending" && (
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white mx-auto mb-4"></div>
-                      <p>Sending request to {creator.name}...</p>
-                    </div>
-                  )}
-                  
-                  {requestStatus === "accepted" && (
-                    <div className="text-center">
-                      <div className="text-green-500 text-6xl mb-4">✓</div>
-                      <p className="mb-4">Your request has been accepted!</p>
-                      <Button 
-                        onClick={() => setRequestStatus("idle")}
-                        className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                      >
-                        Close
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {requestStatus === "rejected" && (
-                    <div className="text-center">
-                      <div className="text-red-500 text-6xl mb-4">✕</div>
-                      <p className="mb-4">Your request has been rejected.</p>
-                      <Button 
-                        onClick={() => setRequestStatus("idle")}
-                        className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                      >
-                        Close
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        <ActionButtons 
+          onVoteClick={() => setIsVoteDialogOpen(true)}
+          onGiftClick={() => setIsGiftDialogOpen(true)}
+          onShareClick={() => setIsShareDialogOpen(true)}
+          onSearchClick={() => setIsSearchOpen(true)}
+          onRequestClick={handleRequest}
+          onCommentClick={() => {}}
+          requestStatus={requestStatus}
+          stopAllPropagation={stopAllPropagation}
+        />
       </div>
 
       <TokenVoteDialog
@@ -556,6 +421,48 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Request status display */}
+      {requestStatus !== "idle" && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+          <div className="bg-black/90 p-6 rounded-lg border border-white/10 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Request Status</h2>
+            
+            {requestStatus === "pending" && (
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white mx-auto mb-4"></div>
+                <p>Sending request to {creator.name}...</p>
+              </div>
+            )}
+            
+            {requestStatus === "accepted" && (
+              <div className="text-center">
+                <div className="text-green-500 text-6xl mb-4">✓</div>
+                <p className="mb-4">Your request has been accepted!</p>
+                <Button 
+                  onClick={() => setRequestStatus("idle")}
+                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+            
+            {requestStatus === "rejected" && (
+              <div className="text-center">
+                <div className="text-red-500 text-6xl mb-4">✕</div>
+                <p className="mb-4">Your request has been rejected.</p>
+                <Button 
+                  onClick={() => setRequestStatus("idle")}
+                  className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                >
+                  Close
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <style>
         {`

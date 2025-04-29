@@ -4,8 +4,7 @@ import ReelNavigation from "@/components/ReelNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import HomeSidebar from "@/components/HomeSidebar";
-import LiveSidebar from "@/components/LiveSidebar";
+import CommentSidebarButton from "@/components/CommentSidebarButton";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -186,8 +185,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-black text-white flex w-full">
-        <HomeSidebar />
-        <LiveSidebar />
+        <CommentSidebarButton />
         
         <div className="flex-1">
           <Navbar />
