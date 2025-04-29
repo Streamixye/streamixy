@@ -148,14 +148,17 @@ const NFTDetail = () => {
           <div className="grid grid-cols-3 gap-2 text-sm">
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">Price</div>
-              <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500' : 'text-red-500'}`}>
+              <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                 {nft.price.toFixed(2)} SYX
               </div>
             </div>
             
             <div className="p-2 rounded bg-black/40">
               <div className="text-white">Market Cap</div>
-              <div className="font-bold">{nft.marketCap.toLocaleString()} SYX</div>
+              <div className="font-bold text-white">{nft.marketCap.toLocaleString()} SYX</div>
+              <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
+                <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
+              </div>
             </div>
             
             <div className="p-2 rounded bg-black/40">

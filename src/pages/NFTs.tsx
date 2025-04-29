@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -114,7 +115,9 @@ const NFTs = () => {
     return () => clearInterval(interval);
   }, []);
   
-  const handleStakeModalOpen = (nft: NFT) => {
+  const handleStakeModalOpen = (e: React.MouseEvent, nft: NFT) => {
+    e.preventDefault();
+    e.stopPropagation();
     setSelectedNft(nft);
     setStakeModalOpen(true);
   };
@@ -161,28 +164,28 @@ const NFTs = () => {
                     {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
                   </Badge>
                 </CardTitle>
-                <div className="text-sm text-white/70">Creator: {nft.creator}</div>
+                <div className="text-sm text-white">Creator: {nft.creator}</div>
               </CardHeader>
               
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="p-2 rounded bg-black/40">
-                    <div className="text-white/70">Price</div>
-                    <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500' : 'text-red-500'}`}>
+                    <div className="text-white">Price</div>
+                    <div className={`font-bold flex items-center ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
-                    <div className="text-white/70">Market Cap</div>
-                    <div className="font-bold">{nft.marketCap.toLocaleString()} SYX</div>
+                    <div className="text-white">Market Cap</div>
+                    <div className="font-bold text-white">{nft.marketCap.toLocaleString()} SYX</div>
                     <div className="animate-pulse mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
                       <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
-                    <div className="text-white/70">ROI</div>
+                    <div className="text-white">ROI</div>
                     <div className={`font-bold ${nft.roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
@@ -211,7 +214,7 @@ const NFTs = () => {
               
               <CardFooter>
                 <Button 
-                  onClick={() => handleStakeModalOpen(nft)} 
+                  onClick={(e) => handleStakeModalOpen(e, nft)} 
                   className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
                 >
                   <Coins className="h-4 w-4 mr-2" /> 
