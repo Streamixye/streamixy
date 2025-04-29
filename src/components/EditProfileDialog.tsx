@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,16 @@ const EditProfileDialog = ({
     nickname: profile.nickname,
     avatar: profile.avatar,
   });
+
+  // Reset state when dialog opens or profile changes
+  useEffect(() => {
+    if (isOpen) {
+      setEditProfile({
+        nickname: profile.nickname,
+        avatar: profile.avatar,
+      });
+    }
+  }, [isOpen, profile]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

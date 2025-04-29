@@ -20,14 +20,19 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   
   useEffect(() => {
     // Make the comment visible immediately after rendering
-    setVisible(true);
+    const showTimeout = setTimeout(() => {
+      setVisible(true);
+    }, 10); // Small delay to ensure DOM is ready
     
     // After 4.5 seconds, start fading out
-    const timeout = setTimeout(() => {
+    const hideTimeout = setTimeout(() => {
       setVisible(false);
     }, 4500);
     
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(showTimeout);
+      clearTimeout(hideTimeout);
+    };
   }, []);
   
   return (
