@@ -38,13 +38,13 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         Your browser does not support the video tag.
       </video>
       
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
       {/* Like animations */}
       {likeAnimations.map(like => (
         <div 
           key={like.id}
-          className="absolute animate-like-float"
+          className="absolute animate-like-float pointer-events-none"
           style={{ 
             left: `${like.x}%`,
             top: `${like.y}%`,
@@ -56,13 +56,13 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       ))}
 
       {isLive && (
-        <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse">
+        <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse pointer-events-none">
           <span className="h-2 w-2 bg-white rounded-full"></span>
           <span>LIVE</span>
         </div>
       )}
 
-      <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1">
+      <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1 pointer-events-none">
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
     </>

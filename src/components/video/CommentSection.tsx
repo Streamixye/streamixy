@@ -29,6 +29,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (onLike) onLike();
     // Like notification removed as requested
@@ -36,6 +37,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   
   // Handle follow button click
   const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsFollowing(!isFollowing);
     
@@ -51,12 +53,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   // Handle comment box toggle
   const handleCommentToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsCommentBoxOpen(!isCommentBoxOpen);
   };
 
   // Handle comment submission
   const handleCommentSubmit = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (commentText.trim() && onComment) {
       onComment(commentText);
@@ -112,19 +116,24 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
       {/* Comment box popup */}
       {isCommentBoxOpen && (
-        <div className="absolute bottom-32 left-4 right-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/10 z-20">
+        <div 
+          className="absolute bottom-32 left-4 right-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/10 z-20"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex flex-col space-y-3">
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               placeholder="Add a comment..."
               className="bg-transparent border-white/20 text-white resize-none"
+              onClick={(e) => e.stopPropagation()}
             />
             <div className="flex justify-end space-x-2">
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   setIsCommentBoxOpen(false);
                 }}
