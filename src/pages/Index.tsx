@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
@@ -185,7 +184,7 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-black text-white flex">
+      <div className="min-h-screen bg-black text-white flex w-full">
         <HomeSidebar />
         
         <div className="flex-1">
@@ -213,7 +212,7 @@ const Index = () => {
           {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
         
-        <style>{`
+        <style jsx>{`
           @keyframes heart-float {
             0% {
               opacity: 0;
@@ -234,8 +233,6 @@ const Index = () => {
           
           .animate-heart-float {
             animation: heart-float 2s ease-out forwards;
-            --scale: 1;
-            --rotation: 0deg;
           }
         `}</style>
       </div>

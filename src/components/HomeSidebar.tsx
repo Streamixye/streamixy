@@ -79,8 +79,9 @@ const HomeSidebar = () => {
             left: `${heart.x}%`,
             top: `${heart.y}%`,
             zIndex: 1000,
-            transform: `scale(${heart.size/40}) rotate(${heart.rotation}deg)`
-          }}
+            '--scale': `${heart.size/40}`,
+            '--rotation': `${heart.rotation}deg`
+          } as React.CSSProperties}
         >
           <Heart className="text-pink-500 fill-pink-500" size={40} />
         </div>

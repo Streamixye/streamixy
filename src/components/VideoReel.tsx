@@ -357,7 +357,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
           poster={thumbnailUrl}
           preload="auto"
         >
-          <source src={`https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4`} type="video/mp4" />
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         

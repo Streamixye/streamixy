@@ -28,7 +28,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({
     >
       <div
         className={cn(
-          "text-white scale-75",
+          "text-white",
           active && "text-streamixy-highlight"
         )}
       >
