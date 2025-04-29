@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
 import NFTDetail from "./pages/NFTDetail";
 import CreatorProfile from "./pages/CreatorProfile";
+import Ecosystem from "./pages/Ecosystem";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/creator-tools" element={<CreatorTools />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/creator/:username" element={<CreatorProfile />} />
+            <Route path="/ecosystem" element={<Ecosystem />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNav />

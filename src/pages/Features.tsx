@@ -3,7 +3,6 @@ import React from "react";
 import { 
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle
@@ -62,19 +61,13 @@ const Features = () => {
           <CardHeader>
             <Layers className="h-6 w-6 text-streamixy-primary mb-2" />
             <CardTitle className="text-white">Ecosystem</CardTitle>
-            <CardDescription className="text-white/70">
-              Decentralized creator economy
-            </CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-white/80">
-            Join our blockchain-powered ecosystem where creators and audiences connect directly, with transparent monetization and ownership of digital assets.
-          </CardContent>
           <CardFooter>
             <Button 
               variant="outline" 
               size="sm" 
               className="w-full bg-black border-white/20 text-white hover:bg-black/80"
-              onClick={() => navigate("/stake")}
+              onClick={() => navigate("/ecosystem")}
             >
               View Ecosystem
             </Button>
