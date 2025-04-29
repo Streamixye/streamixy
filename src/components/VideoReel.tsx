@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -56,6 +55,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
   const [likeCounter, setLikeCounter] = useState(0);
   const [lastTap, setLastTap] = useState<number>(0);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -281,6 +282,39 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }, 3000);
   };
 
+  // Handle follow action
+  const handleFollow = (followed: boolean) => {
+    setIsFollowing(followed);
+    
+    // You might want to save this state to local storage or a database
+    localStorage.setItem(`following_${creator.username}`, followed ? 'true' : 'false');
+    
+    // If we were connected to a backend, we would update the creator's followers count
+    // For now, we'll just show a toast notification
+    toast({
+      title: followed ? "Following!" : "Unfollowed",
+      description: followed 
+        ? `You are now following ${creator.name}` 
+        : `You unfollowed ${creator.name}`,
+    });
+  };
+
+  // Implement manual like function
+  const handleManualLike = () => {
+    // Increment likes count
+    setLikesCount(prev => prev + 1);
+    
+    // Show heart animation in the middle of the screen
+    const centerX = 50;
+    const centerY = 50;
+    createLikeAnimation(centerX, centerY);
+    
+    toast({
+      title: "Liked!",
+      description: `You liked ${creator.name}'s stream`,
+    });
+  };
+
   // Enhanced double-tap like handler
   const handleTap = (e: React.TouchEvent) => {
     if (!videoRef.current) return;
@@ -316,6 +350,9 @@ const VideoReel: React.FC<VideoReelProps> = ({
     const rect = videoRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Increment likes count
+    setLikesCount(prev => prev + 1);
     
     createLikeAnimation(x, y);
   };
@@ -359,6 +396,9 @@ const VideoReel: React.FC<VideoReelProps> = ({
         <CommentSection 
           comments={comments}
           activeComment={activeComment}
+          onLike={handleManualLike}
+          onFollow={handleFollow}
+          creatorName={creator.name}
         />
 
         <ActionButtons 
