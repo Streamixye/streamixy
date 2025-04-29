@@ -30,6 +30,13 @@ const GoLive = () => {
   const [receivedGifts, setReceivedGifts] = useState<{ id: number; emoji: string; }[]>([]);
   const [giftCounter, setGiftCounter] = useState(0);
   const [totalTokens, setTotalTokens] = useState(0);
+  const [joinRequests, setJoinRequests] = useState<{
+    id: number;
+    username: string;
+    message: string;
+    status: "pending" | "accepted" | "rejected";
+  }[]>([]);
+  const [requestCounter, setRequestCounter] = useState(0);
   const { toast } = useToast();
   
   const mockUser = {
@@ -242,6 +249,14 @@ const GoLive = () => {
     setComments(prev => [...prev, newComment]);
     setCommentCounter(prev => prev + 1);
     
+    // Show notification for comments from others
+    if (username !== mockUser.name) {
+      toast({
+        title: "New Comment",
+        description: `${username}: ${text}`
+      });
+    }
+    
     setTimeout(() => {
       setComments(prev => prev.filter(comment => comment.id !== newComment.id));
     }, 5000);
@@ -266,6 +281,43 @@ const GoLive = () => {
     if (comment.trim()) {
       addComment(comment);
       setComment("");
+    }
+  };
+
+  const handleJoinRequest = (request: { username: string; message: string }) => {
+    const newRequest = {
+      id: requestCounter,
+      username: request.username,
+      message: request.message,
+      status: "pending" as const
+    };
+    
+    setJoinRequests(prev => [...prev, newRequest]);
+    setRequestCounter(prev => prev + 1);
+    
+    toast({
+      title: "Join Request",
+      description: `${request.username} wants to join your stream: "${request.message}"`
+    });
+    
+    return newRequest.id;
+  };
+
+  const handleJoinRequestResponse = (requestId: number, accepted: boolean) => {
+    setJoinRequests(prev => 
+      prev.map(request => 
+        request.id === requestId 
+          ? { ...request, status: accepted ? "accepted" : "rejected" } 
+          : request
+      )
+    );
+    
+    const request = joinRequests.find(req => req.id === requestId);
+    if (request) {
+      toast({
+        title: accepted ? "Request Accepted" : "Request Rejected",
+        description: `You ${accepted ? 'accepted' : 'rejected'} ${request.username}'s request to join`
+      });
     }
   };
 
@@ -355,6 +407,46 @@ const GoLive = () => {
             )}
           </div>
         </div>
+        
+        {/* Join Requests Notifications */}
+        {isLive && joinRequests.some(req => req.status === "pending") && (
+          <div className="absolute top-16 right-0 p-4">
+            {joinRequests
+              .filter(req => req.status === "pending")
+              .map(request => (
+                <div 
+                  key={request.id}
+                  className="bg-black/80 backdrop-blur-sm p-3 rounded-lg mb-2 border border-streamixy-primary/50"
+                >
+                  <div className="flex items-center mb-2">
+                    <Avatar className="h-6 w-6 mr-2">
+                      <AvatarFallback>{request.username[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold">{request.username}</span>
+                  </div>
+                  <p className="text-sm mb-2">{request.message}</p>
+                  <div className="flex space-x-2">
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      onClick={() => handleJoinRequestResponse(request.id, true)}
+                    >
+                      Accept
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="bg-transparent border-white/20"
+                      onClick={() => handleJoinRequestResponse(request.id, false)}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
         
         <div className="absolute bottom-20 left-0 right-0 overflow-x-auto hide-scrollbar pb-2">
           <div className="flex space-x-2 px-4">

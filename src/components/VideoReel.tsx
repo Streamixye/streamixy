@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from "react";
-import { Gift, MessagesSquare, Search, Share } from "lucide-react";
+import { Gift, MessageSquare, Search, Share } from "lucide-react";
 import VoteButton from "./VoteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
@@ -14,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import SearchDialog from "./SearchDialog";
+import LiveComment from "./LiveComment";
 
 interface VideoReelProps {
   streamId: string;
@@ -42,13 +44,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const { tokenBalance, handleTransaction } = useTokens(creator.name);
   const [creatorTokens, setCreatorTokens] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [comments, setComments] = useState<{text: string, id: number}[]>([]);
-  const [activeComment, setActiveComment] = useState<{text: string, id: number} | null>(null);
+  const [comments, setComments] = useState<{text: string, id: number, username: string}[]>([]);
+  const [activeComment, setActiveComment] = useState<{text: string, id: number, username: string} | null>(null);
   const [nextCommentId, setNextCommentId] = useState(1);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestText, setRequestText] = useState("");
@@ -212,20 +215,29 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const handleComment = () => {
     if (!commentText.trim()) return;
     
-    const newComment = { text: commentText, id: nextCommentId };
+    // Add to local comments
+    const newComment = { text: commentText, id: nextCommentId, username: "You" };
     setNextCommentId(prev => prev + 1);
     setComments(prev => [...prev, newComment]);
     setActiveComment(newComment);
-    setCommentText("");
     
-    setTimeout(() => {
-      setActiveComment(null);
-    }, 3000);
-    
+    // Show the comment in the UI
     toast({
       title: "Comment Posted!",
       description: "Your comment is now visible on stream",
     });
+    
+    // Clear the input field
+    setCommentText("");
+    
+    // Close the comment dialog
+    setIsCommentDialogOpen(false);
+    
+    // Remove the comment after a while
+    setTimeout(() => {
+      setActiveComment(null);
+      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+    }, 5000);
   };
 
   const handleRequest = () => {
@@ -312,56 +324,36 @@ const VideoReel: React.FC<VideoReelProps> = ({
           <span className="text-xs text-white">{viewers} viewers</span>
         </div>
 
-        {activeComment && (
-          <div className="absolute bottom-48 left-4 max-w-[80%] animate-fade-in glass px-4 py-2 rounded-lg">
-            <p className="text-white text-sm">{activeComment.text}</p>
-          </div>
-        )}
+        {/* Display comments in the stream */}
+        <div className="absolute left-4 right-4 top-16 bottom-32 overflow-hidden pointer-events-none">
+          {comments.map((comment) => (
+            <LiveComment 
+              key={comment.id} 
+              username={comment.username} 
+              text={comment.text} 
+              position={comment.username === "You" ? "right" : "left"}
+            />
+          ))}
+        </div>
 
         <div 
           className="absolute right-4 bottom-32 flex flex-col space-y-6"
           onClick={stopAllPropagation}
         >
           <div className="flex flex-col items-center space-y-6">
-            <Dialog>
-              <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
-                  <VoteButton
-                    icon={<MessagesSquare className="h-7 w-7" />}
-                    label="Comment"
-                  />
-                </div>
-              </DialogTrigger>
-              <DialogContent data-comment-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-                <DialogHeader>
-                  <DialogTitle>Add Comment</DialogTitle>
-                </DialogHeader>
-                <div className="flex flex-col space-y-4 py-4">
-                  <p className="text-sm text-muted-foreground">
-                    Leave a comment on {creator.name}'s stream
-                  </p>
-                  <div className="flex space-x-2 items-center">
-                    <Input 
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Type your comment..." 
-                      className="flex-1 bg-white/10 border-white/20 text-white"
-                    />
-                    <Button 
-                      onClick={handleComment}
-                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                    >
-                      Send
-                    </Button>
-                  </div>
-                </div>
-                <DialogPrimitive.Close className="hidden" data-dialog-close />
-              </DialogContent>
-            </Dialog>
+            <div onClick={(e) => {
+              e.stopPropagation();
+              setIsCommentDialogOpen(true);
+            }}>
+              <VoteButton
+                icon={<MessageSquare className="h-7 w-7" />}
+                label="Comment"
+              />
+            </div>
 
             <div onClick={(e) => e.stopPropagation()}>
               <VoteButton
-                icon={<MessagesSquare className="h-7 w-7" />}
+                icon={<MessageSquare className="h-7 w-7" />}
                 label="Vote"
                 onClick={() => setIsVoteDialogOpen(true)}
               />
@@ -391,16 +383,19 @@ const VideoReel: React.FC<VideoReelProps> = ({
               <span className="text-[8px] text-white/70 mt-0.5">Search</span>
             </button>
             
-            <Dialog>
+            <Dialog open={requestStatus === "idle"}>
               <DialogTrigger asChild>
-                <div onClick={stopAllPropagation}>
+                <div onClick={(e) => {
+                  e.stopPropagation();
+                  // This will open the dialog automatically when clicked
+                }}>
                   <VoteButton
-                    icon={<MessagesSquare className="h-7 w-7" />}
+                    icon={<MessageSquare className="h-7 w-7" />}
                     label="Request"
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent data-request-dialog onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
+              <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
                 <DialogHeader>
                   <DialogTitle>Send Request</DialogTitle>
                 </DialogHeader>
@@ -413,24 +408,95 @@ const VideoReel: React.FC<VideoReelProps> = ({
                     className="min-h-[100px] bg-white/10 border-white/20 text-white"
                     value={requestText}
                     onChange={(e) => setRequestText(e.target.value)}
-                    disabled={requestStatus !== "idle"}
                   />
                   <Button 
                     onClick={handleRequest}
                     className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                    disabled={requestStatus !== "idle"}
                   >
-                    {requestStatus === "pending" ? "Sending..." : 
-                     requestStatus === "accepted" ? "Accepted!" : 
-                     requestStatus === "rejected" ? "Rejected" : "Send Request"}
+                    Send Request
                   </Button>
                 </div>
-                <DialogPrimitive.Close className="hidden" data-dialog-close />
               </DialogContent>
             </Dialog>
+            
+            {/* Request status display - separate from the dialog */}
+            {requestStatus !== "idle" && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+                <div className="bg-black/90 p-6 rounded-lg border border-white/10 max-w-md w-full">
+                  <h2 className="text-xl font-bold mb-4">Request Status</h2>
+                  
+                  {requestStatus === "pending" && (
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white mx-auto mb-4"></div>
+                      <p>Sending request to {creator.name}...</p>
+                    </div>
+                  )}
+                  
+                  {requestStatus === "accepted" && (
+                    <div className="text-center">
+                      <div className="text-green-500 text-6xl mb-4">✓</div>
+                      <p className="mb-4">Your request has been accepted!</p>
+                      <Button 
+                        onClick={() => setRequestStatus("idle")}
+                        className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {requestStatus === "rejected" && (
+                    <div className="text-center">
+                      <div className="text-red-500 text-6xl mb-4">✕</div>
+                      <p className="mb-4">Your request has been rejected.</p>
+                      <Button 
+                        onClick={() => setRequestStatus("idle")}
+                        className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Comment Dialog */}
+      <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
+        <DialogContent onClick={stopAllPropagation} className="bg-black/90 border border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              Leave a comment on {creator.name}'s stream
+            </p>
+            <div className="flex space-x-2 items-center">
+              <Input 
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Type your comment..." 
+                className="flex-1 bg-white/10 border-white/20 text-white"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleComment();
+                  }
+                }}
+              />
+              <Button 
+                onClick={handleComment}
+                className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <TokenVoteDialog
         isOpen={isVoteDialogOpen}

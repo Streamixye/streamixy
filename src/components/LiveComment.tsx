@@ -7,9 +7,15 @@ interface LiveCommentProps {
   username: string;
   text: string;
   avatarUrl?: string;
+  position?: "left" | "right";
 }
 
-const LiveComment: React.FC<LiveCommentProps> = ({ username, text, avatarUrl }) => {
+const LiveComment: React.FC<LiveCommentProps> = ({ 
+  username, 
+  text, 
+  avatarUrl,
+  position = "left"
+}) => {
   const [visible, setVisible] = useState(false);
   
   useEffect(() => {
@@ -26,7 +32,8 @@ const LiveComment: React.FC<LiveCommentProps> = ({ username, text, avatarUrl }) 
   return (
     <div 
       className={cn(
-        "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 ml-4 max-w-[80%] transition-opacity duration-500",
+        "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-opacity duration-500",
+        position === "left" ? "ml-4" : "mr-4 self-end",
         visible ? "opacity-100" : "opacity-0"
       )}
     >
