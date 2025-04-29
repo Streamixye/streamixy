@@ -44,19 +44,13 @@ const Features = () => {
           <CardHeader>
             <Wrench className="h-6 w-6 text-streamixy-primary mb-2" />
             <CardTitle className="text-white">Creator Tools</CardTitle>
-            <CardDescription className="text-white/70">
-              Everything you need to create and monetize content
-            </CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-white/80">
-            Access our suite of tools designed specifically for content creators to help you produce, distribute, and monetize your work effectively.
-          </CardContent>
           <CardFooter>
             <Button 
               variant="outline" 
               size="sm" 
               className="w-full bg-black border-white/20 text-white hover:bg-black/80"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/creator-tools")}
             >
               Explore Tools
             </Button>

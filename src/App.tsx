@@ -10,6 +10,7 @@ import NFTs from "./pages/NFTs";
 import Stake from "./pages/Stake";
 import Dashboard from "./pages/Dashboard";
 import Features from "./pages/Features";
+import CreatorTools from "./pages/CreatorTools";
 import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 import BottomNav from "./components/BottomNav";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/stake" element={<Stake />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/features" element={<Features />} />
+            <Route path="/creator-tools" element={<CreatorTools />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/creator/:username" element={<CreatorProfile />} />
             <Route path="*" element={<NotFound />} />
