@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
@@ -6,6 +5,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import HomeSidebar from "@/components/HomeSidebar";
+import LiveSidebar from "@/components/LiveSidebar";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -187,6 +187,7 @@ const Index = () => {
     <SidebarProvider>
       <div className="min-h-screen bg-black text-white flex w-full">
         <HomeSidebar />
+        <LiveSidebar />
         
         <div className="flex-1">
           <Navbar />

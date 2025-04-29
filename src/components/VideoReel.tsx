@@ -242,7 +242,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setCommentText("");
     
     // Close the comment dialog
-    setIsCommentDialogOpen(false);
+    
     
     // Remove the comment after a while
     setTimeout(() => {
