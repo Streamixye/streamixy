@@ -288,7 +288,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
   };
 
   // Enhanced double-tap like handler
-  const handleDoubleTap = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleTap = (e: React.TouchEvent) => {
     if (!videoRef.current) return;
     
     const currentTime = new Date().getTime();
@@ -298,21 +298,14 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setLastTap(currentTime);
     
     if (isDoubleTap) {
-      // Calculate position for like animation
-      let x, y;
+      // Prevent default behavior
+      e.preventDefault();
       
-      if ('touches' in e) {
-        // Touch event
-        const touch = e.touches[0] || e.changedTouches[0];
-        const rect = videoRef.current.getBoundingClientRect();
-        x = ((touch.clientX - rect.left) / rect.width) * 100;
-        y = ((touch.clientY - rect.top) / rect.height) * 100;
-      } else {
-        // Mouse event
-        const rect = videoRef.current.getBoundingClientRect();
-        x = ((e.clientX - rect.left) / rect.width) * 100;
-        y = ((e.clientY - rect.top) / rect.height) * 100;
-      }
+      // Calculate position for like animation
+      const touch = e.touches[0] || e.changedTouches[0];
+      const rect = videoRef.current.getBoundingClientRect();
+      const x = ((touch.clientX - rect.left) / rect.width) * 100;
+      const y = ((touch.clientY - rect.top) / rect.height) * 100;
       
       createLikeAnimation(x, y);
     }
@@ -321,6 +314,9 @@ const VideoReel: React.FC<VideoReelProps> = ({
   // Handle direct double click for desktop users
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (!videoRef.current) return;
+    
+    // Prevent default behavior to avoid issues
+    e.preventDefault();
     
     // Get position relative to the video element
     const rect = videoRef.current.getBoundingClientRect();
@@ -353,9 +349,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
         <video
           ref={videoRef}
           className="absolute inset-0 object-cover w-full h-full"
-          onClick={(e) => handleDoubleTap(e)}
           onDoubleClick={handleDoubleClick}
-          onTouchStart={(e) => handleDoubleTap(e)}
+          onTouchStart={handleTap}
           muted
           loop
           playsInline
@@ -526,7 +521,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
 
       {/* Comment Dialog */}
       <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
-        <DialogContent onClick={stopAllPropagation} className="bg-black/90 border border-white/10 text-white">
+        <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
           <DialogHeader>
             <DialogTitle>Add Comment</DialogTitle>
           </DialogHeader>
