@@ -1,4 +1,3 @@
-
 import React from "react";
 import { 
   Card,
@@ -15,7 +14,7 @@ import {
   TrendingUp,
   Image as ImageIcon,
   Share,
-  BadgeDollar,
+  BadgeDollarSign,
   ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -161,7 +160,7 @@ const Features = () => {
         
         <Card className="bg-black border border-white/10">
           <CardHeader>
-            <BadgeDollar className="h-5 w-5 text-streamixy-primary mb-2" />
+            <BadgeDollarSign className="h-5 w-5 text-streamixy-primary mb-2" />
             <CardTitle className="text-white">Token Economy</CardTitle>
             <CardDescription className="text-white/70">
               SYX token ecosystem
