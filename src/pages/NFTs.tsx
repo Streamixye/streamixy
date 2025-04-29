@@ -22,7 +22,9 @@ interface NFT {
   previousPrice: number;
   image: string;
   marketCap: number;
+  previousMarketCap: number;
   roi: number;
+  previousRoi: number;
   staked: number;
   pnl: number;
 }
@@ -35,9 +37,11 @@ const NFTs = () => {
       creator: "CryptoArtist",
       price: 230,
       previousPrice: 220,
-      image: "",
+      image: "https://source.unsplash.com/photo-1518770660439-4636190af475",
       marketCap: 45000,
+      previousMarketCap: 44000,
       roi: 12,
+      previousRoi: 10,
       staked: 0,
       pnl: 0
     },
@@ -47,9 +51,11 @@ const NFTs = () => {
       creator: "NFTMaster",
       price: 180,
       previousPrice: 190,
-      image: "",
+      image: "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b",
       marketCap: 32000,
+      previousMarketCap: 33000,
       roi: -5,
+      previousRoi: -3,
       staked: 0,
       pnl: 0
     },
@@ -59,9 +65,11 @@ const NFTs = () => {
       creator: "VRCreator",
       price: 320,
       previousPrice: 300,
-      image: "",
+      image: "https://source.unsplash.com/photo-1582562124811-c09040d0a901",
       marketCap: 64000,
+      previousMarketCap: 62000,
       roi: 8,
+      previousRoi: 7,
       staked: 0,
       pnl: 0
     },
@@ -71,16 +79,17 @@ const NFTs = () => {
       creator: "MetaDesigner",
       price: 450,
       previousPrice: 440,
-      image: "",
+      image: "https://source.unsplash.com/photo-1535268647677-300dbf3d78d1",
       marketCap: 89000,
+      previousMarketCap: 88000,
       roi: 15,
+      previousRoi: 13,
       staked: 0,
       pnl: 0
     }
   ]);
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
-  const [userBalance, setUserBalance] = useState(1000);
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
   
   useEffect(() => {
@@ -91,9 +100,12 @@ const NFTs = () => {
           const previousPrice = nft.price;
           const newPrice = Math.max(10, nft.price + priceChange);
           
-          const roi = ((newPrice - previousPrice) / previousPrice) * 100;
+          const roiChange = (Math.random() * 3) - 1;
+          const previousRoi = nft.roi;
+          const newRoi = nft.roi + roiChange;
           
           const capChange = Math.random() < 0.5 ? -1 : 1;
+          const previousMarketCap = nft.marketCap;
           const newMarketCap = nft.marketCap + (capChange * Math.random() * 1000);
           
           const pnl = nft.staked > 0 
@@ -104,8 +116,10 @@ const NFTs = () => {
             ...nft,
             previousPrice: previousPrice,
             price: newPrice,
+            previousMarketCap: previousMarketCap,
             marketCap: newMarketCap,
-            roi: roi,
+            previousRoi: previousRoi,
+            roi: newRoi,
             pnl: pnl
           };
         })
@@ -150,8 +164,15 @@ const NFTs = () => {
         {nfts.map((nft) => (
           <Link to={`/nfts/${nft.id}`} key={nft.id}>
             <Card className="bg-black border border-white/10 overflow-hidden hover:border-streamixy-primary/50 transition-colors">
-              <div className="w-full h-48 bg-streamixy-dark/50 flex items-center justify-center">
-                <div className="text-4xl font-bold text-streamixy-primary/30">{nft.name}</div>
+              <div className="w-full h-48 bg-streamixy-dark/50 flex items-center justify-center relative overflow-hidden">
+                <img 
+                  src={nft.image} 
+                  alt={nft.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <div className="text-4xl font-bold text-white/70">{nft.name}</div>
+                </div>
               </div>
               
               <CardHeader>
@@ -169,24 +190,24 @@ const NFTs = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold text-white ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className={`font-bold text-white ${nft.marketCap > (nft.marketCap - nft.marketCap * 0.01) ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.marketCap > nft.previousMarketCap ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.marketCap.toLocaleString()} SYX
                     </div>
                     <div className="mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
-                      <div className="h-full bg-streamixy-primary" style={{width: `${Math.random() * 100}%`}}></div>
+                      <div className="h-full bg-streamixy-primary" style={{width: `${Math.min(100, Math.max(0, (nft.marketCap / 100000) * 100))}%`}}></div>
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold text-white ${nft.roi > 0 ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className={`font-bold ${nft.roi > nft.previousRoi ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
                       {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
                     </div>
                   </div>
