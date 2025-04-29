@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -216,11 +215,11 @@ const NFTs = () => {
                 {nft.staked > 0 && (
                   <div className="mt-2 p-3 rounded bg-streamixy-primary/10">
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Your Stake:</span>
-                      <span className="font-bold">{nft.staked.toFixed(2)} SYX</span>
+                      <span className="text-white">Your Stake:</span>
+                      <span className="font-bold text-white">{nft.staked.toFixed(2)} SYX</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>P&L:</span>
+                      <span className="text-white">P&L:</span>
                       <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
                       </span>
