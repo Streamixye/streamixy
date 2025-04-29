@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -21,6 +20,8 @@ import LiveComment from "@/components/LiveComment";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import LiveSidebar from "@/components/LiveSidebar";
 
 const GoLive = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -457,346 +458,371 @@ const GoLive = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="relative w-full h-screen overflow-hidden">
-        <video 
-          ref={videoRef}
-          autoPlay 
-          playsInline
-          muted={isMuted}
-          className={`absolute inset-0 h-full w-full object-cover ${!activeFilter || activeFilter === 'normal' ? '' : filters.find(f => f.id === activeFilter)?.class || ''}`}
-          onClick={handleDoubleLike}
-        />
+    <SidebarProvider>
+      <div className="min-h-screen bg-black text-white flex w-full">
+        <LiveSidebar />
         
-        <canvas 
-          ref={canvasRef} 
-          width="640" 
-          height="480" 
-          className={`absolute inset-0 h-full w-full object-cover ${activeFilter && activeFilter !== 'blur' ? 'block' : 'hidden'}`}
-        />
-        
-        <div className="absolute inset-0 bg-black/20" />
-        
-        {/* Double like animations */}
-        {likeAnimations.map(like => (
-          <div 
-            key={like.id}
-            className="absolute animate-like-float"
-            style={{ 
-              left: `${like.x}%`,
-              top: `${like.y}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <Heart className="text-pink-500 h-12 w-12 fill-pink-500" />
-          </div>
-        ))}
-        
-        <div className="absolute left-0 top-20 right-0 bottom-20 overflow-hidden pointer-events-none">
-          {comments.map((comment) => (
-            <LiveComment 
-              key={comment.id} 
-              username={comment.username} 
-              text={comment.text} 
+        <div className="flex-1 relative overflow-hidden">
+          <div className="relative w-full h-screen overflow-hidden">
+            <video 
+              ref={videoRef}
+              autoPlay 
+              playsInline
+              muted={isMuted}
+              className={`absolute inset-0 h-full w-full object-cover ${!activeFilter || activeFilter === 'normal' ? '' : filters.find(f => f.id === activeFilter)?.class || ''}`}
+              onClick={handleDoubleLike}
             />
-          ))}
-        </div>
-
-        <div className="absolute right-20 top-20 bottom-20 overflow-hidden pointer-events-none flex flex-col items-end">
-          {receivedGifts.map((gift) => (
-            <div 
-              key={gift.id} 
-              className="text-4xl animate-gift mb-4"
-            >
-              {gift.emoji}
+            
+            <canvas 
+              ref={canvasRef} 
+              width="640" 
+              height="480" 
+              className={`absolute inset-0 h-full w-full object-cover ${activeFilter && activeFilter !== 'blur' ? 'block' : 'hidden'}`}
+            />
+            
+            <div className="absolute inset-0 bg-black/20" />
+            
+            {/* Double like animations */}
+            {likeAnimations.map(like => (
+              <div 
+                key={like.id}
+                className="absolute animate-like-float"
+                style={{ 
+                  left: `${like.x}%`,
+                  top: `${like.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              >
+                <Heart className="text-pink-500 h-12 w-12 fill-pink-500" />
+              </div>
+            ))}
+            
+            <div className="absolute left-0 top-20 right-0 bottom-20 overflow-hidden pointer-events-none">
+              {comments.map((comment) => (
+                <LiveComment 
+                  key={comment.id} 
+                  username={comment.username} 
+                  text={comment.text} 
+                />
+              ))}
             </div>
-          ))}
-        </div>
-        
-        <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
-          <div className="flex items-center">
-            <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
-              <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
-              <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
-            </Avatar>
-            <span className="ml-2 font-semibold">{mockUser.name}</span>
-            {isLive && (
-              <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center">
-                <span className="h-1.5 w-1.5 bg-white rounded-full mr-1"></span>
-                LIVE
-              </span>
-            )}
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-1" />
-              <span className="text-sm animate-pulse">{viewerCount}</span>
+
+            <div className="absolute right-20 top-20 bottom-20 overflow-hidden pointer-events-none flex flex-col items-end">
+              {receivedGifts.map((gift) => (
+                <div 
+                  key={gift.id} 
+                  className="text-4xl animate-gift mb-4"
+                >
+                  {gift.emoji}
+                </div>
+              ))}
             </div>
             
-            {isLive && (
-              <div className="flex items-center bg-black/40 backdrop-blur-sm py-1 px-2 rounded-full">
-                <span className="text-streamixy-primary text-xs font-bold mr-1">SYX:</span>
-                <span className="text-sm">{totalTokens}</span>
+            <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
+              <div className="flex items-center">
+                <Avatar className="h-8 w-8 border-2 border-streamixy-primary">
+                  <AvatarImage src={mockUser.avatar} alt={mockUser.name} />
+                  <AvatarFallback>{mockUser.name[0]}</AvatarFallback>
+                </Avatar>
+                <span className="ml-2 font-semibold">{mockUser.name}</span>
+                {isLive && (
+                  <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center">
+                    <span className="h-1.5 w-1.5 bg-white rounded-full mr-1"></span>
+                    LIVE
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  <Users className="h-4 w-4 mr-1" />
+                  <span className="text-sm animate-pulse">{viewerCount}</span>
+                </div>
+                
+                {isLive && (
+                  <div className="flex items-center bg-black/40 backdrop-blur-sm py-1 px-2 rounded-full">
+                    <span className="text-streamixy-primary text-xs font-bold mr-1">SYX:</span>
+                    <span className="text-sm">{totalTokens}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Join Requests Notifications */}
+            {isLive && joinRequests.some(req => req.status === "pending") && (
+              <div className="absolute top-16 right-0 p-4">
+                {joinRequests
+                  .filter(req => req.status === "pending")
+                  .map(request => (
+                    <div 
+                      key={request.id}
+                      className="bg-black/80 backdrop-blur-sm p-3 rounded-lg mb-2 border border-streamixy-primary/50"
+                    >
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <AvatarFallback>{request.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-semibold">{request.username}</span>
+                      </div>
+                      <p className="text-sm mb-2">{request.message}</p>
+                      <div className="flex space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="default"
+                          className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                          onClick={() => handleJoinRequestResponse(request.id, true)}
+                        >
+                          Accept
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="bg-transparent border-white/20"
+                          onClick={() => handleJoinRequestResponse(request.id, false)}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
               </div>
             )}
-          </div>
-        </div>
-        
-        {/* Join Requests Notifications */}
-        {isLive && joinRequests.some(req => req.status === "pending") && (
-          <div className="absolute top-16 right-0 p-4">
-            {joinRequests
-              .filter(req => req.status === "pending")
-              .map(request => (
-                <div 
-                  key={request.id}
-                  className="bg-black/80 backdrop-blur-sm p-3 rounded-lg mb-2 border border-streamixy-primary/50"
-                >
-                  <div className="flex items-center mb-2">
-                    <Avatar className="h-6 w-6 mr-2">
-                      <AvatarFallback>{request.username[0]}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-semibold">{request.username}</span>
-                  </div>
-                  <p className="text-sm mb-2">{request.message}</p>
-                  <div className="flex space-x-2">
+            
+            <div className="absolute bottom-20 left-0 right-0 overflow-x-auto hide-scrollbar pb-2">
+              <div className="flex space-x-2 px-4">
+                {filters.map(filter => (
+                  <LiveFilter 
+                    key={filter.id} 
+                    name={filter.name} 
+                    isActive={activeFilter === filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
+              {isLive ? (
+                <div className="flex flex-col space-y-4">
+                  <form onSubmit={handleSubmitComment} className="flex space-x-2">
+                    <Input 
+                      type="text" 
+                      className="flex-1 bg-white/20 border-0 text-white placeholder:text-white/70"
+                      placeholder="Add a comment..."
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                    />
                     <Button 
-                      size="sm" 
-                      variant="default"
-                      className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-                      onClick={() => handleJoinRequestResponse(request.id, true)}
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleShare}
+                      className="relative"
                     >
-                      Accept
+                      <Share className="h-5 w-5" />
                     </Button>
                     <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="bg-transparent border-white/20"
-                      onClick={() => handleJoinRequestResponse(request.id, false)}
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleCoHost}
+                      className="relative"
                     >
-                      Decline
+                      <UserPlus className="h-5 w-5" />
+                    </Button>
+                  </form>
+                  
+                  <div className="flex justify-between">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={toggleMute}
+                    >
+                      {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                    </Button>
+                    
+                    <Button 
+                      variant="default" 
+                      className="bg-red-500 hover:bg-red-600"
+                      onClick={toggleLive}
+                    >
+                      End Stream
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setActiveFilter(activeFilter === null ? 'normal' : null)}
+                    >
+                      <Filter className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
-              ))}
-          </div>
-        )}
-        
-        <div className="absolute bottom-20 left-0 right-0 overflow-x-auto hide-scrollbar pb-2">
-          <div className="flex space-x-2 px-4">
-            {filters.map(filter => (
-              <LiveFilter 
-                key={filter.id} 
-                name={filter.name} 
-                isActive={activeFilter === filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-              />
-            ))}
-          </div>
-        </div>
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-          {isLive ? (
-            <div className="flex flex-col space-y-4">
-              <form onSubmit={handleSubmitComment} className="flex space-x-2">
-                <Input 
-                  type="text" 
-                  className="flex-1 bg-white/20 border-0 text-white placeholder:text-white/70"
-                  placeholder="Add a comment..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-                <Button type="submit" variant="ghost" size="icon">
-                  <MessageSquare className="h-5 w-5" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleShare}
-                  className="relative"
-                >
-                  <Share className="h-5 w-5" />
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleCoHost}
-                  className="relative"
-                >
-                  <UserPlus className="h-5 w-5" />
-                </Button>
-              </form>
-              
-              <div className="flex justify-between">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={toggleMute}
-                >
-                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-                </Button>
-                
-                <Button 
-                  variant="default" 
-                  className="bg-red-500 hover:bg-red-600"
-                  onClick={toggleLive}
-                >
-                  End Stream
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => setActiveFilter(activeFilter === null ? 'normal' : null)}
-                >
-                  <Filter className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <Button 
-                className="bg-streamixy-primary hover:bg-streamixy-primary/80 px-8"
-                onClick={toggleLive}
-              >
-                <Play className="mr-2 h-5 w-5" />
-                Go Live
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Share Dialog */}
-      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="bg-black/90 border border-white/20 text-white">
-          <DialogHeader>
-            <DialogTitle>Share Stream</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col space-y-4 p-2">
-            <p className="text-sm text-white/70">Invite co-host to join your stream</p>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <Button 
-                variant="outline" 
-                className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
-                onClick={() => handleShareToApp("whatsapp")}
-              >
-                <Smartphone className="h-10 w-10 mb-2 text-green-500" />
-                <span>WhatsApp</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
-                onClick={() => handleShareToApp("instagram")}
-              >
-                <Instagram className="h-10 w-10 mb-2 text-pink-500" />
-                <span>Instagram</span>
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Co-Host Dialog */}
-      <Dialog open={isCoHostDialogOpen} onOpenChange={setIsCoHostDialogOpen}>
-        <DialogContent className="bg-black/90 border border-white/20 text-white">
-          <DialogHeader>
-            <DialogTitle>Add Co-Host</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col space-y-4">
-            <p className="text-sm text-white/70">Select viewers to invite as co-hosts</p>
-            
-            <div className="max-h-60 overflow-y-auto pr-2">
-              {audiences.map(audience => (
-                <div 
-                  key={audience.id}
-                  className="flex items-center justify-between p-2 hover:bg-white/10 rounded-md mb-1"
-                >
-                  <div className="flex items-center">
-                    <Avatar className="h-8 w-8 mr-2">
-                      <AvatarImage src={audience.avatar} alt={audience.username} />
-                      <AvatarFallback>{audience.username[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{audience.username}</div>
-                      <div className="text-xs text-white/60">Viewer</div>
-                    </div>
-                  </div>
-                  
+              ) : (
+                <div className="flex justify-center">
                   <Button 
-                    size="sm"
-                    variant="outline"
-                    className="border-streamixy-primary text-streamixy-primary hover:bg-streamixy-primary/10"
-                    onClick={() => inviteCoHost(audience.id)}
+                    className="bg-streamixy-primary hover:bg-streamixy-primary/80 px-8"
+                    onClick={toggleLive}
                   >
-                    Invite
+                    <Play className="mr-2 h-5 w-5" />
+                    Go Live
                   </Button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
 
-      <style>
-        {`
-        @keyframes gift-animation {
-          0% {
-            transform: translateX(100px);
-            opacity: 0;
+          {/* Share Dialog */}
+          <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+            <DialogContent className="bg-black/90 border border-white/20 text-white">
+              <DialogHeader>
+                <DialogTitle>Share Stream</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4 p-2">
+                <p className="text-sm text-white/70">Invite co-host to join your stream</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    variant="outline" 
+                    className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
+                    onClick={() => handleShareToApp("whatsapp")}
+                  >
+                    <Smartphone className="h-10 w-10 mb-2 text-green-500" />
+                    <span>WhatsApp</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
+                    onClick={() => handleShareToApp("instagram")}
+                  >
+                    <Instagram className="h-10 w-10 mb-2 text-pink-500" />
+                    <span>Instagram</span>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          {/* Co-Host Dialog */}
+          <Dialog open={isCoHostDialogOpen} onOpenChange={setIsCoHostDialogOpen}>
+            <DialogContent className="bg-black/90 border border-white/20 text-white">
+              <DialogHeader>
+                <DialogTitle>Add Co-Host</DialogTitle>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4">
+                <p className="text-sm text-white/70">Select viewers to invite as co-hosts</p>
+                
+                <div className="max-h-60 overflow-y-auto pr-2">
+                  {audiences.map(audience => (
+                    <div 
+                      key={audience.id}
+                      className="flex items-center justify-between p-2 hover:bg-white/10 rounded-md mb-1"
+                    >
+                      <div className="flex items-center">
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarImage src={audience.avatar} alt={audience.username} />
+                          <AvatarFallback>{audience.username[0]}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{audience.username}</div>
+                          <div className="text-xs text-white/60">Viewer</div>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        className="border-streamixy-primary text-streamixy-primary hover:bg-streamixy-primary/10"
+                        onClick={() => inviteCoHost(audience.id)}
+                      >
+                        Invite
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <style>
+          {`
+          @keyframes gift-animation {
+            0% {
+              transform: translateX(100px);
+              opacity: 0;
+            }
+            10% {
+              transform: translateX(0);
+              opacity: 1;
+            }
+            90% {
+              transform: translateX(0);
+              opacity: 1;
+            }
+            100% {
+              transform: translateX(-20px);
+              opacity: 0;
+            }
           }
-          10% {
-            transform: translateX(0);
-            opacity: 1;
+          
+          @keyframes like-float {
+            0% {
+              opacity: 1;
+              transform: translate(-50%, -50%) scale(0.5);
+            }
+            50% {
+              opacity: 1;
+              transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+              opacity: 0;
+              transform: translate(-50%, -80%) scale(1);
+            }
           }
-          90% {
-            transform: translateX(0);
-            opacity: 1;
+          
+          @keyframes heart-float {
+            0% {
+              opacity: 0;
+              transform: scale(0.5) rotate(var(--rotation));
+            }
+            25% {
+              opacity: 1;
+            }
+            75% {
+              opacity: 1;
+              transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
+            }
+            100% {
+              opacity: 0;
+              transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
+            }
           }
-          100% {
-            transform: translateX(-20px);
-            opacity: 0;
+          
+          .animate-gift {
+            animation: gift-animation 3s ease-out forwards;
           }
-        }
-        
-        @keyframes like-float {
-          0% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(0.5);
+          
+          .animate-like-float {
+            animation: like-float 1.5s ease-out forwards;
           }
-          50% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.2);
+          
+          .animate-heart-float {
+            animation: heart-float 2s ease-out forwards;
           }
-          100% {
-            opacity: 0;
-            transform: translate(-50%, -80%) scale(1);
+          
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
           }
-        }
-        
-        .animate-gift {
-          animation: gift-animation 3s ease-out forwards;
-        }
-        
-        .animate-like-float {
-          animation: like-float 1.5s ease-out forwards;
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        `}
-      </style>
-    </div>
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          `}
+        </style>
+      </div>
+    </SidebarProvider>
   );
 };
 

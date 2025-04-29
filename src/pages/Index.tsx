@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
@@ -212,29 +213,31 @@ const Index = () => {
           {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
         
-        <style jsx>{`
-          @keyframes heart-float {
-            0% {
-              opacity: 0;
-              transform: scale(0.5) rotate(var(--rotation));
+        <style>
+          {`
+            @keyframes heart-float {
+              0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(var(--rotation));
+              }
+              25% {
+                opacity: 1;
+              }
+              75% {
+                opacity: 1;
+                transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
+              }
+              100% {
+                opacity: 0;
+                transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
+              }
             }
-            25% {
-              opacity: 1;
+            
+            .animate-heart-float {
+              animation: heart-float 2s ease-out forwards;
             }
-            75% {
-              opacity: 1;
-              transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
-            }
-            100% {
-              opacity: 0;
-              transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
-            }
-          }
-          
-          .animate-heart-float {
-            animation: heart-float 2s ease-out forwards;
-          }
-        `}</style>
+          `}
+        </style>
       </div>
     </SidebarProvider>
   );

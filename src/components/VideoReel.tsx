@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Gift, MessageSquare, Search, Share, Heart } from "lucide-react";
+import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useTokens, TokenTransaction } from "@/hooks/use-tokens";
@@ -48,7 +48,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
   const [commentText, setCommentText] = useState("");
   const [requestStatus, setRequestStatus] = useState<"idle" | "pending" | "accepted" | "rejected">("idle");
@@ -422,19 +421,9 @@ const VideoReel: React.FC<VideoReelProps> = ({
           onClick={stopAllPropagation}
         >
           <div className="flex flex-col items-center space-y-6">
-            <div onClick={(e) => {
-              e.stopPropagation();
-              setIsCommentDialogOpen(true);
-            }}>
-              <VoteButton
-                icon={<MessageSquare className="h-7 w-7" />}
-                label="Comment"
-              />
-            </div>
-
             <div onClick={(e) => e.stopPropagation()}>
               <VoteButton
-                icon={<MessageSquare className="h-7 w-7" />}
+                icon={<Heart className="h-7 w-7" />}
                 label="Vote"
                 onClick={() => setIsVoteDialogOpen(true)}
               />
@@ -465,7 +454,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
             </button>
             
             <VoteButton
-              icon={<MessageSquare className="h-7 w-7" />}
+              icon={<Heart className="h-7 w-7" />}
               label="Request"
               onClick={() => {
                 if (requestStatus === "idle") {
@@ -518,40 +507,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Comment Dialog */}
-      <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
-        <DialogContent onClick={stopAllPropagation} className="dialog-content bg-black/90 border border-white/10 text-white">
-          <DialogHeader>
-            <DialogTitle>Add Comment</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col space-y-4 py-4">
-            <p className="text-sm text-muted-foreground">
-              Leave a comment on {creator.name}'s stream
-            </p>
-            <div className="flex space-x-2 items-center">
-              <Input 
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Type your comment..." 
-                className="flex-1 bg-white/10 border-white/20 text-white"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleComment();
-                  }
-                }}
-              />
-              <Button 
-                onClick={handleComment}
-                className="bg-streamixy-primary hover:bg-streamixy-primary/80"
-              >
-                Send
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <TokenVoteDialog
         isOpen={isVoteDialogOpen}
