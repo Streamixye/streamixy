@@ -4,6 +4,8 @@ import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import HomeSidebar from "@/components/HomeSidebar";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -182,30 +184,62 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar />
-      <div 
-        className="h-screen w-full overflow-hidden"
-        onWheel={handleScroll}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div 
-          className="w-full h-full transition-transform duration-300"
-          style={{
-            transform: `translateY(-${currentReelIndex * 100}%)`
-          }}
-        >
-          {MOCK_REELS.map((reel, index) => (
-            <div key={reel.streamId} className="h-screen w-full">
-              <VideoReel {...reel} />
+    <SidebarProvider>
+      <div className="min-h-screen bg-black text-white flex">
+        <HomeSidebar />
+        
+        <div className="flex-1">
+          <Navbar />
+          <div 
+            className="h-screen w-full overflow-hidden"
+            onWheel={handleScroll}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div 
+              className="w-full h-full transition-transform duration-300"
+              style={{
+                transform: `translateY(-${currentReelIndex * 100}%)`
+              }}
+            >
+              {MOCK_REELS.map((reel, index) => (
+                <div key={reel.streamId} className="h-screen w-full">
+                  <VideoReel {...reel} />
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+          {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
+        
+        <style jsx global>{`
+          @keyframes heart-float {
+            0% {
+              opacity: 0;
+              transform: scale(0.5) rotate(var(--rotation));
+            }
+            25% {
+              opacity: 1;
+            }
+            75% {
+              opacity: 1;
+              transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
+            }
+            100% {
+              opacity: 0;
+              transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
+            }
+          }
+          
+          .animate-heart-float {
+            animation: heart-float 2s ease-out forwards;
+            --scale: 1;
+            --rotation: 0deg;
+          }
+        `}</style>
       </div>
-      {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
-    </div>
+    </SidebarProvider>
   );
 };
 
