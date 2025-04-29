@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -8,7 +9,10 @@ import {
   Volume2,
   VolumeX,
   Filter,
-  Heart
+  Heart,
+  Instagram,
+  Smartphone,
+  UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -16,6 +20,7 @@ import LiveFilter from "@/components/LiveFilter";
 import LiveComment from "@/components/LiveComment";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const GoLive = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -39,6 +44,14 @@ const GoLive = () => {
   const [requestCounter, setRequestCounter] = useState(0);
   const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
   const [likeCounter, setLikeCounter] = useState(0);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isCoHostDialogOpen, setIsCoHostDialogOpen] = useState(false);
+  const [audiences, setAudiences] = useState<{
+    id: number;
+    username: string;
+    avatar: string;
+    isViewing: boolean;
+  }[]>([]);
   const { toast } = useToast();
   
   const mockUser = {
@@ -97,6 +110,20 @@ const GoLive = () => {
         handleJoinRequest(randomUser);
       }
     }, 15000);
+    
+    // Generate mock audiences for co-host dialog
+    if (isLive) {
+      const mockAudiences = [
+        { id: 1, username: "TechEnthusiast", avatar: "https://i.pravatar.cc/150?img=1", isViewing: true },
+        { id: 2, username: "MusicLover", avatar: "https://i.pravatar.cc/150?img=2", isViewing: true },
+        { id: 3, username: "ArtistViewer", avatar: "https://i.pravatar.cc/150?img=3", isViewing: true },
+        { id: 4, username: "GamingFan", avatar: "https://i.pravatar.cc/150?img=4", isViewing: true },
+        { id: 5, username: "TravelBlogger", avatar: "https://i.pravatar.cc/150?img=5", isViewing: true },
+        { id: 6, username: "FitnessCoach", avatar: "https://i.pravatar.cc/150?img=6", isViewing: true },
+        { id: 7, username: "FoodieExplorer", avatar: "https://i.pravatar.cc/150?img=7", isViewing: true },
+      ];
+      setAudiences(mockAudiences);
+    }
 
     return () => {
       stopCamera();
@@ -342,10 +369,57 @@ const GoLive = () => {
   };
 
   const handleShare = () => {
-    toast({
-      title: "Share",
-      description: "Sharing options opened"
-    });
+    setIsShareDialogOpen(true);
+  };
+  
+  const handleShareToApp = (app: string) => {
+    // Simulating share functionality
+    switch(app) {
+      case "whatsapp":
+        toast({
+          title: "Sharing to WhatsApp",
+          description: "Opening WhatsApp to invite co-host..."
+        });
+        // In a real app, this would open WhatsApp with a pre-filled message
+        break;
+      case "instagram":
+        toast({
+          title: "Sharing to Instagram",
+          description: "Opening Instagram to invite co-host..."
+        });
+        // In a real app, this would open Instagram with a share intent
+        break;
+      default:
+        toast({
+          title: "Share",
+          description: "Opening share options..."
+        });
+    }
+    setIsShareDialogOpen(false);
+  };
+  
+  const handleCoHost = () => {
+    setIsCoHostDialogOpen(true);
+  };
+  
+  const inviteCoHost = (audienceId: number) => {
+    const audience = audiences.find(a => a.id === audienceId);
+    if (audience) {
+      toast({
+        title: "Co-host Invitation Sent",
+        description: `Invitation sent to ${audience.username} to co-host your stream`
+      });
+      
+      // In a real app, this would send an invitation to the user
+      // For demo purposes, we'll simulate acceptance after a delay
+      setTimeout(() => {
+        toast({
+          title: "Co-host Joined",
+          description: `${audience.username} has joined as co-host`
+        });
+      }, 2000);
+    }
+    setIsCoHostDialogOpen(false);
   };
 
   // Handle double like feature
@@ -536,8 +610,23 @@ const GoLive = () => {
                 <Button type="submit" variant="ghost" size="icon">
                   <MessageSquare className="h-5 w-5" />
                 </Button>
-                <Button type="button" variant="ghost" size="icon" onClick={handleShare}>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleShare}
+                  className="relative"
+                >
                   <Share className="h-5 w-5" />
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleCoHost}
+                  className="relative"
+                >
+                  <UserPlus className="h-5 w-5" />
                 </Button>
               </form>
               
@@ -580,6 +669,79 @@ const GoLive = () => {
           )}
         </div>
       </div>
+
+      {/* Share Dialog */}
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent className="bg-black/90 border border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle>Share Stream</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4 p-2">
+            <p className="text-sm text-white/70">Invite co-host to join your stream</p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
+                onClick={() => handleShareToApp("whatsapp")}
+              >
+                <Smartphone className="h-10 w-10 mb-2 text-green-500" />
+                <span>WhatsApp</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="flex flex-col items-center justify-center h-24 bg-transparent hover:bg-white/10 border-white/20"
+                onClick={() => handleShareToApp("instagram")}
+              >
+                <Instagram className="h-10 w-10 mb-2 text-pink-500" />
+                <span>Instagram</span>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Co-Host Dialog */}
+      <Dialog open={isCoHostDialogOpen} onOpenChange={setIsCoHostDialogOpen}>
+        <DialogContent className="bg-black/90 border border-white/20 text-white">
+          <DialogHeader>
+            <DialogTitle>Add Co-Host</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4">
+            <p className="text-sm text-white/70">Select viewers to invite as co-hosts</p>
+            
+            <div className="max-h-60 overflow-y-auto pr-2">
+              {audiences.map(audience => (
+                <div 
+                  key={audience.id}
+                  className="flex items-center justify-between p-2 hover:bg-white/10 rounded-md mb-1"
+                >
+                  <div className="flex items-center">
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarImage src={audience.avatar} alt={audience.username} />
+                      <AvatarFallback>{audience.username[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{audience.username}</div>
+                      <div className="text-xs text-white/60">Viewer</div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    className="border-streamixy-primary text-streamixy-primary hover:bg-streamixy-primary/10"
+                    onClick={() => inviteCoHost(audience.id)}
+                  >
+                    Invite
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <style>
         {`
