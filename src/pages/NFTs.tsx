@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -158,7 +159,7 @@ const NFTs = () => {
                   <span>{nft.name}</span>
                   <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
                     {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                    {Math.abs(((nft.price - nft.previousPrice) / previousPrice) * 100).toFixed(2)}%
+                    {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
                   </Badge>
                 </CardTitle>
                 <div className="text-sm text-white">Creator: {nft.creator}</div>
