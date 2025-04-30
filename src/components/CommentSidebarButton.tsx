@@ -54,6 +54,14 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
     setIsCommentOpen(false);
   };
 
+  // Add a handler for the Enter key
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmitComment();
+    }
+  };
+
   return (
     <>
       <Sidebar side="left" variant="inset">
@@ -81,6 +89,7 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
             className="bg-transparent border-white/20 mb-2"
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <div className="flex justify-end gap-2">
             <Button 

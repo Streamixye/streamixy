@@ -58,7 +58,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsCommentBoxOpen(!isCommentBoxOpen);
   };
 
-  // Handle comment submission - fixed to properly submit comments
+  // Handle comment submission
   const handleCommentSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -66,6 +66,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (commentText.trim() && onComment) {
       onComment(commentText);
       setCommentText("");
+      // Close the comment box after sending
+      setIsCommentBoxOpen(false);
       
       // Show toast to confirm submission
       toast({
@@ -77,12 +79,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   // Handle Enter key in comment box for submission
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    e.stopPropagation();
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      e.stopPropagation();
+      
       if (commentText.trim() && onComment) {
         onComment(commentText);
         setCommentText("");
+        // Close the comment box after sending
+        setIsCommentBoxOpen(false);
         
         toast({
           title: "Comment sent!",
@@ -205,12 +210,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onKeyPress={(e) => {
-                e.stopPropagation();
-              }}
-              onTouchStart={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}
-              onTouchEnd={(e) => e.stopPropagation()}
               data-prevent-scroll="true"
             />
             <div className="flex justify-end space-x-2">
@@ -223,6 +222,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                   setIsCommentBoxOpen(false);
                 }}
                 className="border-white/20 text-white hover:bg-white/10"
+                data-prevent-scroll="true"
               >
                 Cancel
               </Button>
@@ -230,6 +230,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 size="sm" 
                 onClick={handleCommentSubmit}
                 className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                data-prevent-scroll="true"
               >
                 Send
               </Button>
