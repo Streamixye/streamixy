@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import LiveComment from "../LiveComment";
 import { MessageCircle, Heart, UserPlus, Check } from "lucide-react";
@@ -57,7 +58,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsCommentBoxOpen(!isCommentBoxOpen);
   };
 
-  // Handle comment submission - fixed to ensure it works properly
+  // Handle comment submission - fixed to properly submit comments
   const handleCommentSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -65,14 +66,29 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (commentText.trim() && onComment) {
       onComment(commentText);
       setCommentText("");
-      // Keep comment box open for better UX - removing the line that closes it
-      // setIsCommentBoxOpen(false);
       
       // Show toast to confirm submission
       toast({
         title: "Comment sent!",
-        description: "Your comment has been sent successfully",
+        description: "Your comment has been posted and will display briefly",
       });
+    }
+  };
+
+  // Handle Enter key in comment box for submission
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (commentText.trim() && onComment) {
+        onComment(commentText);
+        setCommentText("");
+        
+        toast({
+          title: "Comment sent!",
+          description: "Your comment has been posted and will display briefly",
+        });
+      }
     }
   };
   
@@ -182,13 +198,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Add a comment..."
               className="bg-transparent border-white/20 text-white resize-none"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onKeyDown={(e) => {
+              onKeyPress={(e) => {
                 e.stopPropagation();
               }}
               onTouchStart={(e) => e.stopPropagation()}

@@ -24,7 +24,7 @@ const LiveComment: React.FC<LiveCommentProps> = ({
       setVisible(true);
     }, 10); // Small delay to ensure DOM is ready
     
-    // After 1 second (changed from 4.5 seconds), start fading out
+    // After exactly 1 second, start fading out
     const hideTimeout = setTimeout(() => {
       setVisible(false);
     }, 1000);
