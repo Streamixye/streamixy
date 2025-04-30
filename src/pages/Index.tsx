@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import CommentSidebarButton from "@/components/CommentSidebarButton";
 
 // Mock data for demo
 const MOCK_REELS = [
@@ -89,8 +89,6 @@ const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const isMobile = useIsMobile();
   const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
-  const [sidebarComments, setSidebarComments] = useState<{text: string, id: number}[]>([]);
-  const [commentIdCounter, setCommentIdCounter] = useState(1);
 
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
@@ -195,25 +193,6 @@ const Index = () => {
     );
   };
 
-  // Handle sidebar comments
-  const handleSidebarComment = (text: string) => {
-    if (!text.trim()) return;
-    
-    const newComment = { text, id: commentIdCounter };
-    setSidebarComments(prev => [...prev, newComment]);
-    setCommentIdCounter(prev => prev + 1);
-    
-    // Get the current VideoReel component and dispatch a custom event
-    const reelElement = document.querySelector(`.video-reel-${currentReelIndex}`);
-    if (reelElement) {
-      // Create and dispatch a custom event with the comment data
-      const customEvent = new CustomEvent('new-comment', { 
-        detail: { text, username: "You" }
-      });
-      reelElement.dispatchEvent(customEvent);
-    }
-  };
-
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -256,8 +235,6 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-black text-white flex w-full">
-        <CommentSidebarButton onComment={handleSidebarComment} />
-        
         <div className="flex-1">
           <Navbar />
           <div 

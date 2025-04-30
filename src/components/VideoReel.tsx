@@ -41,15 +41,11 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const { tokenBalance, handleTransaction } = useTokens(creator.name);
   const [creatorTokens, setCreatorTokens] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [comments, setComments] = useState<{text: string, id: number, username: string}[]>([]);
-  const [activeComment, setActiveComment] = useState<{text: string, id: number, username: string} | null>(null);
-  const [nextCommentId, setNextCommentId] = useState(1);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isVoteDialogOpen, setIsVoteDialogOpen] = useState(false);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [voteAmount, setVoteAmount] = useState("");
-  const [commentText, setCommentText] = useState("");
   const [requestStatus, setRequestStatus] = useState<"idle" | "pending" | "accepted" | "rejected">("idle");
   const [displayedViewers, setDisplayedViewers] = useState(viewers);
   const [likeAnimations, setLikeAnimations] = useState<{id: number, x: number, y: number}[]>([]);
@@ -225,75 +221,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setIsShareDialogOpen(false);
   };
 
-  // Updated comment handler to display for 1 second
-  const handleComment = (text: string) => {
-    if (!text.trim()) return;
-    
-    // Add to local comments
-    const newComment = { text, id: nextCommentId, username: "You" };
-    setNextCommentId(prev => prev + 1);
-    setComments(prev => [...prev, newComment]);
-    setActiveComment(newComment);
-    
-    // Remove the comment after 1 second (changed from 5 seconds)
-    setTimeout(() => {
-      setActiveComment(null);
-      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
-    }, 1000); // Changed to 1 second as requested
-  };
-
-  const handleRequest = () => {
-    setRequestStatus("pending");
-    
-    toast({
-      title: "Request Sent",
-      description: `Your request to join ${creator.name}'s live has been sent!`,
-    });
-    
-    // Simulate creator responding after a delay
-    setTimeout(() => {
-      const isAccepted = Math.random() > 0.5; // Randomly accept or reject for demo
-      
-      if (isAccepted) {
-        setRequestStatus("accepted");
-        toast({
-          title: "Request Accepted!",
-          description: `${creator.name} has accepted your request to join the stream!`,
-        });
-      } else {
-        setRequestStatus("rejected");
-        toast({
-          variant: "destructive",
-          title: "Request Rejected",
-          description: `${creator.name} has rejected your request to join the stream.`,
-        });
-      }
-      
-      // Reset status after notification
-      setTimeout(() => {
-        setRequestStatus("idle");
-      }, 5000);
-      
-    }, 3000);
-  };
-
-  // Handle follow action
-  const handleFollow = (followed: boolean) => {
-    setIsFollowing(followed);
-    
-    // You might want to save this state to local storage or a database
-    localStorage.setItem(`following_${creator.username}`, followed ? 'true' : 'false');
-    
-    // If we were connected to a backend, we would update the creator's followers count
-    // For now, we'll just show a toast notification
-    toast({
-      title: followed ? "Following!" : "Unfollowed",
-      description: followed 
-        ? `You are now following ${creator.name}` 
-        : `You unfollowed ${creator.name}`,
-    });
-  };
-
   // Implement manual like function - removed toast notification
   const handleManualLike = () => {
     // Increment likes count
@@ -364,6 +291,58 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }, 1500);
   };
 
+  // Handle follow action
+  const handleFollow = (followed: boolean) => {
+    setIsFollowing(followed);
+    
+    // You might want to save this state to local storage or a database
+    localStorage.setItem(`following_${creator.username}`, followed ? 'true' : 'false');
+    
+    // If we were connected to a backend, we would update the creator's followers count
+    // For now, we'll just show a toast notification
+    toast({
+      title: followed ? "Following!" : "Unfollowed",
+      description: followed 
+        ? `You are now following ${creator.name}` 
+        : `You unfollowed ${creator.name}`,
+    });
+  };
+
+  const handleRequest = () => {
+    setRequestStatus("pending");
+    
+    toast({
+      title: "Request Sent",
+      description: `Your request to join ${creator.name}'s live has been sent!`,
+    });
+    
+    // Simulate creator responding after a delay
+    setTimeout(() => {
+      const isAccepted = Math.random() > 0.5; // Randomly accept or reject for demo
+      
+      if (isAccepted) {
+        setRequestStatus("accepted");
+        toast({
+          title: "Request Accepted!",
+          description: `${creator.name} has accepted your request to join the stream!`,
+        });
+      } else {
+        setRequestStatus("rejected");
+        toast({
+          variant: "destructive",
+          title: "Request Rejected",
+          description: `${creator.name} has rejected your request to join the stream.`,
+        });
+      }
+      
+      // Reset status after notification
+      setTimeout(() => {
+        setRequestStatus("idle");
+      }, 5000);
+      
+    }, 3000);
+  };
+
   return (
     <div className="relative w-full h-full flex" onClick={(e) => e.stopPropagation()}>
       <div className="video-container w-full h-full bg-black">
@@ -384,11 +363,8 @@ const VideoReel: React.FC<VideoReelProps> = ({
         />
 
         <CommentSection 
-          comments={comments}
-          activeComment={activeComment}
           onLike={handleManualLike}
           onFollow={handleFollow}
-          onComment={handleComment}
           creatorName={creator.name}
         />
 
@@ -398,7 +374,6 @@ const VideoReel: React.FC<VideoReelProps> = ({
           onShareClick={() => setIsShareDialogOpen(true)}
           onSearchClick={() => setIsSearchOpen(true)}
           onRequestClick={handleRequest}
-          onCommentClick={() => {}}
           requestStatus={requestStatus}
           stopAllPropagation={stopAllPropagation}
         />

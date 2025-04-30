@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Gift, Search, Share, Heart, MessageCircle } from "lucide-react";
+import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "../VoteButton";
 
 interface ActionButtonsProps {
@@ -9,7 +9,6 @@ interface ActionButtonsProps {
   onShareClick: () => void;
   onSearchClick: () => void;
   onRequestClick: () => void;
-  onCommentClick: () => void;
   requestStatus: "idle" | "pending" | "accepted" | "rejected";
   stopAllPropagation: (e: React.MouseEvent) => void;
 }
@@ -20,7 +19,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onShareClick,
   onSearchClick,
   onRequestClick,
-  onCommentClick,
   requestStatus,
   stopAllPropagation
 }) => {
