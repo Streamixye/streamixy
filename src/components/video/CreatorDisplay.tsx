@@ -14,7 +14,7 @@ const CreatorDisplay: React.FC<CreatorDisplayProps> = ({
   creatorTokens
 }) => {
   return (
-    <div className="fixed bottom-24 left-4 z-30">
+    <div className="absolute bottom-24 left-4">
       <div className="flex items-center bg-black/50 backdrop-blur-md rounded-lg py-1.5 px-3 border border-white/10">
         <span className="text-white text-sm font-medium mr-2">{creatorName}</span>
         <Avatar className="h-8 w-8 border-2 border-streamixy-primary">

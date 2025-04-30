@@ -26,7 +26,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 }) => {
   return (
     <div 
-      className="fixed right-4 bottom-32 flex flex-col space-y-6 z-30"
+      className="absolute right-4 bottom-32 flex flex-col space-y-6"
       onClick={stopAllPropagation}
     >
       <div className="flex flex-col items-center space-y-6">
