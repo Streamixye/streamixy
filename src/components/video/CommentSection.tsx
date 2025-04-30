@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Heart, UserPlus, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import LiveComment from "../LiveComment";
 
 interface CommentSectionProps {
   onLike?: () => void;
@@ -18,6 +19,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<{id: number, text: string}[]>([]);
+  const [commentCounter, setCommentCounter] = useState(0);
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
@@ -49,10 +52,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     
     if (!commentText.trim()) return;
     
-    // Remove toast notification - comment will just appear on the reel
+    // Add comment to the list
+    const newComment = {
+      id: commentCounter,
+      text: commentText
+    };
+    
+    setComments(prev => [...prev, newComment]);
+    setCommentCounter(prev => prev + 1);
     
     setCommentText("");
     setIsCommentOpen(false);
+    
+    // Remove comment after animation duration
+    setTimeout(() => {
+      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+    }, 3000);
   };
 
   // Handle Enter key for submitting comments
@@ -63,10 +78,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       
       if (!commentText.trim()) return;
       
-      // Remove toast notification - comment will just appear on the reel
+      // Add comment to the list
+      const newComment = {
+        id: commentCounter,
+        text: commentText
+      };
+      
+      setComments(prev => [...prev, newComment]);
+      setCommentCounter(prev => prev + 1);
       
       setCommentText("");
       setIsCommentOpen(false);
+      
+      // Remove comment after animation duration
+      setTimeout(() => {
+        setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+      }, 3000);
     }
   };
 
@@ -108,6 +135,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         >
           <Heart className="h-6 w-6 text-white hover:fill-pink-500 transition-colors" />
         </div>
+      </div>
+
+      {/* Floating Comments Display */}
+      <div className="fixed left-4 bottom-32 flex flex-col space-y-2 z-30 pointer-events-none">
+        {comments.map(comment => (
+          <LiveComment 
+            key={comment.id}
+            username="You"
+            text={comment.text}
+            position="left"
+          />
+        ))}
       </div>
 
       {/* Comment Form Popup */}

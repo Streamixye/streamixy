@@ -4,7 +4,7 @@ import { Gift, Search, Share, Heart, MessageCircle } from "lucide-react";
 import VoteButton from "../VoteButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import LiveComment from "../LiveComment";
 
 interface ActionButtonsProps {
   onVoteClick: () => void;
@@ -27,6 +27,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 }) => {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [comments, setComments] = useState<{id: number, text: string}[]>([]);
+  const [commentCounter, setCommentCounter] = useState(0);
 
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,11 +42,23 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     
     if (!commentText.trim()) return;
     
-    // Remove toast notification - comment will just appear on the reel
+    // Add comment to the list
+    const newComment = {
+      id: commentCounter,
+      text: commentText
+    };
+    
+    setComments(prev => [...prev, newComment]);
+    setCommentCounter(prev => prev + 1);
     
     // Clear the input field and close the comment panel
     setCommentText("");
     setIsCommentOpen(false);
+    
+    // Remove comment after animation duration
+    setTimeout(() => {
+      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+    }, 3000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,10 +68,22 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       
       if (!commentText.trim()) return;
       
-      // Remove toast notification - comment will just appear on the reel
+      // Add comment to the list
+      const newComment = {
+        id: commentCounter,
+        text: commentText
+      };
+      
+      setComments(prev => [...prev, newComment]);
+      setCommentCounter(prev => prev + 1);
       
       setCommentText("");
       setIsCommentOpen(false);
+      
+      // Remove comment after animation duration
+      setTimeout(() => {
+        setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+      }, 3000);
     }
   };
 
@@ -113,6 +139,18 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           label="Request"
           onClick={onRequestClick}
         />
+      </div>
+
+      {/* Floating Comments Display */}
+      <div className="fixed left-4 bottom-32 flex flex-col space-y-2 z-30 pointer-events-none">
+        {comments.map(comment => (
+          <LiveComment 
+            key={comment.id}
+            username="You"
+            text={comment.text}
+            position={Math.random() > 0.5 ? "left" : "right"}
+          />
+        ))}
       </div>
 
       {/* Comment Form Popup */}
