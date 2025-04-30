@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
@@ -90,6 +89,8 @@ const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
   const isMobile = useIsMobile();
   const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
+  const [sidebarComments, setSidebarComments] = useState<{text: string, id: number}[]>([]);
+  const [commentIdCounter, setCommentIdCounter] = useState(1);
 
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
@@ -194,6 +195,23 @@ const Index = () => {
     );
   };
 
+  // Handle sidebar comments
+  const handleSidebarComment = (text: string) => {
+    const newComment = { text, id: commentIdCounter };
+    setSidebarComments(prev => [...prev, newComment]);
+    setCommentIdCounter(prev => prev + 1);
+    
+    // Pass the comment to the current VideoReel component
+    const currentReel = document.querySelector(`.video-reel-${currentReelIndex}`);
+    const customEvent = new CustomEvent('sidebarComment', { 
+      detail: { text, username: "You" }
+    });
+    
+    if (currentReel) {
+      currentReel.dispatchEvent(customEvent);
+    }
+  };
+
   // Add keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -237,7 +255,7 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-black text-white flex w-full">
-        <CommentSidebarButton />
+        <CommentSidebarButton onComment={handleSidebarComment} />
         
         <div className="flex-1">
           <Navbar />
@@ -255,7 +273,7 @@ const Index = () => {
               }}
             >
               {MOCK_REELS.map((reel, index) => (
-                <div key={reel.streamId} className="h-screen w-full">
+                <div key={reel.streamId} className={`h-screen w-full video-reel-${index}`}>
                   <VideoReel {...reel} />
                 </div>
               ))}

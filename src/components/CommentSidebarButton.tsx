@@ -82,7 +82,14 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
       </Sidebar>
 
       {isCommentOpen && (
-        <div className="fixed bottom-24 left-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72">
+        <div 
+          className="fixed bottom-24 left-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72"
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          data-prevent-scroll="true"
+        >
           <h3 className="text-lg font-semibold mb-2">Add a comment</h3>
           <Textarea 
             placeholder="Share your thoughts..." 
@@ -90,18 +97,21 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={handleKeyDown}
+            data-prevent-scroll="true"
           />
           <div className="flex justify-end gap-2">
             <Button 
               variant="outline" 
               onClick={() => setIsCommentOpen(false)}
               className="text-white border-white/20"
+              data-prevent-scroll="true"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSubmitComment}
               className="bg-purple-500 hover:bg-purple-600"
+              data-prevent-scroll="true"
             >
               Comment
             </Button>
