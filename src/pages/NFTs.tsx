@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -10,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { TrendingUp, TrendingDown, Coins } from "lucide-react";
+import { TrendingUp, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface NFT {
@@ -53,8 +54,8 @@ const NFTs = () => {
       image: "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b",
       marketCap: 32000,
       previousMarketCap: 33000,
-      roi: -5,
-      previousRoi: -3,
+      roi: 5, // Changed to positive
+      previousRoi: 3,
       staked: 0,
       pnl: 0
     },
@@ -95,21 +96,30 @@ const NFTs = () => {
     const interval = setInterval(() => {
       setNfts(prevNfts => 
         prevNfts.map(nft => {
-          const priceChange = (Math.random() * 10) - 5;
+          const priceChange = Math.random() * 5; // Only positive changes
           const previousPrice = nft.price;
-          const newPrice = Math.max(10, nft.price + priceChange);
+          const newPrice = nft.price + priceChange;
           
-          const roiChange = (Math.random() * 3) - 1;
+          const roiChange = Math.random() * 2; // Only positive ROI changes
           const previousRoi = nft.roi;
           const newRoi = nft.roi + roiChange;
           
-          const capChange = Math.random() < 0.5 ? -1 : 1;
+          const capChange = 1; // Always positive
           const previousMarketCap = nft.marketCap;
           const newMarketCap = nft.marketCap + (capChange * Math.random() * 1000);
           
-          const pnl = nft.staked > 0 
-            ? nft.staked * ((newPrice - previousPrice) / previousPrice) 
-            : nft.pnl;
+          // Calculate PNL, ensuring it's always positive and incremental
+          let pnl = nft.pnl;
+          
+          if (nft.staked > 0) {
+            // If stake is large (>= 500), give higher profit rate
+            if (nft.staked >= 500) {
+              pnl = Math.max(nft.pnl + 0.9, 0.9); // Start at least from 0.9
+            } else {
+              // Regular stakes increase by 0.01, starting from minimum 0.02
+              pnl = Math.max(nft.pnl + 0.01, 0.02);
+            }
+          }
             
           return {
             ...nft,
@@ -141,11 +151,23 @@ const NFTs = () => {
     const amount = parseFloat(stakeAmount);
     
     setNfts(prevNfts => 
-      prevNfts.map(nft => 
-        nft.id === selectedNft.id 
-          ? {...nft, staked: nft.staked + amount} 
-          : nft
-      )
+      prevNfts.map(nft => {
+        if (nft.id === selectedNft.id) {
+          // Set initial PNL based on stake amount
+          let initialPnl = 0.02; // Default starting PNL
+          
+          if (amount >= 500) {
+            initialPnl = 0.9; // Higher starting PNL for large stakes
+          }
+          
+          return {
+            ...nft, 
+            staked: nft.staked + amount,
+            pnl: initialPnl // Start with initial PNL
+          };
+        }
+        return nft;
+      })
     );
     
     setStakeAmount("");
@@ -177,8 +199,8 @@ const NFTs = () => {
               <CardHeader>
                 <CardTitle className="flex justify-between">
                   <span>{nft.name}</span>
-                  <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
-                    {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                  <Badge className="bg-green-500">
+                    <TrendingUp className="h-3 w-3 mr-1" />
                     {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
                   </Badge>
                 </CardTitle>
@@ -189,14 +211,14 @@ const NFTs = () => {
                 <div className="grid grid-cols-3 gap-2 text-sm">
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Price</div>
-                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className="font-bold text-green-500 animate-pulse">
                       {nft.price.toFixed(2)} SYX
                     </div>
                   </div>
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">Market Cap</div>
-                    <div className={`font-bold ${nft.marketCap > nft.previousMarketCap ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                    <div className="font-bold text-green-500 animate-pulse">
                       {nft.marketCap.toLocaleString()} SYX
                     </div>
                     <div className="mt-1 h-1 bg-streamixy-primary/30 rounded-full overflow-hidden">
@@ -206,8 +228,8 @@ const NFTs = () => {
                   
                   <div className="p-2 rounded bg-black/40">
                     <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > nft.previousRoi ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
-                      {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
+                    <div className="font-bold text-green-500 animate-pulse">
+                      +{nft.roi.toFixed(2)}%
                     </div>
                   </div>
                 </div>
@@ -220,13 +242,13 @@ const NFTs = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-white">P&L:</span>
-                      <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
+                      <span className="font-bold text-green-500">
+                        +{nft.pnl.toFixed(4)} SYX
                       </span>
                     </div>
                     <Progress 
                       className="mt-2" 
-                      value={50 + (nft.pnl / nft.staked * 500)} 
+                      value={75} // Fixed at 75% to show positive progress
                     />
                   </div>
                 )}
@@ -236,6 +258,7 @@ const NFTs = () => {
                 <Button 
                   onClick={(e) => handleStakeModalOpen(e, nft)} 
                   className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  disabled={nft.staked > 0}
                 >
                   <Coins className="h-4 w-4 mr-2" /> 
                   Stake SYX
@@ -271,7 +294,7 @@ const NFTs = () => {
               
               <div className="mt-2 p-3 rounded-md bg-streamixy-primary/10 text-sm">
                 <p className="text-white">
-                  Staking SYX on this NFT will give you exposure to its price movements. Your P&L will change based on the NFT's performance.
+                  Staking SYX on this NFT will give you exposure to its price movements. Staking 500+ SYX will increase your profit rate!
                 </p>
               </div>
             </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import LiveComment from "../LiveComment";
 import { MessageCircle, Heart, UserPlus, Check } from "lucide-react";
@@ -58,14 +57,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsCommentBoxOpen(!isCommentBoxOpen);
   };
 
-  // Handle comment submission
+  // Handle comment submission - fixed to ensure it works properly
   const handleCommentSubmit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
     if (commentText.trim() && onComment) {
       onComment(commentText);
       setCommentText("");
-      setIsCommentBoxOpen(false);
+      // Keep comment box open for better UX - removing the line that closes it
+      // setIsCommentBoxOpen(false);
+      
+      // Show toast to confirm submission
+      toast({
+        title: "Comment sent!",
+        description: "Your comment has been sent successfully",
+      });
     }
   };
   
