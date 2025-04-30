@@ -37,7 +37,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (onLike) onLike();
-    // No toast notification as requested
   };
   
   // Handle follow button click
@@ -66,7 +65,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       setCommentText("");
       // Close the comment box after sending
       setIsCommentBoxOpen(false);
-      // No toast notification as requested
     }
   };
 
@@ -81,7 +79,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         setCommentText("");
         // Close the comment box after sending
         setIsCommentBoxOpen(false);
-        // No toast notification as requested
       }
     }
   };
@@ -90,7 +87,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     <>
       {/* Icons at the left side in a vertical list */}
       <div 
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4"
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-20 flex flex-col space-y-4"
         onClick={e => e.stopPropagation()}
         data-prevent-scroll="true"
       >
@@ -141,7 +138,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       {/* TikTok/Instagram style comment box popup */}
       {isCommentBoxOpen && (
         <div 
-          className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-white/10 p-4 z-50 animate-slide-in-bottom"
+          className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-white/10 p-4 z-40 animate-slide-in-bottom"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

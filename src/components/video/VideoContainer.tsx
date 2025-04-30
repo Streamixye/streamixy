@@ -56,13 +56,13 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       ))}
 
       {isLive && (
-        <div className="absolute top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse pointer-events-none">
+        <div className="fixed top-4 left-4 bg-red-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1 animate-pulse pointer-events-none z-30">
           <span className="h-2 w-2 bg-white rounded-full"></span>
           <span>LIVE</span>
         </div>
       )}
 
-      <div className="absolute top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1 pointer-events-none">
+      <div className="fixed top-4 right-4 glass px-3 py-1 rounded-full flex items-center space-x-1 pointer-events-none z-30">
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
     </>
