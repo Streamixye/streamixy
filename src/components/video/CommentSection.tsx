@@ -72,11 +72,38 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   return (
     <>
       {/* Icons at the left side in a vertical list */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4" onClick={e => e.stopPropagation()}>
+      <div 
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4"
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onTouchStart={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onTouchMove={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onTouchEnd={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onWheel={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        data-prevent-scroll="true"
+      >
         {/* Follow icon - at top */}
         <div 
           className={`${isFollowing ? 'bg-streamixy-primary/80' : 'bg-black/50'} backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/50 transition-colors`}
           onClick={handleFollow}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+          data-prevent-scroll="true"
         >
           {isFollowing ? (
             <Check className="h-6 w-6 text-white" />
@@ -89,6 +116,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div 
           className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-pink-500/30 transition-colors"
           onClick={handleLike}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+          data-prevent-scroll="true"
         >
           <Heart className="h-6 w-6 text-white hover:fill-pink-500 transition-colors" />
         </div>
@@ -97,6 +128,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div 
           className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/30 transition-colors"
           onClick={handleCommentToggle}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+          data-prevent-scroll="true"
         >
           <MessageCircle className="h-6 w-6 text-white" />
         </div>
@@ -122,6 +157,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             e.preventDefault();
             e.stopPropagation();
           }}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchMove={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          data-prevent-scroll="true"
         >
           <div className="flex flex-col space-y-3">
             <Textarea
@@ -136,6 +184,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               onKeyDown={(e) => {
                 e.stopPropagation();
               }}
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => e.stopPropagation()}
+              data-prevent-scroll="true"
             />
             <div className="flex justify-end space-x-2">
               <Button 

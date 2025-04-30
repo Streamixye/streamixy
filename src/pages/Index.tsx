@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
@@ -92,14 +93,16 @@ const Index = () => {
 
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
-    e.stopPropagation();
-    
     // Check if the user is interacting with any UI elements that should prevent scrolling
+    if ((e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+      e.stopPropagation();
+      return;
+    }
+    
     if (isInteractingWithUI ||
         (e.target as HTMLElement).closest(".dialog-content") || 
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest("textarea") ||
-        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+        (e.target as HTMLElement).closest("textarea")) {
       return;
     }
     
@@ -121,36 +124,48 @@ const Index = () => {
   const [touchEnd, setTouchEnd] = useState(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Don't handle touch if element has data-prevent-scroll attribute
+    if ((e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+      return;
+    }
+    
     // Don't handle touch if interacting with controls
     if (isInteractingWithUI ||
         (e.target as HTMLElement).closest(".dialog-content") || 
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest("textarea") ||
-        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+        (e.target as HTMLElement).closest("textarea")) {
       return;
     }
     setTouchStart(e.targetTouches[0].clientY);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    // Don't handle touch if element has data-prevent-scroll attribute
+    if ((e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+      return;
+    }
+    
     // Don't handle touch if interacting with controls
     if (isInteractingWithUI ||
         (e.target as HTMLElement).closest(".dialog-content") || 
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest("textarea") ||
-        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+        (e.target as HTMLElement).closest("textarea")) {
       return;
     }
     setTouchEnd(e.targetTouches[0].clientY);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    // Don't handle touch if element has data-prevent-scroll attribute
+    if ((e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+      return;
+    }
+    
     // Don't handle touch end if interacting with controls
     if (isInteractingWithUI ||
         (e.target as HTMLElement).closest(".dialog-content") || 
         (e.target as HTMLElement).closest("button") ||
-        (e.target as HTMLElement).closest("textarea") ||
-        (e.target as HTMLElement).closest("[data-prevent-scroll]")) {
+        (e.target as HTMLElement).closest("textarea")) {
       return;
     }
     
