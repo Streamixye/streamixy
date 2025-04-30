@@ -28,11 +28,16 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
   const { toast } = useToast();
   const [commentCounter, setCommentCounter] = useState(0);
 
-  const handleCommentClick = () => {
+  const handleCommentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsCommentOpen(prev => !prev);
   };
 
-  const handleSubmitComment = () => {
+  const handleSubmitComment = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!commentText.trim()) return;
     
     if (onComment) {
@@ -58,7 +63,25 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmitComment();
+      e.stopPropagation();
+      
+      if (!commentText.trim()) return;
+      
+      if (onComment) {
+        onComment(commentText);
+      }
+      
+      setCommentCounter(prev => prev + 1);
+      
+      if (commentCounter % 5 === 0 && commentCounter > 0) {
+        toast({
+          title: "Comment shared!",
+          description: `You've shared ${commentCounter + 1} comments!`,
+        });
+      }
+      
+      setCommentText("");
+      setIsCommentOpen(false);
     }
   };
 
@@ -84,7 +107,10 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
       {isCommentOpen && (
         <div 
           className="fixed bottom-24 left-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
           onTouchStart={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
@@ -98,11 +124,16 @@ const CommentSidebarButton: React.FC<CommentSidebarButtonProps> = ({ onComment }
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={handleKeyDown}
             data-prevent-scroll="true"
+            autoFocus
           />
           <div className="flex justify-end gap-2">
             <Button 
               variant="outline" 
-              onClick={() => setIsCommentOpen(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsCommentOpen(false);
+              }}
               className="text-white border-white/20"
               data-prevent-scroll="true"
             >

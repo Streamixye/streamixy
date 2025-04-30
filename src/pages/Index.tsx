@@ -197,18 +197,28 @@ const Index = () => {
 
   // Handle sidebar comments
   const handleSidebarComment = (text: string) => {
+    if (!text.trim()) return;
+    
     const newComment = { text, id: commentIdCounter };
     setSidebarComments(prev => [...prev, newComment]);
     setCommentIdCounter(prev => prev + 1);
     
-    // Pass the comment to the current VideoReel component
-    const currentReel = document.querySelector(`.video-reel-${currentReelIndex}`);
-    const customEvent = new CustomEvent('sidebarComment', { 
-      detail: { text, username: "You" }
-    });
+    // Find the current VideoReel component and pass the comment directly
+    // This is a more reliable approach than using custom events
+    const currentReel = document.querySelector(`.video-reel-${currentReelIndex} [data-comment-handler]`);
     
-    if (currentReel) {
-      currentReel.dispatchEvent(customEvent);
+    if (currentReel && typeof (currentReel as any).addComment === 'function') {
+      (currentReel as any).addComment(text);
+    } else {
+      // As a fallback, use custom events
+      const customEvent = new CustomEvent('sidebarComment', { 
+        detail: { text, username: "You" }
+      });
+      
+      const reelElement = document.querySelector(`.video-reel-${currentReelIndex}`);
+      if (reelElement) {
+        reelElement.dispatchEvent(customEvent);
+      }
     }
   };
 

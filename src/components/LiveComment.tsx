@@ -19,10 +19,10 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   const [visible, setVisible] = useState(false);
   
   useEffect(() => {
-    // Make the comment visible immediately after rendering
+    // Make the comment visible immediately after mounting
     const showTimeout = setTimeout(() => {
       setVisible(true);
-    }, 10); // Small delay to ensure DOM is ready
+    }, 10);
     
     // After exactly 1 second, start fading out
     const hideTimeout = setTimeout(() => {
@@ -43,6 +43,9 @@ const LiveComment: React.FC<LiveCommentProps> = ({
         visible ? "opacity-100" : "opacity-0",
         "animate-fade-in"
       )}
+      style={{
+        alignSelf: position === "right" ? "flex-end" : "flex-start"
+      }}
     >
       <Avatar className="h-6 w-6 mr-2">
         <AvatarImage src={avatarUrl} />

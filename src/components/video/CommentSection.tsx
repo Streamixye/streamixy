@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LiveComment from "../LiveComment";
 import { MessageCircle, Heart, UserPlus, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -211,6 +211,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 e.stopPropagation();
               }}
               data-prevent-scroll="true"
+              autoFocus
             />
             <div className="flex justify-end space-x-2">
               <Button 
