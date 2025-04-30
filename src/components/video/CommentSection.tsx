@@ -22,17 +22,22 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   onComment,
   creatorName = "Creator" 
 }) => {
-  const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentBoxOpen, setIsCommentBoxOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [commentsToShow, setCommentsToShow] = useState<{text: string, id: number, username: string}[]>([]);
+  
+  useEffect(() => {
+    // Update comments to display
+    setCommentsToShow(comments);
+  }, [comments]);
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (onLike) onLike();
-    // Like notification removed as requested
+    // No toast notification as requested
   };
   
   // Handle follow button click
@@ -42,13 +47,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setIsFollowing(!isFollowing);
     
     if (onFollow) onFollow(!isFollowing);
-    
-    toast({
-      title: isFollowing ? "Unfollowed" : "Following!",
-      description: isFollowing 
-        ? `You unfollowed ${creatorName}` 
-        : `You are now following ${creatorName}`,
-    });
   };
 
   // Handle comment box toggle
@@ -68,12 +66,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       setCommentText("");
       // Close the comment box after sending
       setIsCommentBoxOpen(false);
-      
-      // Show toast to confirm submission
-      toast({
-        title: "Comment sent!",
-        description: "Your comment has been posted and will display briefly",
-      });
+      // No toast notification as requested
     }
   };
 
@@ -88,49 +81,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         setCommentText("");
         // Close the comment box after sending
         setIsCommentBoxOpen(false);
-        
-        toast({
-          title: "Comment sent!",
-          description: "Your comment has been posted and will display briefly",
-        });
+        // No toast notification as requested
       }
     }
   };
-  
+
   return (
     <>
       {/* Icons at the left side in a vertical list */}
       <div 
         className="absolute left-4 top-1/2 -translate-y-1/2 z-10 flex flex-col space-y-4"
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onTouchStart={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onTouchMove={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onTouchEnd={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onWheel={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+        onClick={e => e.stopPropagation()}
         data-prevent-scroll="true"
       >
         {/* Follow icon - at top */}
         <div 
           className={`${isFollowing ? 'bg-streamixy-primary/80' : 'bg-black/50'} backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/50 transition-colors`}
           onClick={handleFollow}
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
           data-prevent-scroll="true"
         >
           {isFollowing ? (
@@ -144,9 +111,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div 
           className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-pink-500/30 transition-colors"
           onClick={handleLike}
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
           data-prevent-scroll="true"
         >
           <Heart className="h-6 w-6 text-white hover:fill-pink-500 transition-colors" />
@@ -156,9 +120,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <div 
           className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/30 transition-colors"
           onClick={handleCommentToggle}
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
           data-prevent-scroll="true"
         >
           <MessageCircle className="h-6 w-6 text-white" />
@@ -167,7 +128,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       
       {/* Comments display */}
       <div className="absolute left-4 right-4 top-16 bottom-32 overflow-hidden pointer-events-none">
-        {comments.map((comment) => (
+        {commentsToShow.map((comment) => (
           <LiveComment 
             key={comment.id} 
             username={comment.username} 
@@ -177,60 +138,45 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         ))}
       </div>
 
-      {/* Comment box popup */}
+      {/* TikTok/Instagram style comment box popup */}
       {isCommentBoxOpen && (
         <div 
-          className="absolute bottom-32 left-4 right-4 bg-black/80 backdrop-blur-sm p-4 rounded-lg border border-white/10 z-20"
+          className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-white/10 p-4 z-50 animate-slide-in-bottom"
           onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onTouchStart={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onTouchMove={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onTouchEnd={(e) => {
             e.preventDefault();
             e.stopPropagation();
           }}
           data-prevent-scroll="true"
         >
-          <div className="flex flex-col space-y-3">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Add a comment..."
-              className="bg-transparent border-white/20 text-white resize-none"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              data-prevent-scroll="true"
-              autoFocus
-            />
-            <div className="flex justify-end space-x-2">
+          <div className="flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold">Comments</h3>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setIsCommentBoxOpen(false);
-                }}
-                className="border-white/20 text-white hover:bg-white/10"
+                className="text-white hover:bg-white/10"
+                onClick={() => setIsCommentBoxOpen(false)}
                 data-prevent-scroll="true"
               >
-                Cancel
+                Close
               </Button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Add a comment..."
+                className="bg-black/50 border-white/20 text-white resize-none flex-1 h-10 min-h-0 py-2"
+                onClick={(e) => e.stopPropagation()}
+                data-prevent-scroll="true"
+                autoFocus
+              />
               <Button 
-                size="sm" 
                 onClick={handleCommentSubmit}
-                className="bg-streamixy-primary hover:bg-streamixy-primary/80"
+                className="bg-streamixy-primary hover:bg-streamixy-primary/80 h-10"
+                disabled={!commentText.trim()}
                 data-prevent-scroll="true"
               >
                 Send
@@ -239,6 +185,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes slide-in-bottom {
+          from {
+            transform: translateY(100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-in-bottom {
+          animation: slide-in-bottom 0.3s ease-out forwards;
+        }
+      `}</style>
     </>
   );
 };

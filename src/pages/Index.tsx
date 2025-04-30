@@ -203,22 +203,14 @@ const Index = () => {
     setSidebarComments(prev => [...prev, newComment]);
     setCommentIdCounter(prev => prev + 1);
     
-    // Find the current VideoReel component and pass the comment directly
-    // This is a more reliable approach than using custom events
-    const currentReel = document.querySelector(`.video-reel-${currentReelIndex} [data-comment-handler]`);
-    
-    if (currentReel && typeof (currentReel as any).addComment === 'function') {
-      (currentReel as any).addComment(text);
-    } else {
-      // As a fallback, use custom events
-      const customEvent = new CustomEvent('sidebarComment', { 
+    // Get the current VideoReel component and dispatch a custom event
+    const reelElement = document.querySelector(`.video-reel-${currentReelIndex}`);
+    if (reelElement) {
+      // Create and dispatch a custom event with the comment data
+      const customEvent = new CustomEvent('new-comment', { 
         detail: { text, username: "You" }
       });
-      
-      const reelElement = document.querySelector(`.video-reel-${currentReelIndex}`);
-      if (reelElement) {
-        reelElement.dispatchEvent(customEvent);
-      }
+      reelElement.dispatchEvent(customEvent);
     }
   };
 
@@ -240,20 +232,19 @@ const Index = () => {
 
   // Set up global event listeners for UI interaction state
   useEffect(() => {
-    const handleInteractionStart = () => setIsInteractingWithUI(true);
-    const handleInteractionEnd = () => setIsInteractingWithUI(false);
-
-    // Elements that might need interaction tracking
-    document.addEventListener('mousedown', (e) => {
+    const handleInteractionStart = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('button') || 
           target.closest('textarea') || 
           target.closest('input') || 
           target.closest('[data-prevent-scroll]')) {
-        handleInteractionStart();
+        setIsInteractingWithUI(true);
       }
-    });
+    };
     
+    const handleInteractionEnd = () => setIsInteractingWithUI(false);
+
+    document.addEventListener('mousedown', handleInteractionStart);
     document.addEventListener('mouseup', handleInteractionEnd);
     
     return () => {
@@ -283,7 +274,10 @@ const Index = () => {
               }}
             >
               {MOCK_REELS.map((reel, index) => (
-                <div key={reel.streamId} className={`h-screen w-full video-reel-${index}`}>
+                <div 
+                  key={reel.streamId} 
+                  className={`h-screen w-full video-reel-${index}`}
+                >
                   <VideoReel {...reel} />
                 </div>
               ))}
@@ -292,31 +286,29 @@ const Index = () => {
           {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
         
-        <style>
-          {`
-            @keyframes heart-float {
-              0% {
-                opacity: 0;
-                transform: scale(0.5) rotate(var(--rotation));
-              }
-              25% {
-                opacity: 1;
-              }
-              75% {
-                opacity: 1;
-                transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
-              }
-              100% {
-                opacity: 0;
-                transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
-              }
+        <style jsx>{`
+          @keyframes heart-float {
+            0% {
+              opacity: 0;
+              transform: scale(0.5) rotate(var(--rotation));
             }
-            
-            .animate-heart-float {
-              animation: heart-float 2s ease-out forwards;
+            25% {
+              opacity: 1;
             }
-          `}
-        </style>
+            75% {
+              opacity: 1;
+              transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
+            }
+            100% {
+              opacity: 0;
+              transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
+            }
+          }
+          
+          .animate-heart-float {
+            animation: heart-float 2s ease-out forwards;
+          }
+        `}</style>
       </div>
     </SidebarProvider>
   );

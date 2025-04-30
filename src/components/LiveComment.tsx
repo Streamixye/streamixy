@@ -20,17 +20,14 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   
   useEffect(() => {
     // Make the comment visible immediately after mounting
-    const showTimeout = setTimeout(() => {
-      setVisible(true);
-    }, 10);
+    setVisible(true);
     
-    // After exactly 1 second, start fading out
+    // After 2 seconds, start fading out
     const hideTimeout = setTimeout(() => {
       setVisible(false);
-    }, 1000);
+    }, 2000);
     
     return () => {
-      clearTimeout(showTimeout);
       clearTimeout(hideTimeout);
     };
   }, []);
@@ -38,9 +35,9 @@ const LiveComment: React.FC<LiveCommentProps> = ({
   return (
     <div 
       className={cn(
-        "flex items-center bg-black/50 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-opacity duration-300",
+        "flex items-center bg-black/70 backdrop-blur-sm rounded-full px-3 py-1.5 mb-2 max-w-[80%] transition-all duration-300",
         position === "left" ? "ml-4" : "mr-4 self-end",
-        visible ? "opacity-100" : "opacity-0",
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
         "animate-fade-in"
       )}
       style={{
