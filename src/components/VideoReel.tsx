@@ -183,6 +183,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     if (closeGiftDialog) closeGiftDialog.click();
   };
 
+  // Update the share options to use white text color for all platforms
   const shareOptions = [
     { name: "WhatsApp", icon: "whatsapp", color: "#25D366" },
     { name: "Telegram", icon: "telegram", color: "#0088cc" },
@@ -420,7 +421,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                                                 option.icon === "telegram" ? "✈️" : 
                                                 option.icon === "facebook" ? "👍" : "🐦"}</span>
                   </div>
-                  <span>{option.name}</span>
+                  <span className="text-white">{option.name}</span>
                 </div>
               </Button>
             ))}

@@ -1,7 +1,6 @@
 
 import React, { useState } from "react";
 import { Heart, UserPlus, Check, MessageCircle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -19,7 +18,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const { toast } = useToast();
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
@@ -51,10 +49,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     
     if (!commentText.trim()) return;
     
-    toast({
-      title: "Comment Posted",
-      description: "Your comment has been posted successfully.",
-    });
+    // Remove toast notification - comment will just appear on the reel
     
     setCommentText("");
     setIsCommentOpen(false);
@@ -68,10 +63,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       
       if (!commentText.trim()) return;
       
-      toast({
-        title: "Comment Posted",
-        description: "Your comment has been posted successfully.",
-      });
+      // Remove toast notification - comment will just appear on the reel
       
       setCommentText("");
       setIsCommentOpen(false);

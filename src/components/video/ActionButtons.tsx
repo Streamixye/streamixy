@@ -27,7 +27,6 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
 }) => {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const { toast } = useToast();
 
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -41,11 +40,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
     
     if (!commentText.trim()) return;
     
-    // In a real app, you would send this to your backend
-    toast({
-      title: "Comment Posted",
-      description: "Your comment has been posted successfully.",
-    });
+    // Remove toast notification - comment will just appear on the reel
     
     // Clear the input field and close the comment panel
     setCommentText("");
@@ -59,10 +54,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       
       if (!commentText.trim()) return;
       
-      toast({
-        title: "Comment Posted",
-        description: "Your comment has been posted successfully.",
-      });
+      // Remove toast notification - comment will just appear on the reel
       
       setCommentText("");
       setIsCommentOpen(false);
