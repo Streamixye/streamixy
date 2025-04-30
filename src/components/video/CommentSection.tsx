@@ -186,7 +186,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       )}
 
-      <style jsx>{`
+      <style>
+        {`
         @keyframes slide-in-bottom {
           from {
             transform: translateY(100%);
@@ -198,7 +199,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         .animate-slide-in-bottom {
           animation: slide-in-bottom 0.3s ease-out forwards;
         }
-      `}</style>
+        `}
+      </style>
     </>
   );
 };

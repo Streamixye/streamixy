@@ -286,7 +286,8 @@ const Index = () => {
           {!isMobile && <ReelNavigation onNext={handleNext} onPrevious={handlePrevious} />}
         </div>
         
-        <style jsx>{`
+        <style>
+          {`
           @keyframes heart-float {
             0% {
               opacity: 0;
@@ -308,7 +309,8 @@ const Index = () => {
           .animate-heart-float {
             animation: heart-float 2s ease-out forwards;
           }
-        `}</style>
+          `}
+        </style>
       </div>
     </SidebarProvider>
   );
