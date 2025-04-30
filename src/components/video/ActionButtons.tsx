@@ -30,10 +30,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   const [comments, setComments] = useState<{id: number, text: string}[]>([]);
   const [commentCounter, setCommentCounter] = useState(0);
 
-  // Fixed this function to match the expected signature
-  const handleCommentClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Fixing the function to properly handle events and match expected signature
+  const handleCommentClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setIsCommentOpen(prev => !prev);
   };
 
@@ -94,12 +96,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       onClick={stopAllPropagation}
     >
       <div className="flex flex-col items-center space-y-6">
-        {/* Comment Button - Fixed to pass the event parameter explicitly */}
+        {/* Comment Button - Fixed to match the correct signature */}
         <div onClick={(e) => e.stopPropagation()}>
           <VoteButton
             icon={<MessageCircle className="h-7 w-7" />}
             label="Comment"
-            onClick={(e) => handleCommentClick(e)}
+            onClick={() => handleCommentClick(null)} // Fixed by providing a function with no parameters
           />
         </div>
 
