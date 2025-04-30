@@ -183,7 +183,7 @@ const NFTs = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {nfts.map((nft) => (
-          <Link to={`/nfts/${nft.id}`} key={nft.id}>
+          <Link to={`/nfts/${nft.id}`} key={nft.id} className="block">
             <Card className="bg-black border border-white/10 overflow-hidden hover:border-streamixy-primary/50 transition-colors">
               <div className="w-full h-48 bg-streamixy-dark/50 flex items-center justify-center relative overflow-hidden">
                 <img 
@@ -301,7 +301,7 @@ const NFTs = () => {
             <CardFooter className="flex gap-2">
               <Button 
                 variant="outline" 
-                className="w-1/2 border-white/20" 
+                className="w-1/2 border-white/20 text-white" 
                 onClick={() => {
                   setStakeModalOpen(false);
                   setSelectedNft(null);

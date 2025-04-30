@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -236,83 +236,93 @@ const CreatorProfile = () => {
         <h2 className="text-xl font-semibold mb-4">NFTs</h2>
         <div className="grid grid-cols-1 gap-4">
           {creator.nfts.map((nft) => (
-            <Card key={nft.id} className="bg-black/50 border border-white/10">
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span className="text-white">{nft.name}</span>
-                  <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
-                    {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
-                    {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
-                  </Badge>
-                </CardTitle>
-                <div className="text-sm text-white/70">Creator: {creator.name}</div>
-              </CardHeader>
-              <CardContent>
-                <img
-                  src={nft.image}
-                  alt={nft.name}
-                  className="w-full h-48 object-cover rounded-md mb-4"
-                />
-                
-                {/* NFT Stats Section */}
-                <div className="grid grid-cols-3 gap-2 text-sm mb-4">
-                  <div className="p-2 rounded bg-black/40">
-                    <div className="text-white">Price</div>
-                    <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
-                      {nft.price.toFixed(2)} SYX
+            <Link to={`/nfts/${nft.id}`} key={nft.id}>
+              <Card className="bg-black/50 border border-white/10 hover:border-streamixy-primary/50 transition-colors">
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span className="text-white">{nft.name}</span>
+                    <Badge className={nft.price > nft.previousPrice ? "bg-green-500" : "bg-red-500"}>
+                      {nft.price > nft.previousPrice ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                      {Math.abs(((nft.price - nft.previousPrice) / nft.previousPrice) * 100).toFixed(2)}%
+                    </Badge>
+                  </CardTitle>
+                  <div className="text-sm text-white/70">Creator: {creator.name}</div>
+                </CardHeader>
+                <CardContent>
+                  <img
+                    src={nft.image}
+                    alt={nft.name}
+                    className="w-full h-48 object-cover rounded-md mb-4"
+                  />
+                  
+                  {/* NFT Stats Section */}
+                  <div className="grid grid-cols-3 gap-2 text-sm mb-4">
+                    <div className="p-2 rounded bg-black/40">
+                      <div className="text-white">Price</div>
+                      <div className={`font-bold ${nft.price > nft.previousPrice ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                        {nft.price.toFixed(2)} SYX
+                      </div>
+                    </div>
+                    
+                    <div className="p-2 rounded bg-black/40">
+                      <div className="text-white">Market Cap</div>
+                      <div className={`font-bold ${nft.marketCap > nft.previousMarketCap ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                        {nft.marketCap.toLocaleString()} SYX
+                      </div>
+                    </div>
+                    
+                    <div className="p-2 rounded bg-black/40">
+                      <div className="text-white">ROI</div>
+                      <div className={`font-bold ${nft.roi > nft.previousRoi ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
+                        {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="p-2 rounded bg-black/40">
-                    <div className="text-white">Market Cap</div>
-                    <div className={`font-bold ${nft.marketCap > nft.previousMarketCap ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
-                      {nft.marketCap.toLocaleString()} SYX
+                  {/* Staking Section */}
+                  {nft.stakedAmount > 0 ? (
+                    <div className="mt-2 p-3 rounded bg-streamixy-primary/10">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-white">Your Stake:</span>
+                        <span className="font-bold text-white">{nft.stakedAmount.toFixed(2)} SYX</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-white">P&L:</span>
+                        <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
+                        </span>
+                      </div>
+                      <Progress 
+                        className="mt-2" 
+                        value={50 + (nft.pnl / nft.stakedAmount * 500)} 
+                      />
+                      <Button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleWithdraw(nft);
+                        }}
+                        className="w-full mt-3 bg-streamixy-primary hover:bg-streamixy-primary/80"
+                      >
+                        Withdraw Stake
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="p-2 rounded bg-black/40">
-                    <div className="text-white">ROI</div>
-                    <div className={`font-bold ${nft.roi > nft.previousRoi ? 'text-green-500 animate-pulse' : 'text-red-500 animate-pulse'}`}>
-                      {nft.roi > 0 ? '+' : ''}{nft.roi.toFixed(2)}%
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Staking Section */}
-                {nft.stakedAmount > 0 ? (
-                  <div className="mt-2 p-3 rounded bg-streamixy-primary/10">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-white">Your Stake:</span>
-                      <span className="font-bold text-white">{nft.stakedAmount.toFixed(2)} SYX</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white">P&L:</span>
-                      <span className={`font-bold ${nft.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {nft.pnl >= 0 ? '+' : ''}{nft.pnl.toFixed(4)} SYX
-                      </span>
-                    </div>
-                    <Progress 
-                      className="mt-2" 
-                      value={50 + (nft.pnl / nft.stakedAmount * 500)} 
-                    />
-                    <Button 
-                      onClick={() => handleWithdraw(nft)}
-                      className="w-full mt-3 bg-streamixy-primary hover:bg-streamixy-primary/80"
+                  ) : (
+                    <Button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleStakeModalOpen(nft);
+                      }}
+                      className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
                     >
-                      Withdraw Stake
+                      <Coins className="h-4 w-4 mr-2" />
+                      Stake SYX
                     </Button>
-                  </div>
-                ) : (
-                  <Button
-                    onClick={() => handleStakeModalOpen(nft)}
-                    className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
-                  >
-                    <Coins className="h-4 w-4 mr-2" />
-                    Stake SYX
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>
@@ -430,7 +440,7 @@ const CreatorProfile = () => {
             <div className="flex gap-2 p-6 pt-0">
               <Button 
                 variant="outline" 
-                className="w-1/2 border-white/20" 
+                className="w-1/2 border-white/20 text-white" 
                 onClick={() => {
                   setStakeModalOpen(false);
                   setSelectedNft(null);

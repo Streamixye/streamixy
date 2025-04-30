@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { 
@@ -273,7 +272,7 @@ const NFTDetail = () => {
             <CardFooter className="flex gap-2">
               <Button 
                 variant="outline" 
-                className="w-1/2 border-white/20" 
+                className="w-1/2 border-white/20 text-white" 
                 onClick={() => {
                   setShowStakeModal(false);
                   setStakeAmount("");
