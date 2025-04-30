@@ -94,12 +94,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       onClick={stopAllPropagation}
     >
       <div className="flex flex-col items-center space-y-6">
-        {/* Comment Button - Now using the handleCommentClick function */}
+        {/* Comment Button - Fixed to pass the event parameter explicitly */}
         <div onClick={(e) => e.stopPropagation()}>
           <VoteButton
             icon={<MessageCircle className="h-7 w-7" />}
             label="Comment"
-            onClick={handleCommentClick}
+            onClick={(e) => handleCommentClick(e)}
           />
         </div>
 
