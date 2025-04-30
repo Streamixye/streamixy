@@ -421,7 +421,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
                                                 option.icon === "telegram" ? "✈️" : 
                                                 option.icon === "facebook" ? "👍" : "🐦"}</span>
                   </div>
-                  <span className="text-white">{option.name}</span>
+                  <span className="text-white font-medium">{option.name}</span>
                 </div>
               </Button>
             ))}

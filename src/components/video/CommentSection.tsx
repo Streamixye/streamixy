@@ -38,7 +38,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (onFollow) onFollow(!isFollowing);
   };
 
-  // Handle comment button click
+  // Handle comment button click - Ensure this works properly
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -64,7 +64,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setCommentText("");
     setIsCommentOpen(false);
     
-    // Remove comment after animation duration
+    // Remove comment after animation duration - TikTok style
     setTimeout(() => {
       setComments(prev => prev.filter(comment => comment.id !== newComment.id));
     }, 3000);
@@ -90,7 +90,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       setCommentText("");
       setIsCommentOpen(false);
       
-      // Remove comment after animation duration
+      // Remove comment after animation duration - TikTok style
       setTimeout(() => {
         setComments(prev => prev.filter(comment => comment.id !== newComment.id));
       }, 3000);
@@ -137,7 +137,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </div>
       </div>
 
-      {/* Floating Comments Display */}
+      {/* Floating Comments Display - TikTok style floating comments */}
       <div className="fixed left-4 bottom-32 flex flex-col space-y-2 z-30 pointer-events-none">
         {comments.map(comment => (
           <LiveComment 

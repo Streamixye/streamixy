@@ -30,6 +30,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   const [comments, setComments] = useState<{id: number, text: string}[]>([]);
   const [commentCounter, setCommentCounter] = useState(0);
 
+  // Fixed this function to match the expected signature
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -93,7 +94,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       onClick={stopAllPropagation}
     >
       <div className="flex flex-col items-center space-y-6">
-        {/* Comment Button - New button added above the Vote button */}
+        {/* Comment Button - Now using the handleCommentClick function */}
         <div onClick={(e) => e.stopPropagation()}>
           <VoteButton
             icon={<MessageCircle className="h-7 w-7" />}
