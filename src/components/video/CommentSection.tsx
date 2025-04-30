@@ -1,7 +1,9 @@
 
 import React, { useState } from "react";
-import { Heart, UserPlus, Check } from "lucide-react";
+import { Heart, UserPlus, Check, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CommentSectionProps {
   onLike?: () => void;
@@ -15,6 +17,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   creatorName = "Creator" 
 }) => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const { toast } = useToast();
   
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
@@ -32,6 +37,47 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (onFollow) onFollow(!isFollowing);
   };
 
+  // Handle comment button click
+  const handleCommentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsCommentOpen(prev => !prev);
+  };
+
+  // Handle comment submission
+  const handleSubmitComment = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!commentText.trim()) return;
+    
+    toast({
+      title: "Comment Posted",
+      description: "Your comment has been posted successfully.",
+    });
+    
+    setCommentText("");
+    setIsCommentOpen(false);
+  };
+
+  // Handle Enter key for submitting comments
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (!commentText.trim()) return;
+      
+      toast({
+        title: "Comment Posted",
+        description: "Your comment has been posted successfully.",
+      });
+      
+      setCommentText("");
+      setIsCommentOpen(false);
+    }
+  };
+
   return (
     <>
       {/* Icons at the left side in a vertical list */}
@@ -40,7 +86,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         onClick={e => e.stopPropagation()}
         data-prevent-scroll="true"
       >
-        {/* Follow icon - at top */}
+        {/* Comment icon - at top */}
+        <div 
+          className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-purple-500/30 transition-colors"
+          onClick={handleCommentClick}
+          data-prevent-scroll="true"
+        >
+          <MessageCircle className="h-6 w-6 text-white" />
+        </div>
+        
+        {/* Follow icon - in middle */}
         <div 
           className={`${isFollowing ? 'bg-streamixy-primary/80' : 'bg-black/50'} backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-streamixy-primary/50 transition-colors`}
           onClick={handleFollow}
@@ -53,7 +108,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           )}
         </div>
         
-        {/* Love icon - in middle */}
+        {/* Love icon - at bottom */}
         <div 
           className="bg-black/50 backdrop-blur-md rounded-full p-2 border border-white/10 cursor-pointer hover:bg-pink-500/30 transition-colors"
           onClick={handleLike}
@@ -62,6 +117,39 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           <Heart className="h-6 w-6 text-white hover:fill-pink-500 transition-colors" />
         </div>
       </div>
+
+      {/* Comment Form Popup */}
+      {isCommentOpen && (
+        <div 
+          className="fixed bottom-24 left-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72"
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          data-prevent-scroll="true"
+        >
+          <h3 className="text-lg font-semibold mb-2">Add a comment</h3>
+          <div className="flex flex-col space-y-2">
+            <Textarea 
+              placeholder="Share your thoughts..." 
+              className="bg-transparent border-white/20 flex-1"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              data-prevent-scroll="true"
+              autoFocus
+            />
+            <Button 
+              onClick={handleSubmitComment}
+              className="bg-purple-500 hover:bg-purple-600 h-10 w-full"
+              disabled={!commentText.trim()}
+              data-prevent-scroll="true"
+            >
+              Post Comment
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

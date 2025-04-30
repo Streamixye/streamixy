@@ -119,11 +119,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         <VoteButton
           icon={<Heart className="h-7 w-7" />}
           label="Request"
-          onClick={() => {
-            if (requestStatus === "idle") {
-              onRequestClick();
-            }
-          }}
+          onClick={onRequestClick}
         />
       </div>
 
