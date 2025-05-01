@@ -106,7 +106,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           <VoteButton
             icon={<MessageCircle className="h-7 w-7" />}
             label="Comment"
-            onClick={handleCommentClick}
+            onClick={(e) => handleCommentClick(e)}
           />
         </div>
 
