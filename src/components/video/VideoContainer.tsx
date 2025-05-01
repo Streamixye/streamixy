@@ -4,6 +4,7 @@ import { VideoSource } from "./VideoSource";
 import { LikeAnimations } from "./LikeAnimations";
 import { VideoOverlays } from "./VideoOverlays";
 import { useVideoPlayback } from "@/hooks/use-video-playback";
+import "./VideoContainer.css";
 
 interface VideoContainerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -26,17 +27,27 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
   displayedViewers,
   reelId
 }) => {
-  // Use our custom hook for video playback management
+  // Use our custom hook for video playback management with autoUnmute set to true
   const { isMuted, toggleMute } = useVideoPlayback({
     videoRef, 
-    reelId
+    reelId,
+    autoUnmute: true // Enable auto unmuting for audio
   });
 
   // Add event listeners for user interaction to help with autoplay
   useEffect(() => {
     const handleUserInteraction = () => {
       if (videoRef.current && videoRef.current.paused) {
-        videoRef.current.play().catch(err => console.error("Failed to play on user interaction:", err));
+        // Try to play with audio
+        videoRef.current.muted = false;
+        videoRef.current.play().catch(err => {
+          console.error("Failed to play with audio on user interaction:", err);
+          // Fall back to muted if needed
+          videoRef.current!.muted = true;
+          videoRef.current!.play().catch(err => {
+            console.error("Failed to play even muted on user interaction:", err);
+          });
+        });
       }
     };
     
@@ -56,7 +67,6 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         className="absolute inset-0 object-cover w-full h-full"
         onDoubleClick={handleDoubleClick}
         onTouchStart={handleTap}
-        muted
         loop
         playsInline
         autoPlay

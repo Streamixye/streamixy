@@ -5,38 +5,60 @@ interface UseVideoPlaybackProps {
   videoRef: RefObject<HTMLVideoElement>;
   reelId: string;
   onPlaybackStatusChange?: (isPlaying: boolean) => void;
+  autoUnmute?: boolean; // New prop to control auto unmuting
 }
 
 export function useVideoPlayback({ 
   videoRef, 
   reelId,
-  onPlaybackStatusChange
+  onPlaybackStatusChange,
+  autoUnmute = true // Default to true to automatically unmute
 }: UseVideoPlaybackProps) {
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false); // Default to unmuted now
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Function to attempt playback with more aggressive retry
   const attemptPlayback = () => {
     if (!videoRef.current) return;
     
-    // Start muted to increase chance of autoplay success
-    videoRef.current.muted = true;
+    // Start unmuted if autoUnmute is true
+    videoRef.current.muted = !autoUnmute;
+    setIsMuted(!autoUnmute);
     
     const playPromise = videoRef.current.play();
     
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          console.log("Video autoplay started for", reelId);
+          console.log("Video autoplay started for", reelId, "with audio:", !videoRef.current?.muted);
           setIsPlaying(true);
           if (onPlaybackStatusChange) onPlaybackStatusChange(true);
         })
         .catch(error => {
           console.error("Autoplay prevented:", error);
-          setIsPlaying(false);
-          if (onPlaybackStatusChange) onPlaybackStatusChange(false);
-          // More aggressive retry with reduced intervals
-          setTimeout(attemptPlayback, 500);
+          
+          // If autoplay with sound fails, try with muted (browsers allow this)
+          if (!videoRef.current?.muted) {
+            console.log("Retrying with muted playback");
+            videoRef.current.muted = true;
+            setIsMuted(true);
+            videoRef.current.play()
+              .then(() => {
+                console.log("Muted autoplay successful for", reelId);
+                setIsPlaying(true);
+                if (onPlaybackStatusChange) onPlaybackStatusChange(true);
+              })
+              .catch(err => {
+                console.error("Even muted autoplay failed:", err);
+                setIsPlaying(false);
+                if (onPlaybackStatusChange) onPlaybackStatusChange(false);
+              });
+          } else {
+            setIsPlaying(false);
+            if (onPlaybackStatusChange) onPlaybackStatusChange(false);
+            // More aggressive retry with reduced intervals
+            setTimeout(attemptPlayback, 500);
+          }
         });
     }
   };
@@ -77,13 +99,11 @@ export function useVideoPlayback({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && videoRef.current) {
-            // This video is now in view, attempt to play
+            // This video is now in view, attempt to play with audio
             attemptPlayback();
           } else if (!entry.isIntersecting && videoRef.current) {
-            // Pause and mute when out of view
+            // Pause when out of view
             videoRef.current.pause();
-            videoRef.current.muted = true;
-            setIsMuted(true);
             setIsPlaying(false);
             if (onPlaybackStatusChange) onPlaybackStatusChange(false);
           }
@@ -111,18 +131,13 @@ export function useVideoPlayback({
       const targetReelId = e.detail.reelId;
       
       if (targetReelId === reelId && videoRef.current) {
-        // This is the active reel, ensure it plays
+        // This is the active reel, ensure it plays with audio if autoUnmute is true
+        videoRef.current.muted = !autoUnmute;
+        setIsMuted(!autoUnmute);
         attemptPlayback();
-        
-        // Allow unmuting if this is the active reel
-        if (!isMuted && videoRef.current) {
-          videoRef.current.muted = false;
-        }
       } else if (videoRef.current) {
-        // This is not the active reel, ensure it's paused and muted
+        // This is not the active reel, ensure it's paused
         videoRef.current.pause();
-        videoRef.current.muted = true;
-        setIsMuted(true);
         setIsPlaying(false);
         if (onPlaybackStatusChange) onPlaybackStatusChange(false);
       }
@@ -134,7 +149,7 @@ export function useVideoPlayback({
     return () => {
       document.removeEventListener('reelActive', handleReelActive as EventListener);
     };
-  }, [reelId, isMuted]);
+  }, [reelId, autoUnmute]);
 
   return {
     isMuted,
