@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { TokenTransaction } from "@/hooks/use-tokens";
 
@@ -36,8 +37,8 @@ const GiftDialog: React.FC<GiftDialogProps> = ({
       amount: gift.value,
       type: "gift",
       description: `You gifted a ${gift.name} (${gift.value} SYX) to ${creatorName}`,
+      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_') // Create username from creator name
     });
-    onClose();
   };
 
   return (
@@ -45,6 +46,9 @@ const GiftDialog: React.FC<GiftDialogProps> = ({
       <DialogContent className="dialog-content bg-black/90 border border-white/10 text-white">
         <DialogHeader>
           <DialogTitle>Send Gifts</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Show your appreciation with gifts
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col space-y-4 py-4">
           <p className="text-sm text-muted-foreground">
@@ -55,7 +59,7 @@ const GiftDialog: React.FC<GiftDialogProps> = ({
               <Button
                 key={gift.id}
                 variant="outline"
-                className="h-auto flex flex-col p-4 items-center"
+                className="h-auto flex flex-col p-4 items-center bg-transparent border border-white/20 text-white hover:bg-white/10"
                 onClick={() => handleGift(gift)}
                 disabled={gift.value > tokenBalance}
               >

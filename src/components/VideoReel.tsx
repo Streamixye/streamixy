@@ -129,19 +129,12 @@ const VideoReel: React.FC<VideoReelProps> = ({
     { id: 4, name: "Diamond", value: 500, emoji: "💎" }
   ];
 
-  const handleVote = (amount: number) => {
-    const transaction: TokenTransaction = {
-      amount: amount,
-      type: "vote",
-      description: `You voted ${amount} SYX tokens to ${creator.name}`,
-      creatorUsername: creator.username
-    };
-    
+  const handleVote = (transaction: TokenTransaction) => {
     if (handleTransaction(transaction)) {
-      setCreatorTokens(prev => prev + amount);
+      setCreatorTokens(prev => prev + transaction.amount);
       
       const tokenElement = document.createElement("div");
-      tokenElement.innerText = `+${amount}`;
+      tokenElement.innerText = `+${transaction.amount}`;
       tokenElement.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
       tokenElement.style.left = `${Math.random() * 80 + 10}%`;
       tokenElement.style.bottom = "0";
@@ -161,7 +154,13 @@ const VideoReel: React.FC<VideoReelProps> = ({
   const handleCustomVote = () => {
     const value = parseInt(voteAmount);
     if (value && value > 0) {
-      handleVote(value);
+      const transaction: TokenTransaction = {
+        amount: value,
+        type: "vote",
+        description: `You voted ${value} SYX tokens to ${creator.name}`,
+        creatorUsername: creator.username
+      };
+      handleVote(transaction);
       setVoteAmount("");
     } else {
       toast({
@@ -172,19 +171,15 @@ const VideoReel: React.FC<VideoReelProps> = ({
     }
   };
 
-  const handleGift = (gift: { name: string; value: number; emoji: string }) => {
-    const transaction: TokenTransaction = {
-      amount: gift.value,
-      type: "gift",
-      description: `You gifted a ${gift.name} (${gift.value} SYX) to ${creator.name}`,
-      creatorUsername: creator.username
-    };
-    
+  const handleGift = (transaction: TokenTransaction) => {
     if (handleTransaction(transaction)) {
-      setCreatorTokens(prev => prev + gift.value);
+      setCreatorTokens(prev => prev + transaction.amount);
       
+      // Display the gift animation
       const giftElement = document.createElement("div");
-      giftElement.innerText = gift.emoji;
+      giftElement.innerText = transaction.description.includes("Flower") ? "🌹" : 
+                             transaction.description.includes("Lion") ? "🦁" : 
+                             transaction.description.includes("Crown") ? "👑" : "💎";
       giftElement.className = "fixed text-4xl z-50 animate-float";
       giftElement.style.left = `${Math.random() * 80 + 10}%`;
       giftElement.style.bottom = "0";

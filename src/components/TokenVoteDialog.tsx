@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { TokenTransaction } from "@/hooks/use-tokens";
 
@@ -36,7 +37,6 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
       description: `You voted ${amount} SYX tokens to ${creatorName}`,
       creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_')  // Create a username from the creator name
     });
-    onClose();
   };
 
   const handleCustomVote = () => {
@@ -51,6 +51,9 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
       <DialogContent className="dialog-content bg-black/90 border border-white/10 text-white">
         <DialogHeader>
           <DialogTitle>Vote SYX Tokens</DialogTitle>
+          <DialogDescription className="text-white/70">
+            Support this creator by voting tokens
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col space-y-4 py-4">
           <p className="text-sm text-muted-foreground">
@@ -73,8 +76,8 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
               type="number"
               placeholder="Custom amount"
               className="flex-1 bg-white/10 border-white/20 text-white"
-              min={1}
-              max={tokenBalance}
+              min="1"
+              max={tokenBalance.toString()}
               value={voteAmount}
               onChange={(e) => setVoteAmount(e.target.value)}
             />
