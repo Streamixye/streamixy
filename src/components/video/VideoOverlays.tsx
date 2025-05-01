@@ -30,8 +30,8 @@ export const VideoOverlays: React.FC<VideoOverlaysProps> = ({
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
 
-      {/* Volume control button - always visible with improved icons */}
-      <div className="absolute bottom-6 right-6 z-10">
+      {/* Volume control button - moved slightly higher (from bottom-6 to bottom-10) */}
+      <div className="absolute bottom-10 right-6 z-10">
         <button 
           className="bg-black/50 backdrop-blur-sm p-2 rounded-full hover:bg-streamixy-primary/30 transition-all"
           onClick={toggleMute}

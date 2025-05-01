@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -305,6 +304,11 @@ const Dashboard = () => {
     navigate("/features");
   };
 
+  // Filter transactions to only show referral and withdraw types
+  const filteredTransactions = transactions.filter(
+    transaction => transaction.type === 'referral' || transaction.type === 'withdraw'
+  );
+
   return (
     <div className="min-h-screen bg-black text-white p-2 sm:p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
@@ -486,16 +490,13 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {transactions.map(transaction => (
+                {filteredTransactions.map(transaction => (
                   <div 
                     key={transaction.id} 
                     className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
                   >
                     <div>
                       <div className="font-medium text-white">
-                        {transaction.type === "earn" && "Stream Earnings"}
-                        {transaction.type === "gift" && "Gift Received"}
-                        {transaction.type === "stake" && "Tokens Staked"}
                         {transaction.type === "withdraw" && "Withdrawal"}
                         {transaction.type === "referral" && "Referral Bonus"}
                       </div>
@@ -508,6 +509,12 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+                
+                {filteredTransactions.length === 0 && (
+                  <div className="text-center py-4 text-white/70">
+                    <p>No transaction history yet</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -713,16 +720,13 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {transactions.map(transaction => (
+                {filteredTransactions.map(transaction => (
                   <div 
                     key={transaction.id} 
                     className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
                   >
                     <div>
                       <div className="font-medium text-white">
-                        {transaction.type === "earn" && "Stream Earnings"}
-                        {transaction.type === "gift" && "Gift Sent"}
-                        {transaction.type === "stake" && "Tokens Staked"}
                         {transaction.type === "withdraw" && "Withdrawal"}
                         {transaction.type === "referral" && "Referral Bonus"}
                       </div>
@@ -735,6 +739,12 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+                
+                {filteredTransactions.length === 0 && (
+                  <div className="text-center py-4 text-white/70">
+                    <p>No transaction history yet</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
