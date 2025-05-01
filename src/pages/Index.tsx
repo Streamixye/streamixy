@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import VideoReel from "@/components/VideoReel";
 import ReelNavigation from "@/components/ReelNavigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { useLiveStreams, LiveStream } from "@/hooks/use-live-streams";
 
-// Updated reel data with themed videos
+// Base mock reels data
 const MOCK_REELS = [
   {
     streamId: "stream-1",
@@ -85,10 +85,60 @@ const MOCK_REELS = [
   }
 ];
 
+// Mock current user
+const CURRENT_USER = {
+  username: "current_user"
+};
+
 const Index = () => {
   const [currentReelIndex, setCurrentReelIndex] = useState(0);
+  const [reels, setReels] = useState(MOCK_REELS);
   const isMobile = useIsMobile();
   const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
+  const { liveStreams, getStreamsByInvitedUser } = useLiveStreams();
+
+  // Convert live streams to reel format and merge with mock reels
+  useEffect(() => {
+    if (liveStreams.length > 0) {
+      // Convert live streams to reel format
+      const liveReels = liveStreams.map(stream => ({
+        streamId: stream.streamId,
+        title: stream.title,
+        creator: {
+          name: stream.creatorName,
+          username: stream.creatorUsername,
+          avatar: stream.creatorAvatar,
+          followers: 1000, // Default value for now
+        },
+        viewers: stream.viewers,
+        likes: Math.floor(Math.random() * 500) + 100, // Random likes for demo
+        dislikes: Math.floor(Math.random() * 20) + 5, // Random dislikes for demo
+        isLive: true,
+        thumbnailUrl: stream.thumbnailUrl,
+      }));
+
+      // Check if user is invited to any streams
+      const invitedStreams = getStreamsByInvitedUser(CURRENT_USER.username);
+      const invitedStreamIds = invitedStreams.map(stream => stream.streamId);
+      
+      // Prioritize streams the user is invited to
+      const prioritizedReels = [
+        ...liveReels.filter(reel => invitedStreamIds.includes(reel.streamId)),
+        ...liveReels.filter(reel => !invitedStreamIds.includes(reel.streamId)),
+        ...MOCK_REELS.filter(reel => 
+          !liveReels.some(liveReel => liveReel.streamId === reel.streamId)
+        )
+      ];
+
+      setReels(prioritizedReels);
+      
+      // If the user is invited to streams, show a notification
+      if (invitedStreams.length > 0) {
+        // This would typically show a toast or other notification
+        console.log("You've been invited to join live streams!", invitedStreams);
+      }
+    }
+  }, [liveStreams, getStreamsByInvitedUser]);
 
   // Enhanced helper function to pause all videos except the active one and manage audio
   const activateCurrentReel = (activeReelId: string) => {
@@ -128,15 +178,15 @@ const Index = () => {
     if (e.deltaY > 0) {
       // Scrolling down
       setCurrentReelIndex((prevIndex) => {
-        const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-        activateCurrentReel(`stream-${newIndex + 1}`);
+        const newIndex = prevIndex === reels.length - 1 ? 0 : prevIndex + 1;
+        activateCurrentReel(reels[newIndex].streamId);
         return newIndex;
       });
     } else {
       // Scrolling up
       setCurrentReelIndex((prevIndex) => {
-        const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-        activateCurrentReel(`stream-${newIndex + 1}`);
+        const newIndex = prevIndex === 0 ? reels.length - 1 : prevIndex - 1;
+        activateCurrentReel(reels[newIndex].streamId);
         return newIndex;
       });
     }
@@ -195,15 +245,15 @@ const Index = () => {
     if (touchStart - touchEnd > 50) {
       // Swipe up - go to next reel
       setCurrentReelIndex((prevIndex) => {
-        const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-        activateCurrentReel(`stream-${newIndex + 1}`);
+        const newIndex = prevIndex === reels.length - 1 ? 0 : prevIndex + 1;
+        activateCurrentReel(reels[newIndex].streamId);
         return newIndex;
       });
     } else if (touchEnd - touchStart > 50) {
       // Swipe down - go to previous reel
       setCurrentReelIndex((prevIndex) => {
-        const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-        activateCurrentReel(`stream-${newIndex + 1}`);
+        const newIndex = prevIndex === 0 ? reels.length - 1 : prevIndex - 1;
+        activateCurrentReel(reels[newIndex].streamId);
         return newIndex;
       });
     }
@@ -211,16 +261,16 @@ const Index = () => {
 
   const handleNext = () => {
     setCurrentReelIndex((prevIndex) => {
-      const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-      activateCurrentReel(`stream-${newIndex + 1}`);
+      const newIndex = prevIndex === reels.length - 1 ? 0 : prevIndex + 1;
+      activateCurrentReel(reels[newIndex].streamId);
       return newIndex;
     });
   };
 
   const handlePrevious = () => {
     setCurrentReelIndex((prevIndex) => {
-      const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-      activateCurrentReel(`stream-${newIndex + 1}`);
+      const newIndex = prevIndex === 0 ? reels.length - 1 : prevIndex - 1;
+      activateCurrentReel(reels[newIndex].streamId);
       return newIndex;
     });
   };
@@ -266,16 +316,20 @@ const Index = () => {
 
   // Ensure only the current reel's video plays when component mounts or index changes
   useEffect(() => {
-    activateCurrentReel(`stream-${currentReelIndex + 1}`);
-  }, [currentReelIndex]);
+    if (reels.length > 0) {
+      activateCurrentReel(reels[currentReelIndex].streamId);
+    }
+  }, [currentReelIndex, reels]);
 
   // Additional effect to focus on the current reel when the page loads
   useEffect(() => {
     // Short timeout to ensure the DOM is fully loaded
     setTimeout(() => {
-      activateCurrentReel(`stream-${currentReelIndex + 1}`);
+      if (reels.length > 0) {
+        activateCurrentReel(reels[currentReelIndex].streamId);
+      }
     }, 300);
-  }, []);
+  }, [reels]);
 
   return (
     <SidebarProvider>
@@ -295,7 +349,7 @@ const Index = () => {
                 transform: `translateY(-${currentReelIndex * 100}%)`
               }}
             >
-              {MOCK_REELS.map((reel, index) => (
+              {reels.map((reel, index) => (
                 <div 
                   key={reel.streamId} 
                   className={`h-screen w-full video-reel-${index}`}

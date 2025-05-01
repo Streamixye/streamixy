@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import LiveSidebar from "@/components/LiveSidebar";
+import { useLiveStreams, LiveStream } from "@/hooks/use-live-streams";
 
 const GoLive = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -53,11 +55,40 @@ const GoLive = () => {
     avatar: string;
     isViewing: boolean;
   }[]>([]);
+  const [streamTitle, setStreamTitle] = useState("Live Stream");
+  const [currentStreamId, setCurrentStreamId] = useState("");
   const { toast } = useToast();
+  const { startStream, endStream, inviteUser } = useLiveStreams();
   
   const mockUser = {
     name: "JaneDoe",
+    username: "jane_doe",
     avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb"
+  };
+
+  // Capture thumbnail for stream
+  const captureStreamThumbnail = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      if (context) {
+        // Set canvas dimensions to match video
+        canvasRef.current.width = videoRef.current.videoWidth;
+        canvasRef.current.height = videoRef.current.videoHeight;
+        
+        // Draw the current video frame to the canvas
+        context.drawImage(videoRef.current, 0, 0);
+        
+        // Get the thumbnail as a data URL
+        try {
+          return canvasRef.current.toDataURL('image/jpeg', 0.7);
+        } catch (e) {
+          console.error("Error generating thumbnail:", e);
+          // Return a default thumbnail if canvas is tainted or other errors
+          return "https://source.unsplash.com/featured/1080x1920?streaming";
+        }
+      }
+    }
+    return "https://source.unsplash.com/featured/1080x1920?streaming";
   };
 
   useEffect(() => {
@@ -177,16 +208,37 @@ const GoLive = () => {
 
   const toggleLive = () => {
     if (isLive) {
+      // End stream
+      if (currentStreamId) {
+        endStream(currentStreamId);
+      }
       setIsLive(false);
       setViewerCount(0);
       setTotalTokens(0);
       setComments([]);
       setReceivedGifts([]);
+      setCurrentStreamId("");
       toast({
         title: "Stream Ended",
         description: "Your live stream has ended"
       });
     } else {
+      // Start stream
+      const thumbnailUrl = captureStreamThumbnail();
+      const streamId = `stream-${Date.now()}`;
+      
+      // Register the stream
+      startStream({
+        streamId,
+        creatorName: mockUser.name,
+        creatorUsername: mockUser.username,
+        creatorAvatar: mockUser.avatar,
+        title: streamTitle,
+        thumbnailUrl,
+        viewers: 0
+      });
+      
+      setCurrentStreamId(streamId);
       setIsLive(true);
       toast({
         title: "Stream Started",
@@ -361,10 +413,18 @@ const GoLive = () => {
     );
     
     const request = joinRequests.find(req => req.id === requestId);
-    if (request) {
+    if (request && accepted && currentStreamId) {
+      // Invite the user to the stream
+      inviteUser(currentStreamId, request.username);
+      
       toast({
-        title: accepted ? "Request Accepted" : "Request Rejected",
-        description: `You ${accepted ? 'accepted' : 'rejected'} ${request.username}'s request to join`
+        title: "Request Accepted",
+        description: `You accepted ${request.username}'s request to join`
+      });
+    } else if (request) {
+      toast({
+        title: "Request Rejected",
+        description: `You rejected ${request.username}'s request to join`
       });
     }
   };
@@ -405,7 +465,10 @@ const GoLive = () => {
   
   const inviteCoHost = (audienceId: number) => {
     const audience = audiences.find(a => a.id === audienceId);
-    if (audience) {
+    if (audience && currentStreamId) {
+      // Invite the user to the stream
+      inviteUser(currentStreamId, audience.username);
+      
       toast({
         title: "Co-host Invitation Sent",
         description: `Invitation sent to ${audience.username} to co-host your stream`
@@ -464,6 +527,19 @@ const GoLive = () => {
         
         <div className="flex-1 relative overflow-hidden">
           <div className="relative w-full h-screen overflow-hidden">
+            {/* Add a title input when not live */}
+            {!isLive && (
+              <div className="absolute top-20 left-0 right-0 z-10 px-4">
+                <Input
+                  type="text"
+                  value={streamTitle}
+                  onChange={(e) => setStreamTitle(e.target.value)}
+                  placeholder="Enter stream title"
+                  className="bg-black/50 border-white/30 text-white max-w-md mx-auto"
+                />
+              </div>
+            )}
+            
             <video 
               ref={videoRef}
               autoPlay 

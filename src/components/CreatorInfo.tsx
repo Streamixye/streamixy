@@ -30,6 +30,21 @@ const CreatorInfo: React.FC<CreatorInfoProps> = ({ creator, className }) => {
     if (storedCount) {
       setFollowerCount(parseInt(storedCount));
     }
+    
+    // Listen for follow events from other components
+    const handleFollowChange = (e: Event) => {
+      const event = e as CustomEvent;
+      if (event.detail.username === creator.username) {
+        setIsFollowing(event.detail.isFollowing);
+        setFollowerCount(event.detail.newFollowerCount);
+      }
+    };
+    
+    document.addEventListener('creatorFollowChange', handleFollowChange as EventListener);
+    
+    return () => {
+      document.removeEventListener('creatorFollowChange', handleFollowChange as EventListener);
+    };
   }, [creator.username]);
   
   const handleFollowToggle = () => {
@@ -76,6 +91,17 @@ const CreatorInfo: React.FC<CreatorInfoProps> = ({ creator, className }) => {
       } 
     });
     document.dispatchEvent(event);
+    
+    // Also dispatch a dashboard update event
+    const dashboardEvent = new CustomEvent('dashboardUpdate', {
+      detail: {
+        type: 'followers',
+        username: creator.username,
+        isFollowing: !isFollowing,
+        followerCount: isFollowing ? followerCount - 1 : followerCount + 1
+      }
+    });
+    document.dispatchEvent(dashboardEvent);
   };
 
   return (
