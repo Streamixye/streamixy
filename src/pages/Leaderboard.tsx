@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Table,
@@ -34,14 +33,29 @@ interface Creator {
   trend: "up" | "down" | "stable";
 }
 
+// Stream metrics interface
+interface StreamMetrics {
+  streamId: string;
+  viewerCount: number;
+  tokensEarned: number;
+  creatorName: string;
+  creatorUsername: string;
+  duration: number;
+  timestamp: string;
+}
+
 const Leaderboard = () => {
   const [timeFrame, setTimeFrame] = useState<"daily" | "weekly">("daily");
   const [creators, setCreators] = useState<Creator[]>([]);
   const { toast } = useToast();
 
-  // Initialize creator data
+  // Initialize creator data and listen for stream metrics
   useEffect(() => {
-    const initialCreators = Array(20).fill(null).map((_, index) => ({
+    // Load any saved stream metrics from localStorage
+    const savedMetrics: StreamMetrics[] = JSON.parse(localStorage.getItem('streamMetrics') || '[]');
+    
+    // Generate initial creator data
+    let initialCreators = Array(20).fill(null).map((_, index) => ({
       id: index + 1,
       name: `Creator ${index + 1}`,
       nickname: `creator${index + 1}`,
@@ -52,6 +66,41 @@ const Leaderboard = () => {
       trend: "stable" as "up" | "down" | "stable"
     }));
     
+    // Apply any saved metrics to the creators
+    savedMetrics.forEach(metric => {
+      const existingCreator = initialCreators.find(c => 
+        c.name === metric.creatorName || c.nickname === metric.creatorUsername
+      );
+      
+      if (existingCreator) {
+        // Update the creator with the metrics
+        existingCreator.audienceCount += metric.viewerCount;
+        existingCreator.earnings += metric.tokensEarned;
+      } else {
+        // If the creator doesn't exist yet, add them
+        const newId = initialCreators.length + 1;
+        initialCreators.push({
+          id: newId,
+          name: metric.creatorName,
+          nickname: metric.creatorUsername,
+          avatar: "",
+          audienceCount: metric.viewerCount,
+          earnings: metric.tokensEarned,
+          previousRank: newId,
+          trend: "stable" as "up" | "down" | "stable"
+        });
+      }
+    });
+    
+    // Sort by earnings
+    initialCreators.sort((a, b) => b.earnings - a.earnings);
+    
+    // Update ranks based on sorted position
+    initialCreators = initialCreators.map((creator, index) => ({
+      ...creator,
+      previousRank: index + 1
+    }));
+    
     setCreators(initialCreators);
     
     // Show a welcome toast
@@ -60,6 +109,77 @@ const Leaderboard = () => {
       description: "Welcome to the Streamixy creator rankings!",
       duration: 3000,
     });
+    
+    // Listen for stream ended events to update leaderboard in real-time
+    const handleStreamEnded = (event: Event) => {
+      const { streamId, viewerCount, tokensEarned, creatorName, creatorUsername } = (event as CustomEvent).detail;
+      
+      setCreators(prevCreators => {
+        // Clone the array to avoid direct state mutation
+        const newCreators = [...prevCreators];
+        
+        // Find if the creator already exists
+        const existingCreator = newCreators.find(c => 
+          c.name === creatorName || c.nickname === creatorUsername
+        );
+        
+        if (existingCreator) {
+          // Update existing creator
+          existingCreator.audienceCount += viewerCount;
+          existingCreator.earnings += tokensEarned;
+        } else {
+          // Add new creator
+          const newId = newCreators.length + 1;
+          newCreators.push({
+            id: newId,
+            name: creatorName,
+            nickname: creatorUsername,
+            avatar: "",
+            audienceCount: viewerCount,
+            earnings: tokensEarned,
+            previousRank: newId,
+            trend: "stable" as "up" | "down" | "stable"
+          });
+        }
+        
+        // Sort by earnings
+        newCreators.sort((a, b) => b.earnings - a.earnings);
+        
+        // Update ranks and trends
+        return newCreators.map((creator, index) => {
+          const newRank = index + 1;
+          const previousRank = prevCreators.findIndex(c => c.id === creator.id) + 1;
+          
+          let trend: "up" | "down" | "stable";
+          if (newRank < previousRank) {
+            trend = "up";
+          } else if (newRank > previousRank) {
+            trend = "down";
+          } else {
+            trend = "stable";
+          }
+          
+          return {
+            ...creator,
+            previousRank,
+            trend
+          };
+        });
+      });
+      
+      // Show a toast notification about the leaderboard update
+      toast({
+        title: "Leaderboard Updated",
+        description: `${creatorName} ended a stream with ${viewerCount} viewers and earned ${tokensEarned} SYX tokens!`,
+        duration: 3000,
+      });
+    };
+    
+    document.addEventListener('streamEnded', handleStreamEnded);
+    
+    return () => {
+      document.removeEventListener('streamEnded', handleStreamEnded);
+    };
   }, [toast]);
 
   // Simulate real-time changes

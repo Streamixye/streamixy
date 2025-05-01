@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -24,6 +23,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { SidebarProvider } from "@/components/ui/sidebar";
 import LiveSidebar from "@/components/LiveSidebar";
 import { useLiveStreams, LiveStream } from "@/hooks/use-live-streams";
+
+// Create a custom event interface for saving stream metrics
+interface StreamMetricsEvent extends CustomEvent {
+  detail: {
+    streamId: string;
+    viewerCount: number;
+    tokensEarned: number;
+    creatorName: string;
+    creatorUsername: string;
+    duration: number;
+  };
+}
 
 const GoLive = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -57,6 +68,7 @@ const GoLive = () => {
   }[]>([]);
   const [streamTitle, setStreamTitle] = useState("Live Stream");
   const [currentStreamId, setCurrentStreamId] = useState("");
+  const [streamStartTime, setStreamStartTime] = useState<number | null>(null);
   const { toast } = useToast();
   const { startStream, endStream, inviteUser, liveStreams } = useLiveStreams();
   
@@ -360,19 +372,51 @@ const GoLive = () => {
 
   const toggleLive = () => {
     if (isLive) {
-      // End stream
+      // End stream and save metrics
       if (currentStreamId) {
         endStream(currentStreamId);
+        
+        // Calculate stream duration in minutes
+        const duration = streamStartTime ? Math.floor((Date.now() - streamStartTime) / 60000) : 0;
+        
+        // Dispatch custom event with stream metrics
+        const streamMetricsEvent = new CustomEvent('streamEnded', { 
+          detail: { 
+            streamId: currentStreamId,
+            viewerCount: viewerCount,
+            tokensEarned: totalTokens,
+            creatorName: mockUser.name,
+            creatorUsername: mockUser.username,
+            duration: duration
+          } 
+        });
+        document.dispatchEvent(streamMetricsEvent);
+        
+        // Save metrics to localStorage for persistence
+        const existingMetrics = JSON.parse(localStorage.getItem('streamMetrics') || '[]');
+        existingMetrics.push({
+          streamId: currentStreamId,
+          viewerCount: viewerCount,
+          tokensEarned: totalTokens,
+          creatorName: mockUser.name,
+          creatorUsername: mockUser.username,
+          duration: duration,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('streamMetrics', JSON.stringify(existingMetrics));
       }
+      
       setIsLive(false);
       setViewerCount(0);
       setTotalTokens(0);
       setComments([]);
       setReceivedGifts([]);
       setCurrentStreamId("");
+      setStreamStartTime(null);
+      
       toast({
         title: "Stream Ended",
-        description: "Your live stream has ended"
+        description: "Your live stream has ended and metrics have been saved"
       });
     } else {
       // Start stream
@@ -392,6 +436,8 @@ const GoLive = () => {
       
       setCurrentStreamId(streamId);
       setIsLive(true);
+      setStreamStartTime(Date.now());
+      
       toast({
         title: "Stream Started",
         description: "You're now live! People can join your stream."
@@ -998,4 +1044,3 @@ const GoLive = () => {
 };
 
 export default GoLive;
-
