@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Card, 
@@ -142,7 +143,7 @@ const Stake = () => {
                 placeholder="Enter amount"
                 value={stakeAmount}
                 onChange={(e) => setStakeAmount(e.target.value)}
-                className="bg-transparent border-white/20"
+                className="bg-transparent border-white/20 text-white"
               />
             </div>
             
