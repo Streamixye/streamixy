@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Gift, Search, Share, Heart, MessageCircle } from "lucide-react";
 import VoteButton from "../VoteButton";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ interface ActionButtonsProps {
   onRequestClick: () => void;
   requestStatus: "idle" | "pending" | "accepted" | "rejected";
   stopAllPropagation: (e: React.MouseEvent) => void;
+  reelId: string; // Add unique ID for each reel
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -23,15 +24,18 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   onSearchClick,
   onRequestClick,
   requestStatus,
-  stopAllPropagation
+  stopAllPropagation,
+  reelId
 }) => {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<{id: number, text: string}[]>([]);
   const [commentCounter, setCommentCounter] = useState(0);
 
-  // Fix the comment click handler to work without requiring an event parameter
-  const handleCommentClick = () => {
+  // Fix the comment click handler to work consistently
+  const handleCommentClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsCommentOpen(prev => !prev);
   };
 
@@ -85,6 +89,11 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
       }, 3000);
     }
   };
+
+  // Force close comment box when reel changes
+  useEffect(() => {
+    setIsCommentOpen(false);
+  }, [reelId]);
 
   return (
     <div 
@@ -152,7 +161,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         ))}
       </div>
 
-      {/* Comment Form Popup */}
+      {/* Comment Form Popup - Using portals for proper rendering */}
       {isCommentOpen && (
         <div 
           className="fixed bottom-24 right-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72"
@@ -161,6 +170,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
           data-prevent-scroll="true"
+          id={`comment-form-${reelId}`}
         >
           <h3 className="text-lg font-semibold mb-2">Add a comment</h3>
           <div className="flex flex-col space-y-2">

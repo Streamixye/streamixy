@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Heart, UserPlus, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,12 +9,14 @@ interface CommentSectionProps {
   onLike?: () => void;
   onFollow?: (followed: boolean) => void;
   creatorName?: string;
+  reelId: string; // Add unique ID for each reel
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ 
   onLike, 
   onFollow,
-  creatorName = "Creator" 
+  creatorName = "Creator",
+  reelId
 }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -97,6 +99,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
   };
 
+  // Force close comment box when reel changes
+  useEffect(() => {
+    setIsCommentOpen(false);
+  }, [reelId]);
+
   return (
     <>
       {/* Icons at the left side in a vertical list */}
@@ -149,7 +156,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         ))}
       </div>
 
-      {/* Comment Form Popup */}
+      {/* Comment Form Popup - Using a distinct ID for each reel */}
       {isCommentOpen && (
         <div 
           className="fixed bottom-24 left-16 z-50 bg-black/90 p-4 rounded-lg border border-white/10 w-72"
@@ -158,6 +165,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
           data-prevent-scroll="true"
+          id={`comment-form-left-${reelId}`}
         >
           <h3 className="text-lg font-semibold mb-2">Add a comment</h3>
           <div className="flex flex-col space-y-2">

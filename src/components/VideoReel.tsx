@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -367,6 +368,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
           onLike={handleManualLike}
           onFollow={handleFollow}
           creatorName={creator.name}
+          reelId={streamId} // Pass the unique ID to CommentSection
         />
 
         <ActionButtons 
@@ -377,6 +379,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
           onRequestClick={handleRequest}
           requestStatus={requestStatus}
           stopAllPropagation={stopAllPropagation}
+          reelId={streamId} // Pass the unique ID to ActionButtons
         />
       </div>
 
