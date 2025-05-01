@@ -82,7 +82,7 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
   const { toast: showToast } = useToast();
-  const { tokenBalance } = useTokens();
+  const { tokenBalance, setTokenBalance, handleTransaction } = useTokens();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
@@ -321,22 +321,52 @@ const Dashboard = () => {
   };
 
   const claimReferralBonus = () => {
+    const referralAmount = 200;
+    
+    // Create a new referral transaction record
     const newTransaction: Transaction = {
       id: Date.now(),
       type: "referral",
-      amount: 200,
+      amount: referralAmount,
       date: new Date(),
       details: "Referral bonus claimed"
     };
     setTransactions(prev => [newTransaction, ...prev]);
     
-    setEarnings(prev => prev + 200);
+    // Update earnings for creator mode
+    if (mode === "creator") {
+      setEarnings(prev => prev + referralAmount);
+      
+      showToast({
+        title: "Referral Bonus Claimed",
+        description: `${referralAmount} SYX tokens have been added to your creator earnings.`,
+        duration: 3000,
+      });
+    } 
+    // Update token balance for audience mode
+    else {
+      // Use handleTransaction from useTokens hook to update the token balance
+      handleTransaction({
+        amount: referralAmount,
+        type: 'withdraw', // Using withdraw type as it adds tokens to balance
+        description: "Referral bonus claimed"
+      });
+      
+      showToast({
+        title: "Referral Bonus Claimed",
+        description: `${referralAmount} SYX tokens have been added to your balance.`,
+        duration: 3000,
+      });
+    }
     
-    showToast({
-      title: "Referral Bonus Claimed",
-      description: "200 SYX tokens have been added to your balance.",
-      duration: 3000,
+    // Emit a custom event to update token balance globally
+    const event = new CustomEvent('tokenBalanceUpdate', {
+      detail: {
+        type: 'earn',
+        amount: referralAmount
+      }
     });
+    document.dispatchEvent(event);
   };
 
   const handleNFTCreated = () => {
