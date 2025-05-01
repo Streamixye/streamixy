@@ -1,6 +1,5 @@
-
 import React, { useRef, useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { Heart, Volume2, VolumeX } from "lucide-react";
 
 interface VideoContainerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -46,9 +45,9 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
     const attemptPlayback = () => {
       if (!videoRef.current) return;
       
-      // Always start muted to increase chance of autoplay success
+      // Start muted to increase chance of autoplay success, but keep track of original muted state
+      const wasMuted = videoRef.current.muted;
       videoRef.current.muted = true;
-      setIsMuted(true);
       
       const playPromise = videoRef.current.play();
       
@@ -56,6 +55,17 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         playPromise
           .then(() => {
             console.log("Video autoplay started for", reelId);
+            
+            // Now that playback has started, we can restore the original muted state
+            // But only if this is the currently visible video (in the viewport)
+            if (!wasMuted && isVideoInViewport(videoRef.current!)) {
+              setTimeout(() => {
+                if (videoRef.current) {
+                  videoRef.current.muted = false;
+                  setIsMuted(false);
+                }
+              }, 300);
+            }
           })
           .catch(error => {
             console.error("Autoplay prevented:", error);
@@ -65,28 +75,42 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       }
     };
     
+    // Helper function to check if an element is in the viewport
+    const isVideoInViewport = (video: HTMLVideoElement) => {
+      const rect = video.getBoundingClientRect();
+      return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+      );
+    };
+    
     // Create intersection observer to play/pause when in/out of view
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && videoRef.current) {
-            // Attempt to play the video that's in view
-            attemptPlayback();
-            
-            // Pause all other videos
+            // Before playing this video, pause and mute all others
             document.querySelectorAll('video').forEach(video => {
               if (video !== videoRef.current) {
                 video.pause();
                 video.muted = true;
               }
             });
+            
+            // Attempt to play the video that's in view
+            attemptPlayback();
+            
           } else if (!entry.isIntersecting && videoRef.current) {
-            // Pause when out of view to save resources
+            // Pause and always mute when out of view
             videoRef.current.pause();
+            videoRef.current.muted = true;
+            setIsMuted(true);
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.6 } // Increased threshold for better audio control
     );
 
     if (videoRef.current) {
@@ -96,7 +120,7 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       attemptPlayback();
     }
 
-    // Add event listeners for user interaction to help with autoplay
+    // Add event listeners for user interaction to help with autoplay and unmuting
     const handleUserInteraction = () => {
       if (videoRef.current && videoRef.current.paused) {
         attemptPlayback();
@@ -106,6 +130,34 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
     window.addEventListener('click', handleUserInteraction);
     window.addEventListener('touchstart', handleUserInteraction);
     
+    // Custom event listener for when a reel becomes active
+    const handleReelActive = (e: CustomEvent) => {
+      const targetReelId = e.detail.reelId;
+      if (targetReelId === reelId && videoRef.current) {
+        // This is the active reel, ensure it plays with possible unmuting
+        const shouldUnmute = !isMuted;
+        attemptPlayback();
+        
+        // Attempt to unmute if it was previously unmuted
+        if (shouldUnmute) {
+          setTimeout(() => {
+            if (videoRef.current) {
+              videoRef.current.muted = false;
+              setIsMuted(false);
+            }
+          }, 300);
+        }
+      } else if (videoRef.current) {
+        // This is not the active reel, ensure it's paused and muted
+        videoRef.current.pause();
+        videoRef.current.muted = true;
+        setIsMuted(true);
+      }
+    };
+    
+    // Add custom event listener
+    document.addEventListener('reelActive', handleReelActive as EventListener);
+    
     return () => {
       if (videoRef.current) {
         observer.unobserve(videoRef.current);
@@ -113,8 +165,9 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       }
       window.removeEventListener('click', handleUserInteraction);
       window.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('reelActive', handleReelActive as EventListener);
     };
-  }, [reelId]);
+  }, [reelId, isMuted]);
 
   // Toggle mute status with proper isolation
   const toggleMute = (e: React.MouseEvent) => {
@@ -130,6 +183,17 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       // Then unmute only the current video if requested
       videoRef.current.muted = newMutedState;
       setIsMuted(newMutedState);
+      
+      // If unmuting, ensure this video is playing
+      if (!newMutedState && videoRef.current.paused) {
+        videoRef.current.play().catch(err => console.error("Failed to play on unmute:", err));
+      }
+      
+      // Dispatch a custom event to notify that this reel is now active
+      const event = new CustomEvent('reelActive', { 
+        detail: { reelId } 
+      });
+      document.dispatchEvent(event);
     }
   };
 
@@ -180,46 +244,16 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
 
-      {/* Volume control button - always visible */}
-      <div className="absolute bottom-4 right-4 z-10">
+      {/* Volume control button - always visible with improved icons */}
+      <div className="absolute bottom-6 right-6 z-10">
         <button 
           className="bg-black/50 backdrop-blur-sm p-2 rounded-full hover:bg-streamixy-primary/30 transition-all"
           onClick={toggleMute}
         >
           {!isMuted ? (
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="text-white"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-            </svg>
+            <Volume2 className="text-white h-6 w-6" />
           ) : (
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              className="text-white"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-              <line x1="23" y1="9" x2="17" y2="15" />
-              <line x1="17" y1="9" x2="23" y2="15" />
-            </svg>
+            <VolumeX className="text-white h-6 w-6" />
           )}
         </button>
       </div>

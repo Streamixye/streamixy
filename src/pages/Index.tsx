@@ -90,6 +90,26 @@ const Index = () => {
   const isMobile = useIsMobile();
   const [isInteractingWithUI, setIsInteractingWithUI] = useState(false);
 
+  // Enhanced helper function to pause all videos except the active one and manage audio
+  const activateCurrentReel = (activeReelId: string) => {
+    setTimeout(() => {
+      // First pause and mute all videos
+      document.querySelectorAll('video').forEach(video => {
+        const videoReelId = video.dataset.reelId;
+        if (videoReelId !== activeReelId) {
+          video.pause();
+          video.muted = true;
+        }
+      });
+      
+      // Dispatch a custom event to notify the active reel
+      const event = new CustomEvent('reelActive', {
+        detail: { reelId: activeReelId }
+      });
+      document.dispatchEvent(event);
+    }, 50); // Small delay to ensure DOM is updated
+  };
+
   // Handle manual scrolling between reels
   const handleScroll = (e: React.WheelEvent) => {
     // Check if the user is interacting with any UI elements that should prevent scrolling
@@ -109,30 +129,17 @@ const Index = () => {
       // Scrolling down
       setCurrentReelIndex((prevIndex) => {
         const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        activateCurrentReel(`stream-${newIndex + 1}`);
         return newIndex;
       });
     } else {
       // Scrolling up
       setCurrentReelIndex((prevIndex) => {
         const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        activateCurrentReel(`stream-${newIndex + 1}`);
         return newIndex;
       });
     }
-  };
-
-  // Helper function to pause all videos except the active one
-  const pauseAllVideosExcept = (activeReelId: string) => {
-    setTimeout(() => {
-      document.querySelectorAll('video').forEach(video => {
-        const videoReelId = video.dataset.reelId;
-        if (videoReelId !== activeReelId) {
-          video.pause();
-          video.muted = true;
-        }
-      });
-    }, 100); // Small delay to ensure DOM is updated
   };
 
   // Handle touch events for mobile
@@ -189,14 +196,14 @@ const Index = () => {
       // Swipe up - go to next reel
       setCurrentReelIndex((prevIndex) => {
         const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        activateCurrentReel(`stream-${newIndex + 1}`);
         return newIndex;
       });
     } else if (touchEnd - touchStart > 50) {
       // Swipe down - go to previous reel
       setCurrentReelIndex((prevIndex) => {
         const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        activateCurrentReel(`stream-${newIndex + 1}`);
         return newIndex;
       });
     }
@@ -205,7 +212,7 @@ const Index = () => {
   const handleNext = () => {
     setCurrentReelIndex((prevIndex) => {
       const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
-      pauseAllVideosExcept(`stream-${newIndex + 1}`);
+      activateCurrentReel(`stream-${newIndex + 1}`);
       return newIndex;
     });
   };
@@ -213,7 +220,7 @@ const Index = () => {
   const handlePrevious = () => {
     setCurrentReelIndex((prevIndex) => {
       const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
-      pauseAllVideosExcept(`stream-${newIndex + 1}`);
+      activateCurrentReel(`stream-${newIndex + 1}`);
       return newIndex;
     });
   };
@@ -257,10 +264,18 @@ const Index = () => {
     };
   }, []);
 
-  // Ensure only the current reel's video plays
+  // Ensure only the current reel's video plays when component mounts or index changes
   useEffect(() => {
-    pauseAllVideosExcept(`stream-${currentReelIndex + 1}`);
+    activateCurrentReel(`stream-${currentReelIndex + 1}`);
   }, [currentReelIndex]);
+
+  // Additional effect to focus on the current reel when the page loads
+  useEffect(() => {
+    // Short timeout to ensure the DOM is fully loaded
+    setTimeout(() => {
+      activateCurrentReel(`stream-${currentReelIndex + 1}`);
+    }, 300);
+  }, []);
 
   return (
     <SidebarProvider>
