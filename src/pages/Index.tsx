@@ -6,11 +6,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "@/components/Navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-// Mock data for demo
+// Updated reel data with themed videos
 const MOCK_REELS = [
   {
     streamId: "stream-1",
-    title: "Building a Web3 Metaverse in Real-Time",
+    title: "Nature Beauty in Full Bloom",
     creator: {
       name: "CryptoCreator",
       username: "crypto_creator",
@@ -21,11 +21,11 @@ const MOCK_REELS = [
     likes: 532,
     dislikes: 21,
     isLive: true,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?gaming",
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?nature",
   },
   {
     streamId: "stream-2",
-    title: "Live Pixel Art Creation",
+    title: "Fitness Session: Urban Running",
     creator: {
       name: "ArtisticSoul",
       username: "artistic_soul",
@@ -36,11 +36,11 @@ const MOCK_REELS = [
     likes: 342,
     dislikes: 15,
     isLive: true,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?art",
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?fitness",
   },
   {
     streamId: "stream-3",
-    title: "Music Production Session",
+    title: "Dance Performance Session",
     creator: {
       name: "BeatMaker",
       username: "beat_maker",
@@ -51,11 +51,11 @@ const MOCK_REELS = [
     likes: 245,
     dislikes: 8,
     isLive: true,
-    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?music",
+    thumbnailUrl: "https://source.unsplash.com/featured/1080x1920?dance",
   },
   {
     streamId: "stream-4",
-    title: "Cooking Stream: Italian Pasta",
+    title: "Cooking Stream: Asian Cuisine",
     creator: {
       name: "ChefMaster",
       username: "chef_master",

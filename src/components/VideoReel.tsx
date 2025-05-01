@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "./VoteButton";
@@ -356,6 +355,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
           isLive={isLive}
           likeAnimations={likeAnimations}
           displayedViewers={displayedViewers}
+          reelId={streamId} // Pass the streamId to VideoContainer
         />
 
         <CreatorDisplay 
