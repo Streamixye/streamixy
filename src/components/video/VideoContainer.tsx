@@ -10,7 +10,7 @@ interface VideoContainerProps {
   isLive: boolean;
   likeAnimations: {id: number, x: number, y: number}[];
   displayedViewers: number;
-  reelId: string; // Add reelId prop to pick different videos
+  reelId: string;
 }
 
 const VideoContainer: React.FC<VideoContainerProps> = ({
@@ -30,12 +30,38 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
     "stream-3": "https://assets.mixkit.co/videos/preview/mixkit-man-dancing-under-changing-lights-1240-large.mp4",
     "stream-4": "https://assets.mixkit.co/videos/preview/mixkit-cooking-with-a-wok-on-a-gas-burner-2340-large.mp4",
     "stream-5": "https://assets.mixkit.co/videos/preview/mixkit-woman-doing-a-yoga-position-at-sunset-1236-large.mp4",
-    // Default source in case reelId doesn't match
     "default": "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-1232-large.mp4"
   };
 
   // Get video source based on reelId, fall back to default if not found
   const videoSource = videoSources[reelId] || videoSources["default"];
+  
+  // Force play the video when it's in view
+  useEffect(() => {
+    if (videoRef.current) {
+      // This ensures autoplay works even with sound
+      const playPromise = videoRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Autoplay started successfully
+            console.log("Video autoplay started for", reelId);
+            // Unmute the video to enable sound
+            if (videoRef.current) {
+              videoRef.current.muted = false;
+              videoRef.current.volume = 0.5; // Set to half volume
+            }
+          })
+          .catch(error => {
+            // Autoplay was prevented
+            console.log("Autoplay prevented:", error);
+            // Many browsers require user interaction before unmuting
+            // We'll show a play button or notification in this case
+          });
+      }
+    }
+  }, [reelId]);
 
   return (
     <>
@@ -44,9 +70,10 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         className="absolute inset-0 object-cover w-full h-full"
         onDoubleClick={handleDoubleClick}
         onTouchStart={handleTap}
-        muted={false} // Enable audio
+        muted // Start muted to improve autoplay chances
         loop
         playsInline
+        autoPlay // Added autoPlay attribute
         poster={thumbnailUrl}
         preload="auto"
       >
@@ -82,7 +109,37 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
 
-      {/* Add volume control button */}
+      {/* Add play button for mobile (will appear if autoplay fails) */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <button 
+          className="bg-black/50 backdrop-blur-sm p-4 rounded-full hover:bg-streamixy-primary/30 transition-all opacity-0 hover:opacity-100 focus:opacity-100"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (videoRef.current) {
+              videoRef.current.play();
+              videoRef.current.muted = false;
+            }
+          }}
+          aria-label="Play video"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="32" 
+            height="32" 
+            viewBox="0 0 24 24" 
+            fill="white" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            className="text-white"
+          >
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Volume control button */}
       <div className="absolute bottom-4 right-4 z-10">
         <button 
           className="bg-black/50 backdrop-blur-sm p-2 rounded-full hover:bg-streamixy-primary/30 transition-all"
