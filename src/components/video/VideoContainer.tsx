@@ -1,5 +1,4 @@
-
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 
 interface VideoContainerProps {
@@ -23,6 +22,10 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
   displayedViewers,
   reelId
 }) => {
+  // State to track if user has interacted with the page
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  
   // Map of sample videos for different reels
   const videoSources: Record<string, string> = {
     "stream-1": "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4",
@@ -36,32 +39,93 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
   // Get video source based on reelId, fall back to default if not found
   const videoSource = videoSources[reelId] || videoSources["default"];
   
+  // Detect user interaction with the page
+  useEffect(() => {
+    const handleInteraction = () => {
+      setHasInteracted(true);
+    };
+    
+    // Add event listeners for common user interactions
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction);
+    window.addEventListener('keydown', handleInteraction);
+    
+    return () => {
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
+    };
+  }, []);
+  
   // Force play the video when it's in view
   useEffect(() => {
-    if (videoRef.current) {
-      // This ensures autoplay works even with sound
-      const playPromise = videoRef.current.play();
-      
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // Autoplay started successfully
-            console.log("Video autoplay started for", reelId);
-            // Unmute the video to enable sound
-            if (videoRef.current) {
-              videoRef.current.muted = false;
-              videoRef.current.volume = 0.5; // Set to half volume
-            }
-          })
-          .catch(error => {
-            // Autoplay was prevented
-            console.log("Autoplay prevented:", error);
-            // Many browsers require user interaction before unmuting
-            // We'll show a play button or notification in this case
-          });
+    if (!videoRef.current) return;
+    
+    // Function to attempt playback
+    const attemptPlayback = () => {
+      if (videoRef.current) {
+        // Set video to muted initially to increase autoplay success chance
+        videoRef.current.muted = true;
+        
+        const playPromise = videoRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("Video autoplay started for", reelId);
+              // Only unmute if user has interacted with the page
+              if (hasInteracted && !isMuted) {
+                videoRef.current!.muted = false;
+                videoRef.current!.volume = 0.5;
+              }
+            })
+            .catch(error => {
+              console.error("Autoplay prevented:", error);
+              // We'll keep trying to play the video with reduced intervals
+              setTimeout(attemptPlayback, 1000);
+            });
+        }
       }
+    };
+    
+    // Start attempting playback
+    attemptPlayback();
+    
+    // Create intersection observer to play/pause when in/out of view
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && videoRef.current) {
+            attemptPlayback();
+          } else if (!entry.isIntersecting && videoRef.current) {
+            videoRef.current.pause();
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
     }
-  }, [reelId]);
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+        videoRef.current.pause();
+      }
+    };
+  }, [reelId, hasInteracted, isMuted]);
+
+  // Toggle mute status
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      const newMutedState = !videoRef.current.muted;
+      videoRef.current.muted = newMutedState;
+      setIsMuted(newMutedState);
+    }
+  };
 
   return (
     <>
@@ -109,15 +173,25 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         <span className="text-xs text-white animate-pulse">{displayedViewers} viewers</span>
       </div>
 
-      {/* Add play button for mobile (will appear if autoplay fails) */}
+      {/* Play button - always visible initially to encourage interaction */}
       <div className="absolute inset-0 flex items-center justify-center">
         <button 
-          className="bg-black/50 backdrop-blur-sm p-4 rounded-full hover:bg-streamixy-primary/30 transition-all opacity-0 hover:opacity-100 focus:opacity-100"
+          className="bg-black/50 backdrop-blur-sm p-4 rounded-full hover:bg-streamixy-primary/30 transition-all opacity-100 hover:opacity-100 focus:opacity-100"
           onClick={(e) => {
             e.stopPropagation();
+            setHasInteracted(true);
+            
             if (videoRef.current) {
-              videoRef.current.play();
-              videoRef.current.muted = false;
+              videoRef.current.play()
+                .then(() => {
+                  if (videoRef.current) {
+                    videoRef.current.muted = false;
+                    setIsMuted(false);
+                  }
+                })
+                .catch(err => {
+                  console.error("Play failed even after interaction:", err);
+                });
             }
           }}
           aria-label="Play video"
@@ -143,29 +217,43 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       <div className="absolute bottom-4 right-4 z-10">
         <button 
           className="bg-black/50 backdrop-blur-sm p-2 rounded-full hover:bg-streamixy-primary/30 transition-all"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (videoRef.current) {
-              videoRef.current.muted = !videoRef.current.muted;
-            }
-          }}
+          onClick={toggleMute}
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="text-white"
-          >
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-          </svg>
+          {videoRef.current && !videoRef.current.muted ? (
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="text-white"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            </svg>
+          ) : (
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="text-white"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="23" y1="9" x2="17" y2="15" />
+              <line x1="17" y1="9" x2="23" y2="15" />
+            </svg>
+          )}
         </button>
       </div>
     </>
