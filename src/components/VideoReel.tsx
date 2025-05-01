@@ -130,26 +130,32 @@ const VideoReel: React.FC<VideoReelProps> = ({
   ];
 
   const handleVote = (amount: number) => {
-    setCreatorTokens(prev => prev + amount);
-    
-    const tokenElement = document.createElement("div");
-    tokenElement.innerText = `+${amount}`;
-    tokenElement.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
-    tokenElement.style.left = `${Math.random() * 80 + 10}%`;
-    tokenElement.style.bottom = "0";
-    document.body.appendChild(tokenElement);
-    
-    setTimeout(() => {
-      document.body.removeChild(tokenElement);
-    }, 3000);
-    
-    toast({
-      title: "Tokens Sent!",
+    const transaction: TokenTransaction = {
+      amount: amount,
+      type: "vote",
       description: `You voted ${amount} SYX tokens to ${creator.name}`,
-    });
+      creatorUsername: creator.username
+    };
     
-    const closeVoteDialog = document.querySelector("[data-vote-dialog] button[data-dialog-close]") as HTMLButtonElement;
-    if (closeVoteDialog) closeVoteDialog.click();
+    if (handleTransaction(transaction)) {
+      setCreatorTokens(prev => prev + amount);
+      
+      const tokenElement = document.createElement("div");
+      tokenElement.innerText = `+${amount}`;
+      tokenElement.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
+      tokenElement.style.left = `${Math.random() * 80 + 10}%`;
+      tokenElement.style.bottom = "0";
+      document.body.appendChild(tokenElement);
+      
+      setTimeout(() => {
+        document.body.removeChild(tokenElement);
+      }, 3000);
+      
+      const closeVoteDialog = document.querySelector("[data-vote-dialog] button[data-dialog-close]") as HTMLButtonElement;
+      if (closeVoteDialog) closeVoteDialog.click();
+    }
+    
+    setIsVoteDialogOpen(false);
   };
 
   const handleCustomVote = () => {
@@ -167,26 +173,29 @@ const VideoReel: React.FC<VideoReelProps> = ({
   };
 
   const handleGift = (gift: { name: string; value: number; emoji: string }) => {
-    setCreatorTokens(prev => prev + gift.value);
-    
-    const giftElement = document.createElement("div");
-    giftElement.innerText = gift.emoji;
-    giftElement.className = "fixed text-4xl z-50 animate-float";
-    giftElement.style.left = `${Math.random() * 80 + 10}%`;
-    giftElement.style.bottom = "0";
-    document.body.appendChild(giftElement);
-    
-    setTimeout(() => {
-      document.body.removeChild(giftElement);
-    }, 3000);
-    
-    toast({
-      title: "Gift Sent!",
+    const transaction: TokenTransaction = {
+      amount: gift.value,
+      type: "gift",
       description: `You gifted a ${gift.name} (${gift.value} SYX) to ${creator.name}`,
-    });
+      creatorUsername: creator.username
+    };
     
-    const closeGiftDialog = document.querySelector("[data-gift-dialog] button[data-dialog-close]") as HTMLButtonElement;
-    if (closeGiftDialog) closeGiftDialog.click();
+    if (handleTransaction(transaction)) {
+      setCreatorTokens(prev => prev + gift.value);
+      
+      const giftElement = document.createElement("div");
+      giftElement.innerText = gift.emoji;
+      giftElement.className = "fixed text-4xl z-50 animate-float";
+      giftElement.style.left = `${Math.random() * 80 + 10}%`;
+      giftElement.style.bottom = "0";
+      document.body.appendChild(giftElement);
+      
+      setTimeout(() => {
+        document.body.removeChild(giftElement);
+      }, 3000);
+    }
+    
+    setIsGiftDialogOpen(false);
   };
 
   // Update the share options to use white text color for ALL platforms
@@ -443,7 +452,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
       <TokenVoteDialog
         isOpen={isVoteDialogOpen}
         onClose={() => setIsVoteDialogOpen(false)}
-        onVote={handleTokenTransaction}
+        onVote={handleVote}
         creatorName={creator.name}
         tokenBalance={tokenBalance}
       />
@@ -451,7 +460,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
       <GiftDialog
         isOpen={isGiftDialogOpen}
         onClose={() => setIsGiftDialogOpen(false)}
-        onGift={handleTokenTransaction}
+        onGift={handleGift}
         creatorName={creator.name}
         tokenBalance={tokenBalance}
       />

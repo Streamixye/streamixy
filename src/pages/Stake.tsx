@@ -14,9 +14,12 @@ import { Progress } from "@/components/ui/progress";
 import { Coins, TrendingUp, ArrowUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
+import { useTokens } from "@/hooks/use-tokens";
+import { useToast } from "@/hooks/use-toast";
 
 const Stake = () => {
-  const [balance, setBalance] = useState(1000);
+  const { tokenBalance, handleTransaction } = useTokens();
+  const { toast } = useToast();
   const [stakeAmount, setStakeAmount] = useState("");
   const [stakedAmount, setStakedAmount] = useState(0);
   const [lockPeriod, setLockPeriod] = useState("3weeks");
@@ -57,44 +60,59 @@ const Stake = () => {
   
   const handleStake = () => {
     const amount = parseFloat(stakeAmount);
-    if (isNaN(amount) || amount <= 0 || amount > balance) return;
+    if (isNaN(amount) || amount <= 0 || amount > tokenBalance) return;
     
-    const newStakedAmount = stakedAmount + amount;
-    setStakedAmount(newStakedAmount);
-    setBalance(balance - amount);
-    setShowPerformance(true);
-    
-    const transaction = {
-      id: Date.now(),
-      type: "Stake",
+    // Use the token transaction system
+    const success = handleTransaction({
       amount: amount,
-      date: new Date().toLocaleString(),
-      period: lockPeriod
-    };
+      type: "stake",
+      description: `Staked ${amount} SYX tokens for ${lockPeriod === "3weeks" ? "3 weeks" : lockPeriod === "6weeks" ? "6 weeks" : "3 months"}`
+    });
     
-    setTransactions([transaction, ...transactions]);
-    setStakeAmount("");
+    if (success) {
+      const newStakedAmount = stakedAmount + amount;
+      setStakedAmount(newStakedAmount);
+      setShowPerformance(true);
+      
+      const transaction = {
+        id: Date.now(),
+        type: "Stake",
+        amount: amount,
+        date: new Date().toLocaleString(),
+        period: lockPeriod
+      };
+      
+      setTransactions([transaction, ...transactions]);
+      setStakeAmount("");
+    }
   };
   
   const handleWithdraw = () => {
     if (stakedAmount <= 0) return;
     
-    const newBalance = balance + stakedAmount + earnings;
-    setBalance(newBalance);
+    // Use the token transaction system for withdrawal
+    const totalWithdraw = stakedAmount + earnings;
+    const success = handleTransaction({
+      amount: totalWithdraw,
+      type: "withdraw",
+      description: `Withdrew ${stakedAmount} SYX + ${earnings.toFixed(2)} SYX rewards`
+    });
     
-    const transaction = {
-      id: Date.now(),
-      type: "Withdraw",
-      amount: stakedAmount,
-      date: new Date().toLocaleString(),
-      earnings: earnings
-    };
-    
-    setTransactions([transaction, ...transactions]);
-    setStakedAmount(0);
-    setEarnings(0);
-    setProgress(0);
-    setShowPerformance(false);
+    if (success) {
+      const transaction = {
+        id: Date.now(),
+        type: "Withdraw",
+        amount: stakedAmount,
+        date: new Date().toLocaleString(),
+        earnings: earnings
+      };
+      
+      setTransactions([transaction, ...transactions]);
+      setStakedAmount(0);
+      setEarnings(0);
+      setProgress(0);
+      setShowPerformance(false);
+    }
   };
 
   return (
@@ -183,6 +201,10 @@ const Stake = () => {
                 <span>APY:</span>
                 <span className="font-medium">{apy}%</span>
               </p>
+              <p className="flex justify-between text-white">
+                <span>Available Balance:</span>
+                <span className="font-medium">{tokenBalance.toFixed(2)} SYX</span>
+              </p>
             </div>
           </div>
         </CardContent>
@@ -190,7 +212,7 @@ const Stake = () => {
           <Button 
             className="w-full bg-streamixy-primary hover:bg-streamixy-primary/80"
             onClick={handleStake}
-            disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > balance}
+            disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > tokenBalance}
           >
             <ArrowUp className="h-4 w-4 mr-2" />
             Stake Now
