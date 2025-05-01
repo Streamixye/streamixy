@@ -37,7 +37,7 @@ const GiftDialog: React.FC<GiftDialogProps> = ({
       amount: gift.value,
       type: "gift",
       description: `You gifted a ${gift.name} (${gift.value} SYX) to ${creatorName}`,
-      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_') // Create username from creator name
+      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_')
     });
   };
 

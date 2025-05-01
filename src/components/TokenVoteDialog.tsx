@@ -35,15 +35,16 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
       amount,
       type: "vote",
       description: `You voted ${amount} SYX tokens to ${creatorName}`,
-      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_')  // Create a username from the creator name
+      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_')
     });
   };
 
   const handleCustomVote = () => {
     const amount = parseInt(voteAmount);
-    if (!amount || amount <= 0) return;
-    handleVote(amount);
-    setVoteAmount("");
+    if (!isNaN(amount) && amount > 0) {
+      handleVote(amount);
+      setVoteAmount("");
+    }
   };
 
   return (
