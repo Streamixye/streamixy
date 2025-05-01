@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -63,6 +64,64 @@ const GoLive = () => {
     name: "JaneDoe",
     username: "jane_doe",
     avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb"
+  };
+
+  // Define the addComment, addGift, and handleJoinRequest functions first
+  const addComment = (text: string, username: string = mockUser.name) => {
+    const newComment = {
+      id: commentCounter,
+      text,
+      username
+    };
+    
+    setComments(prev => [...prev, newComment]);
+    setCommentCounter(prev => prev + 1);
+    
+    // Show notification for comments from others
+    if (username !== mockUser.name) {
+      toast({
+        title: "New Comment",
+        description: `${username}: ${text}`
+      });
+    }
+    
+    // Remove the comment after a timeout
+    setTimeout(() => {
+      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
+    }, 5000);
+  };
+
+  const addGift = (emoji: string) => {
+    const newGift = {
+      id: giftCounter,
+      emoji
+    };
+    
+    setReceivedGifts(prev => [...prev, newGift]);
+    setGiftCounter(prev => prev + 1);
+    
+    setTimeout(() => {
+      setReceivedGifts(prev => prev.filter(gift => gift.id !== newGift.id));
+    }, 3000);
+  };
+
+  const handleJoinRequest = (request: { username: string; message: string }) => {
+    const newRequest = {
+      id: requestCounter,
+      username: request.username,
+      message: request.message,
+      status: "pending" as const
+    };
+    
+    setJoinRequests(prev => [...prev, newRequest]);
+    setRequestCounter(prev => prev + 1);
+    
+    toast({
+      title: "Join Request",
+      description: `${request.username} wants to join your stream: "${request.message}"`
+    });
+    
+    return newRequest.id;
   };
 
   // Capture thumbnail for stream
@@ -178,7 +237,12 @@ const GoLive = () => {
   useEffect(() => {
     if (!isLive || !currentStreamId) return;
     
-    const handleTokenTransaction = (event: CustomEvent) => {
+    const handleTokenTransaction = (event: CustomEvent<{
+      creatorName: string;
+      creatorUsername: string;
+      amount: number;
+      type: string;
+    }>) => {
       const { creatorName, creatorUsername, amount, type } = event.detail;
       
       // Only process if this transaction is for the current creator
@@ -207,7 +271,10 @@ const GoLive = () => {
     };
     
     // Listen for like events
-    const handleLike = (event: CustomEvent) => {
+    const handleLike = (event: CustomEvent<{
+      creatorName: string;
+      creatorUsername: string;
+    }>) => {
       const { creatorName, creatorUsername } = event.detail;
       
       // Only process if this like is for the current creator
@@ -234,8 +301,14 @@ const GoLive = () => {
     };
     
     // Listen for join requests
-    const handleJoinRequest = (event: CustomEvent) => {
-      const { creatorName, creatorUsername, username, message, requestId } = event.detail;
+    const handleJoinRequestEvent = (event: CustomEvent<{
+      creatorName: string;
+      creatorUsername: string;
+      username: string;
+      message: string;
+      requestId: string;
+    }>) => {
+      const { creatorName, creatorUsername, username, message } = event.detail;
       
       // Only process if this request is for the current creator
       if (creatorName === mockUser.name || creatorUsername === mockUser.username) {
@@ -246,14 +319,14 @@ const GoLive = () => {
     
     document.addEventListener('tokenTransaction', handleTokenTransaction as EventListener);
     document.addEventListener('streamLike', handleLike as EventListener);
-    document.addEventListener('joinRequest', handleJoinRequest as EventListener);
+    document.addEventListener('joinRequest', handleJoinRequestEvent as EventListener);
     
     return () => {
       document.removeEventListener('tokenTransaction', handleTokenTransaction as EventListener);
       document.removeEventListener('streamLike', handleLike as EventListener);
-      document.removeEventListener('joinRequest', handleJoinRequest as EventListener);
+      document.removeEventListener('joinRequest', handleJoinRequestEvent as EventListener);
     };
-  }, [isLive, currentStreamId, mockUser.name, mockUser.username, likeCounter, addGift, addComment, handleJoinRequest]);
+  }, [isLive, currentStreamId, mockUser.name, mockUser.username, likeCounter]);
 
   const startCamera = async () => {
     try {
@@ -417,69 +490,12 @@ const GoLive = () => {
     }
   };
 
-  const addComment = (text: string, username: string = mockUser.name) => {
-    const newComment = {
-      id: commentCounter,
-      text,
-      username
-    };
-    
-    setComments(prev => [...prev, newComment]);
-    setCommentCounter(prev => prev + 1);
-    
-    // Show notification for comments from others
-    if (username !== mockUser.name) {
-      toast({
-        title: "New Comment",
-        description: `${username}: ${text}`
-      });
-    }
-    
-    // Remove the comment after a timeout
-    setTimeout(() => {
-      setComments(prev => prev.filter(comment => comment.id !== newComment.id));
-    }, 5000);
-  };
-
-  const addGift = (emoji: string) => {
-    const newGift = {
-      id: giftCounter,
-      emoji
-    };
-    
-    setReceivedGifts(prev => [...prev, newGift]);
-    setGiftCounter(prev => prev + 1);
-    
-    setTimeout(() => {
-      setReceivedGifts(prev => prev.filter(gift => gift.id !== newGift.id));
-    }, 3000);
-  };
-
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
     if (comment.trim()) {
       addComment(comment);
       setComment("");
     }
-  };
-
-  const handleJoinRequest = (request: { username: string; message: string }) => {
-    const newRequest = {
-      id: requestCounter,
-      username: request.username,
-      message: request.message,
-      status: "pending" as const
-    };
-    
-    setJoinRequests(prev => [...prev, newRequest]);
-    setRequestCounter(prev => prev + 1);
-    
-    toast({
-      title: "Join Request",
-      description: `${request.username} wants to join your stream: "${request.message}"`
-    });
-    
-    return newRequest.id;
   };
 
   const handleJoinRequestResponse = (requestId: number, accepted: boolean) => {
@@ -982,3 +998,4 @@ const GoLive = () => {
 };
 
 export default GoLive;
+
