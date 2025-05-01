@@ -34,6 +34,7 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
       amount,
       type: "vote",
       description: `You voted ${amount} SYX tokens to ${creatorName}`,
+      creatorUsername: creatorName.toLowerCase().replace(/\s+/g, '_')  // Create a username from the creator name
     });
     onClose();
   };

@@ -95,7 +95,13 @@ const VideoReel: React.FC<VideoReelProps> = ({
   }, [isLive]);
 
   const handleTokenTransaction = (transaction: TokenTransaction) => {
-    if (handleTransaction(transaction)) {
+    // Add creator's username to the transaction
+    const enhancedTransaction = {
+      ...transaction,
+      creatorUsername: creator.username
+    };
+    
+    if (handleTransaction(enhancedTransaction)) {
       setCreatorTokens(prev => prev + transaction.amount);
       
       const element = document.createElement("div");
@@ -222,7 +228,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setIsShareDialogOpen(false);
   };
 
-  // Implement manual like function - removed toast notification
+  // Implement manual like function with event dispatch
   const handleManualLike = () => {
     // Increment likes count
     setLikesCount(prev => prev + 1);
@@ -231,9 +237,20 @@ const VideoReel: React.FC<VideoReelProps> = ({
     const centerX = 50;
     const centerY = 50;
     createLikeAnimation(centerX, centerY);
+    
+    // Emit a custom event for the like
+    const event = new CustomEvent('streamLike', { 
+      detail: { 
+        creatorName: creator.name,
+        creatorUsername: creator.username,
+        streamId: streamId,
+        timestamp: new Date().toISOString()
+      } 
+    });
+    document.dispatchEvent(event);
   };
 
-  // Enhanced double-tap like handler
+  // Enhanced double-tap like handler with event dispatch
   const handleTap = (e: React.TouchEvent) => {
     if (!videoRef.current) return;
     
@@ -254,10 +271,21 @@ const VideoReel: React.FC<VideoReelProps> = ({
       const y = ((touch.clientY - rect.top) / rect.height) * 100;
       
       createLikeAnimation(x, y);
+      
+      // Emit a custom event for the like
+      const event = new CustomEvent('streamLike', { 
+        detail: { 
+          creatorName: creator.name,
+          creatorUsername: creator.username,
+          streamId: streamId,
+          timestamp: new Date().toISOString()
+        } 
+      });
+      document.dispatchEvent(event);
     }
   };
   
-  // Handle direct double click for desktop users - removed toast notification
+  // Handle direct double click for desktop users with event dispatch
   const handleDoubleClick = (e: React.MouseEvent) => {
     if (!videoRef.current) return;
     
@@ -273,6 +301,17 @@ const VideoReel: React.FC<VideoReelProps> = ({
     setLikesCount(prev => prev + 1);
     
     createLikeAnimation(x, y);
+    
+    // Emit a custom event for the like
+    const event = new CustomEvent('streamLike', { 
+      detail: { 
+        creatorName: creator.name,
+        creatorUsername: creator.username,
+        streamId: streamId,
+        timestamp: new Date().toISOString()
+      } 
+    });
+    document.dispatchEvent(event);
   };
   
   const createLikeAnimation = (x: number, y: number) => {
@@ -309,6 +348,7 @@ const VideoReel: React.FC<VideoReelProps> = ({
     });
   };
 
+  // Modified request function to emit an event
   const handleRequest = () => {
     setRequestStatus("pending");
     
@@ -316,6 +356,23 @@ const VideoReel: React.FC<VideoReelProps> = ({
       title: "Request Sent",
       description: `Your request to join ${creator.name}'s live has been sent!`,
     });
+    
+    // Generate a unique ID for this request
+    const requestId = Date.now();
+    
+    // Emit a custom event with join request details
+    const event = new CustomEvent('joinRequest', { 
+      detail: {
+        requestId,
+        creatorName: creator.name,
+        creatorUsername: creator.username,
+        username: "current_user", // This would be the actual logged-in user
+        message: "I would like to join your stream!",
+        streamId: streamId,
+        timestamp: new Date().toISOString()
+      } 
+    });
+    document.dispatchEvent(event);
     
     // Simulate creator responding after a delay
     setTimeout(() => {

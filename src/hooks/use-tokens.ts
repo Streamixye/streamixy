@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 export interface TokenTransaction {
   amount: number;
   type: 'vote' | 'gift';
   description: string;
+  creatorUsername?: string; // Add creator username for targeting specific streams
 }
 
 export const useTokens = (creatorName: string) => {
@@ -27,6 +28,16 @@ export const useTokens = (creatorName: string) => {
       title: `${transaction.type === 'vote' ? 'Tokens Sent!' : 'Gift Sent!'}`,
       description: transaction.description,
     });
+    
+    // Emit a custom event with transaction details
+    const event = new CustomEvent('tokenTransaction', { 
+      detail: {
+        ...transaction,
+        creatorName,
+        timestamp: new Date().toISOString()
+      } 
+    });
+    document.dispatchEvent(event);
     
     return true;
   };

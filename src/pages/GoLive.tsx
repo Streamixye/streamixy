@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { 
   Camera, 
@@ -58,7 +57,7 @@ const GoLive = () => {
   const [streamTitle, setStreamTitle] = useState("Live Stream");
   const [currentStreamId, setCurrentStreamId] = useState("");
   const { toast } = useToast();
-  const { startStream, endStream, inviteUser } = useLiveStreams();
+  const { startStream, endStream, inviteUser, liveStreams } = useLiveStreams();
   
   const mockUser = {
     name: "JaneDoe",
@@ -176,6 +175,86 @@ const GoLive = () => {
     }
   }, [activeFilter, isLive]);
 
+  useEffect(() => {
+    if (!isLive || !currentStreamId) return;
+    
+    const handleTokenTransaction = (event: CustomEvent) => {
+      const { creatorName, creatorUsername, amount, type } = event.detail;
+      
+      // Only process if this transaction is for the current creator
+      if (creatorName === mockUser.name || creatorUsername === mockUser.username) {
+        setTotalTokens(prev => prev + amount);
+        
+        // Add visual feedback for token transaction
+        const tokenElement = document.createElement("div");
+        tokenElement.innerText = `+${amount}`;
+        tokenElement.className = "fixed text-xl font-bold text-streamixy-primary z-50 animate-float";
+        tokenElement.style.left = `${Math.random() * 80 + 10}%`;
+        tokenElement.style.bottom = "0";
+        document.body.appendChild(tokenElement);
+        
+        setTimeout(() => {
+          document.body.removeChild(tokenElement);
+        }, 3000);
+        
+        // Add a comment notification for the transaction
+        if (type === 'vote') {
+          addComment(`Sent you ${amount} tokens!`, "Anonymous Viewer");
+        } else if (type === 'gift') {
+          addGift(amount > 100 ? "💎" : amount > 50 ? "👑" : amount > 10 ? "🦁" : "🌹");
+        }
+      }
+    };
+    
+    // Listen for like events
+    const handleLike = (event: CustomEvent) => {
+      const { creatorName, creatorUsername } = event.detail;
+      
+      // Only process if this like is for the current creator
+      if (creatorName === mockUser.name || creatorUsername === mockUser.username) {
+        // Create a random position for the heart animation
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        
+        // Add a new like animation
+        const newLike = {
+          id: likeCounter,
+          x,
+          y
+        };
+        
+        setLikeAnimations(prev => [...prev, newLike]);
+        setLikeCounter(prev => prev + 1);
+        
+        // Remove the like animation after it completes
+        setTimeout(() => {
+          setLikeAnimations(prev => prev.filter(like => like.id !== newLike.id));
+        }, 1500);
+      }
+    };
+    
+    // Listen for join requests
+    const handleJoinRequest = (event: CustomEvent) => {
+      const { creatorName, creatorUsername, username, message, requestId } = event.detail;
+      
+      // Only process if this request is for the current creator
+      if (creatorName === mockUser.name || creatorUsername === mockUser.username) {
+        // Add the join request
+        handleJoinRequest({ username, message: message || "Can I join your stream?" });
+      }
+    };
+    
+    document.addEventListener('tokenTransaction', handleTokenTransaction as EventListener);
+    document.addEventListener('streamLike', handleLike as EventListener);
+    document.addEventListener('joinRequest', handleJoinRequest as EventListener);
+    
+    return () => {
+      document.removeEventListener('tokenTransaction', handleTokenTransaction as EventListener);
+      document.removeEventListener('streamLike', handleLike as EventListener);
+      document.removeEventListener('joinRequest', handleJoinRequest as EventListener);
+    };
+  }, [isLive, currentStreamId, mockUser.name, mockUser.username, likeCounter, addGift, addComment, handleJoinRequest]);
+
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -227,7 +306,7 @@ const GoLive = () => {
       const thumbnailUrl = captureStreamThumbnail();
       const streamId = `stream-${Date.now()}`;
       
-      // Register the stream
+      // Register the stream with initial tokens and likes counts
       startStream({
         streamId,
         creatorName: mockUser.name,

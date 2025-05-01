@@ -10,6 +10,9 @@ export interface LiveStream {
   thumbnailUrl: string;
   viewers: number;
   invitedUsers: string[];
+  tokens?: number; // Track tokens earned during stream
+  likes?: number; // Track likes received during stream
+  requests?: Array<{id: number, username: string, message: string}>; // Track join requests
 }
 
 // Store active live streams in localStorage to persist between page refreshes
@@ -78,20 +81,84 @@ export const useLiveStreams = () => {
       });
     };
 
+    const handleTokenTransaction = (event: CustomEvent) => {
+      const { creatorName, amount, type } = event.detail;
+      setLiveStreams(prev => {
+        const updated = prev.map(stream => {
+          if (stream.creatorName === creatorName) {
+            return {
+              ...stream,
+              tokens: (stream.tokens || 0) + amount
+            };
+          }
+          return stream;
+        });
+        saveStreams(updated);
+        return updated;
+      });
+    };
+
+    const handleLike = (event: CustomEvent) => {
+      const { creatorName } = event.detail;
+      setLiveStreams(prev => {
+        const updated = prev.map(stream => {
+          if (stream.creatorName === creatorName) {
+            return {
+              ...stream,
+              likes: (stream.likes || 0) + 1
+            };
+          }
+          return stream;
+        });
+        saveStreams(updated);
+        return updated;
+      });
+    };
+
+    const handleJoinRequest = (event: CustomEvent) => {
+      const { creatorName, requestId, username, message } = event.detail;
+      setLiveStreams(prev => {
+        const updated = prev.map(stream => {
+          if (stream.creatorName === creatorName) {
+            const currentRequests = stream.requests || [];
+            return {
+              ...stream,
+              requests: [...currentRequests, { id: requestId, username, message }]
+            };
+          }
+          return stream;
+        });
+        saveStreams(updated);
+        return updated;
+      });
+    };
+
     document.addEventListener('streamStart', handleStreamStart as EventListener);
     document.addEventListener('streamEnd', handleStreamEnd as EventListener);
     document.addEventListener('inviteUser', handleInviteUser as EventListener);
+    document.addEventListener('tokenTransaction', handleTokenTransaction as EventListener);
+    document.addEventListener('streamLike', handleLike as EventListener);
+    document.addEventListener('joinRequest', handleJoinRequest as EventListener);
 
     return () => {
       document.removeEventListener('streamStart', handleStreamStart as EventListener);
       document.removeEventListener('streamEnd', handleStreamEnd as EventListener);
       document.removeEventListener('inviteUser', handleInviteUser as EventListener);
+      document.removeEventListener('tokenTransaction', handleTokenTransaction as EventListener);
+      document.removeEventListener('streamLike', handleLike as EventListener);
+      document.removeEventListener('joinRequest', handleJoinRequest as EventListener);
     };
   }, []);
 
   // Function to start a live stream
   const startStream = (stream: Omit<LiveStream, "invitedUsers">) => {
-    const newStream = { ...stream, invitedUsers: [] };
+    const newStream = { 
+      ...stream, 
+      invitedUsers: [],
+      tokens: 0,
+      likes: 0,
+      requests: []
+    };
     
     // Dispatch custom event for the new stream
     const event = new CustomEvent('streamStart', { detail: newStream });
