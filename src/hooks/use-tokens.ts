@@ -11,15 +11,48 @@ export interface TokenTransaction {
 
 export const useTokens = (creatorName: string = '') => {
   const { toast } = useToast();
-  const [tokenBalance, setTokenBalance] = useState(() => {
-    // Try to get balance from localStorage
+  const [tokenBalance, setTokenBalance] = useState<number>(() => {
+    // Check if wallet is connected
+    const walletConnected = localStorage.getItem('userWalletConnected') === 'true';
+    
+    // If wallet is not connected, return default demo balance
+    if (!walletConnected) {
+      return 1000; // Default demo balance
+    }
+    
+    // If wallet is connected, try to get real balance from localStorage
     const savedBalance = localStorage.getItem('userTokenBalance');
-    return savedBalance ? parseInt(savedBalance, 10) : 1000; // Default initial balance
+    return savedBalance ? parseInt(savedBalance, 10) : 100; // Default starting balance for real accounts
   });
 
   // Save balance to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('userTokenBalance', tokenBalance.toString());
+  }, [tokenBalance]);
+
+  // Check for wallet connection changes
+  useEffect(() => {
+    const checkWalletStatus = () => {
+      const walletConnected = localStorage.getItem('userWalletConnected') === 'true';
+      
+      if (walletConnected) {
+        // If wallet was just connected and we're still showing demo balance of 1000,
+        // reset to the default real account starting balance
+        if (tokenBalance === 1000) {
+          setTokenBalance(100);
+        }
+      }
+    };
+    
+    // Set up event listener for storage changes (in case wallet is connected in another tab)
+    window.addEventListener('storage', checkWalletStatus);
+    
+    // Initial check
+    checkWalletStatus();
+    
+    return () => {
+      window.removeEventListener('storage', checkWalletStatus);
+    };
   }, [tokenBalance]);
 
   // Subscribe to global token events

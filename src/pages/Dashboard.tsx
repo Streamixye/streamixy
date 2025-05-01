@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -71,9 +70,12 @@ interface StakedNFT {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"creator" | "audience">("creator");
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(() => {
+    // Check if wallet is already connected from localStorage
+    return localStorage.getItem('userWalletConnected') === 'true';
+  });
   const [profile, setProfile] = useState({
-    nickname: "StreamerXYZ",
+    nickname: "New User",
     avatar: ""
   });
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -85,95 +87,108 @@ const Dashboard = () => {
   const { toast: showToast } = useToast();
   const { tokenBalance, setTokenBalance, handleTransaction } = useTokens();
 
+  // Initialize user data based on wallet connection status
   useEffect(() => {
-    const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
-    setEarnings(randomEarnings);
-    
-    const randomFollowers = Math.floor(Math.random() * 5000) + 500;
-    setFollowers(randomFollowers);
-    
-    const sampleTransactions: Transaction[] = [
-      {
-        id: 1,
-        type: "earn",
-        amount: 250,
-        date: new Date(Date.now() - 3600000),
-        details: "Stream earnings"
-      },
-      {
-        id: 2,
-        type: "gift",
-        amount: 150,
-        date: new Date(Date.now() - 7200000),
-        details: "Gift from @viewer123"
-      },
-      {
-        id: 3,
-        type: "stake",
-        amount: 500,
-        date: new Date(Date.now() - 86400000),
-        details: "Staked for 3 weeks"
-      },
-      {
-        id: 4,
-        type: "withdraw",
-        amount: -200,
-        date: new Date(Date.now() - 172800000),
-        details: "Withdrawal to wallet"
-      },
-      {
-        id: 5,
-        type: "referral",
-        amount: 300,
-        date: new Date(Date.now() - 259200000),
-        details: "Referral bonus: @newuser1"
+    if (walletConnected) {
+      // For connected wallet users, initialize with clean slate
+      setEarnings(0);
+      setFollowers(0);
+      setTransactions([]);
+      
+      // Clear any stored NFTs and set to empty array for new users
+      localStorage.setItem("stakedNFTs", JSON.stringify([]));
+      setStakedNFTs([]);
+    } else {
+      // For demo users (wallet not connected), initialize with dummy data
+      const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
+      setEarnings(randomEarnings);
+      
+      const randomFollowers = Math.floor(Math.random() * 5000) + 500;
+      setFollowers(randomFollowers);
+      
+      const sampleTransactions: Transaction[] = [
+        {
+          id: 1,
+          type: "earn",
+          amount: 250,
+          date: new Date(Date.now() - 3600000),
+          details: "Stream earnings"
+        },
+        {
+          id: 2,
+          type: "gift",
+          amount: 150,
+          date: new Date(Date.now() - 7200000),
+          details: "Gift from @viewer123"
+        },
+        {
+          id: 3,
+          type: "stake",
+          amount: 500,
+          date: new Date(Date.now() - 86400000),
+          details: "Staked for 3 weeks"
+        },
+        {
+          id: 4,
+          type: "withdraw",
+          amount: -200,
+          date: new Date(Date.now() - 172800000),
+          details: "Withdrawal to wallet"
+        },
+        {
+          id: 5,
+          type: "referral",
+          amount: 300,
+          date: new Date(Date.now() - 259200000),
+          details: "Referral bonus: @newuser1"
+        }
+      ];
+      setTransactions(sampleTransactions);
+      
+      // Load staked NFTs from localStorage or use dummy data
+      try {
+        const savedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+        if (savedNFTs.length > 0) {
+          const formattedNFTs: StakedNFT[] = savedNFTs.map((nft: any) => ({
+            id: nft.id,
+            name: nft.name,
+            amount: nft.staked,
+            roi: nft.roi || 0,
+            pnl: nft.pnl || 0,
+            image: nft.image
+          }));
+          setStakedNFTs(formattedNFTs);
+        } else {
+          const sampleStakedNFTs: StakedNFT[] = [
+            {
+              id: 1,
+              name: "Streamixy Genesis",
+              amount: 250,
+              roi: 12.5,
+              pnl: 31.25
+            },
+            {
+              id: 2,
+              name: "Digital Dreamscape",
+              amount: 180,
+              roi: -4.2,
+              pnl: -7.56
+            },
+            {
+              id: 3,
+              name: "Virtual Reality",
+              amount: 320,
+              roi: 6.8,
+              pnl: 21.76
+            }
+          ];
+          setStakedNFTs(sampleStakedNFTs);
+        }
+      } catch (error) {
+        console.error("Error loading staked NFTs:", error);
       }
-    ];
-    setTransactions(sampleTransactions);
-    
-    // Load staked NFTs from localStorage
-    try {
-      const savedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
-      if (savedNFTs.length > 0) {
-        const formattedNFTs: StakedNFT[] = savedNFTs.map((nft: any) => ({
-          id: nft.id,
-          name: nft.name,
-          amount: nft.staked,
-          roi: nft.roi || 0,
-          pnl: nft.pnl || 0,
-          image: nft.image
-        }));
-        setStakedNFTs(formattedNFTs);
-      } else {
-        const sampleStakedNFTs: StakedNFT[] = [
-          {
-            id: 1,
-            name: "Streamixy Genesis",
-            amount: 250,
-            roi: 12.5,
-            pnl: 31.25
-          },
-          {
-            id: 2,
-            name: "Digital Dreamscape",
-            amount: 180,
-            roi: -4.2,
-            pnl: -7.56
-          },
-          {
-            id: 3,
-            name: "Virtual Reality",
-            amount: 320,
-            roi: 6.8,
-            pnl: 21.76
-          }
-        ];
-        setStakedNFTs(sampleStakedNFTs);
-      }
-    } catch (error) {
-      console.error("Error loading staked NFTs:", error);
     }
-  }, []);
+  }, [walletConnected]);
 
   // Listen for NFT staking/unstaking events
   useEffect(() => {
@@ -211,7 +226,11 @@ const Dashboard = () => {
     };
   }, []);
 
+  // Simulate live updates only for demo mode (wallet not connected)
   useEffect(() => {
+    // Don't run simulations if wallet is connected (live user)
+    if (walletConnected) return;
+
     const interval = setInterval(() => {
       setEarnings(prev => {
         const change = Math.random() * 10 - 3;
@@ -248,14 +267,30 @@ const Dashboard = () => {
     }, 5000);
     
     return () => clearInterval(interval);
-  }, [mode, showToast]);
+  }, [mode, showToast, walletConnected]);
 
   const connectWallet = () => {
+    // Set wallet as connected in localStorage for persistence
+    localStorage.setItem('userWalletConnected', 'true');
     setWalletConnected(true);
+    
+    // Reset to a clean slate for the new live user
+    setProfile({
+      nickname: "New User",
+      avatar: ""
+    });
+    setEarnings(0);
+    setFollowers(0);
+    setTransactions([]);
+    setStakedNFTs([]);
+    
+    // Clear stored NFTs for fresh start
+    localStorage.setItem("stakedNFTs", JSON.stringify([]));
+    
     showToast({
       title: "Wallet Connected",
-      description: "Your wallet has been successfully connected.",
-      duration: 3000,
+      description: "Your wallet has been successfully connected. Welcome to your new account!",
+      duration: 5000,
     });
   };
 
@@ -401,6 +436,11 @@ const Dashboard = () => {
     transaction => transaction.type === 'referral' || transaction.type === 'withdraw'
   );
 
+  // Generate a random wallet address for display if wallet is connected
+  const walletAddress = walletConnected 
+    ? `0x${Math.random().toString(16).substring(2, 10)}...${Math.random().toString(16).substring(2, 6)}`
+    : undefined;
+
   return (
     <div className="min-h-screen bg-black text-white p-2 sm:p-4 pb-20">
       <div className="flex items-center justify-between mb-4">
@@ -434,7 +474,7 @@ const Dashboard = () => {
           <h2 className="text-lg sm:text-xl font-bold text-white">{profile.nickname}</h2>
           <p className="text-sm text-white">
             {walletConnected 
-              ? `Wallet: 0x...${Math.random().toString(36).substring(2, 8)}` 
+              ? `Wallet: ${walletAddress}` 
               : 'Wallet Not Connected'}
           </p>
         </div>
@@ -491,9 +531,10 @@ const Dashboard = () => {
             <Button 
               onClick={connectWallet}
               className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+              disabled={walletConnected}
             >
               <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet
+              {walletConnected ? "Wallet Connected" : "Connect Wallet"}
             </Button>
             
             <Button 
@@ -658,9 +699,10 @@ const Dashboard = () => {
             <Button 
               onClick={connectWallet}
               className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+              disabled={walletConnected}
             >
               <Wallet className="mr-2 h-4 w-4" />
-              Connect Wallet
+              {walletConnected ? "Wallet Connected" : "Connect Wallet"}
             </Button>
             
             <Button 
@@ -846,6 +888,28 @@ const Dashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="mt-4 w-full">
+        {!walletConnected && (
+          <div className="p-4 rounded-lg border border-yellow-600/30 bg-yellow-500/10 mb-6">
+            <h3 className="font-medium text-yellow-400 flex items-center">
+              <Wallet className="h-4 w-4 mr-2" />
+              Demo Mode Active
+            </h3>
+            <p className="text-sm text-yellow-400/80 mt-1">
+              You're currently viewing demo data. Connect your wallet to start your actual account.
+            </p>
+          </div>
+        )}
+        <Button 
+          onClick={connectWallet}
+          className="w-full mt-2 bg-streamixy-primary hover:bg-streamixy-primary/80 flex items-center justify-center text-white"
+          disabled={walletConnected}
+        >
+          <Wallet className="mr-2 h-4 w-4" />
+          {walletConnected ? "Wallet Connected" : "Connect Wallet"}
+        </Button>
+      </div>
     </div>
   );
 };
