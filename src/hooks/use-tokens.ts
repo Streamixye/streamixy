@@ -34,6 +34,38 @@ export const useTokens = (creatorName: string) => {
       detail: {
         ...transaction,
         creatorName,
+        timestamp: new Date().toISOString(),
+        affectsNftPrice: true // Flag to indicate this should affect NFT prices
+      } 
+    });
+    document.dispatchEvent(event);
+    
+    return true;
+  };
+
+  // Now add a specific function for NFT staking
+  const handleNftStake = (nftId: number, amount: number, description: string) => {
+    if (tokenBalance < amount) {
+      toast({
+        title: "Insufficient Balance",
+        description: `You need ${amount} SYX tokens to stake on this NFT`,
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setTokenBalance(prev => prev - amount);
+    toast({
+      title: "NFT Stake Successful",
+      description,
+    });
+    
+    // Emit a custom event for NFT staking
+    const event = new CustomEvent('nftStake', { 
+      detail: {
+        nftId,
+        amount,
+        creatorName, // Link the NFT to the creator
         timestamp: new Date().toISOString()
       } 
     });
@@ -44,6 +76,7 @@ export const useTokens = (creatorName: string) => {
 
   return {
     tokenBalance,
-    handleTransaction
+    handleTransaction,
+    handleNftStake
   };
 };

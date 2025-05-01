@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -13,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { TrendingUp, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useLiveStreams, LiveStream } from "@/hooks/use-live-streams";
+import { useToast } from "@/hooks/use-toast";
 
 interface NFT {
   id: number;
@@ -28,6 +29,16 @@ interface NFT {
   staked: number;
   pnl: number;
   description?: string;
+}
+
+interface StreamMetrics {
+  streamId: string;
+  viewerCount: number;
+  tokensEarned: number;
+  creatorName: string;
+  creatorUsername: string;
+  duration: number;
+  timestamp: string;
 }
 
 const NFTs = () => {
@@ -92,6 +103,8 @@ const NFTs = () => {
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  const { liveStreams } = useLiveStreams();
+  const { toast } = useToast();
   
   // Load NFTs from localStorage on component mount
   useEffect(() => {
@@ -130,51 +143,188 @@ const NFTs = () => {
     };
   }, []);
   
+  // Load livestream metrics from localStorage
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNfts(prevNfts => 
-        prevNfts.map(nft => {
-          const priceChange = Math.random() * 5; // Only positive changes
-          const previousPrice = nft.price;
-          const newPrice = nft.price + priceChange;
-          
-          const roiChange = Math.random() * 2; // Only positive ROI changes
-          const previousRoi = nft.roi;
-          const newRoi = nft.roi + roiChange;
-          
-          const capChange = 1; // Always positive
-          const previousMarketCap = nft.marketCap;
-          const newMarketCap = nft.marketCap + (capChange * Math.random() * 1000);
-          
-          // Calculate PNL, ensuring it's always positive and incremental
-          let pnl = nft.pnl;
-          
-          if (nft.staked > 0) {
-            // If stake is large (>= 500), give higher profit rate
-            if (nft.staked >= 500) {
-              pnl = Math.max(nft.pnl + 0.9, 0.9); // Start at least from 0.9
-            } else {
-              // Regular stakes increase by 0.01, starting from minimum 0.02
-              pnl = Math.max(nft.pnl + 0.01, 0.02);
-            }
-          }
+    try {
+      const savedMetrics: StreamMetrics[] = JSON.parse(localStorage.getItem('streamMetrics') || '[]');
+      
+      // Update NFTs based on saved metrics
+      if (savedMetrics.length > 0) {
+        setNfts(prevNfts => {
+          return prevNfts.map(nft => {
+            // Find metrics for this creator
+            const creatorMetrics = savedMetrics.filter(
+              metric => metric.creatorName === nft.creator || nft.creator.includes(metric.creatorName)
+            );
             
-          return {
-            ...nft,
-            previousPrice: previousPrice,
-            price: newPrice,
-            previousMarketCap: previousMarketCap,
-            marketCap: newMarketCap,
-            previousRoi: previousRoi,
-            roi: newRoi,
-            pnl: pnl
-          };
-        })
-      );
-    }, 3000);
+            if (creatorMetrics.length > 0) {
+              // Calculate influence based on total viewers from metrics
+              const totalViewers = creatorMetrics.reduce((sum, metric) => sum + metric.viewerCount, 0);
+              const viewerInfluence = Math.min(totalViewers / 100, 0.25); // Cap at 25% increase
+              
+              // Apply influence to price
+              const newPrice = nft.price * (1 + viewerInfluence);
+              
+              // Update PNL based on viewer count if NFT is staked
+              let newPnl = nft.pnl;
+              if (nft.staked > 0) {
+                // Higher viewer count = higher PNL
+                newPnl = Math.max(nft.pnl + (viewerInfluence * 0.05), 0.02);
+              }
+              
+              return {
+                ...nft,
+                previousPrice: nft.price,
+                price: newPrice,
+                pnl: newPnl
+              };
+            }
+            return nft;
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Error loading stream metrics:", error);
+    }
+  }, []);
+  
+  // Listen for stream metrics updates
+  useEffect(() => {
+    const handleStreamEnded = (event: CustomEvent) => {
+      const { streamId, viewerCount, tokensEarned, creatorName, creatorUsername } = event.detail;
+      
+      // Update NFTs related to this creator
+      setNfts(prevNfts => {
+        return prevNfts.map(nft => {
+          // Check if this NFT belongs to the creator who ended the stream
+          if (nft.creator === creatorName || nft.creator.includes(creatorName)) {
+            // Calculate price increase based on viewer count (more viewers = higher increase)
+            const viewerInfluence = Math.min(viewerCount / 100, 0.15); // Cap at 15% increase
+            const newPrice = nft.price * (1 + viewerInfluence);
+            
+            // Update PNL based on viewer count if NFT is staked
+            let newPnl = nft.pnl;
+            if (nft.staked > 0) {
+              // Higher viewer count = higher PNL
+              newPnl = Math.max(nft.pnl + (viewerInfluence * 0.05), 0.02);
+            }
+            
+            toast({
+              title: "NFT Price Updated",
+              description: `${nft.name} price increased by ${(viewerInfluence * 100).toFixed(2)}% due to ${creatorName}'s stream performance!`,
+              duration: 4000,
+            });
+            
+            return {
+              ...nft,
+              previousPrice: nft.price,
+              price: newPrice,
+              pnl: newPnl
+            };
+          }
+          return nft;
+        });
+      });
+    };
+    
+    document.addEventListener('streamEnded', handleStreamEnded as EventListener);
+    
+    return () => {
+      document.removeEventListener('streamEnded', handleStreamEnded as EventListener);
+    };
+  }, [toast]);
+  
+  // Track live audiences in real-time to update NFT prices
+  useEffect(() => {
+    // Update NFT prices based on current live stream viewer counts
+    const interval = setInterval(() => {
+      if (liveStreams.length > 0) {
+        setNfts(prevNfts => 
+          prevNfts.map(nft => {
+            // Find all live streams by this creator
+            const creatorStreams = liveStreams.filter(
+              stream => stream.creatorName === nft.creator || nft.creator.includes(stream.creatorName)
+            );
+            
+            if (creatorStreams.length > 0) {
+              // Calculate total viewers across all streams
+              const totalViewers = creatorStreams.reduce((sum, stream) => sum + stream.viewers, 0);
+              
+              // More viewers = higher price increase
+              const viewerInfluence = Math.min(totalViewers / 200, 0.05); // More conservative for real-time updates
+              const previousPrice = nft.price;
+              const newPrice = nft.price * (1 + viewerInfluence);
+              
+              // Calculate market cap based on price and staked amount
+              const marketCapMultiplier = nft.staked > 0 ? (1 + (nft.staked / 1000)) : 1;
+              const previousMarketCap = nft.marketCap;
+              const newMarketCap = newPrice * 200 * marketCapMultiplier; // Assuming 200 circulating supply
+              
+              // Update ROI based on price change
+              const roiChange = viewerInfluence * 100; // Convert to percentage
+              const previousRoi = nft.roi;
+              const newRoi = nft.roi + roiChange;
+              
+              // Update PNL if staked, based on audience size
+              let pnl = nft.pnl;
+              if (nft.staked > 0) {
+                // Higher viewer count = higher PNL gains
+                const pnlIncrease = totalViewers > 500 ? 0.05 : (totalViewers > 100 ? 0.02 : 0.01);
+                pnl = Math.max(nft.pnl + pnlIncrease, 0.02);
+              }
+              
+              return {
+                ...nft,
+                previousPrice,
+                price: newPrice,
+                previousMarketCap,
+                marketCap: newMarketCap,
+                previousRoi,
+                roi: newRoi,
+                pnl
+              };
+            }
+            
+            // If no active streams for this creator, use regular small random changes
+            const priceChange = Math.random() * 3; // Smaller change without active streams
+            const previousPrice = nft.price;
+            const newPrice = nft.price + priceChange;
+            
+            // Calculate market cap based on price and staked amount
+            const marketCapInfluence = nft.staked > 0 ? (nft.staked / 2000) : 0.5;
+            const capChange = marketCapInfluence * Math.random() * 500;
+            const previousMarketCap = nft.marketCap;
+            const newMarketCap = nft.marketCap + capChange;
+            
+            // Update ROI with smaller change when no streams
+            const roiChange = Math.random() * 0.5;
+            const previousRoi = nft.roi;
+            const newRoi = nft.roi + roiChange;
+            
+            // Update PNL with minimal increase if staked
+            let pnl = nft.pnl;
+            if (nft.staked > 0) {
+              // Default small increase when no active streams
+              pnl = Math.max(nft.pnl + 0.005, 0.02);
+            }
+            
+            return {
+              ...nft,
+              previousPrice,
+              price: newPrice,
+              previousMarketCap,
+              marketCap: newMarketCap,
+              previousRoi,
+              roi: newRoi,
+              pnl
+            };
+          })
+        );
+      }
+    }, 5000); // Update every 5 seconds to reflect audience changes
     
     return () => clearInterval(interval);
-  }, []);
+  }, [liveStreams]);
   
   const handleStakeModalOpen = (e: React.MouseEvent, nft: NFT) => {
     e.preventDefault();
@@ -198,10 +348,21 @@ const NFTs = () => {
             initialPnl = 0.9; // Higher starting PNL for large stakes
           }
           
+          // Update market cap immediately based on stake amount
+          const newMarketCap = nft.marketCap + (amount * 0.8);
+          
+          toast({
+            title: "Staking Successful",
+            description: `You've staked ${amount} SYX on ${nft.name}. This has increased its market cap!`,
+            duration: 3000,
+          });
+          
           return {
             ...nft, 
             staked: nft.staked + amount,
-            pnl: initialPnl // Start with initial PNL
+            pnl: initialPnl, // Start with initial PNL
+            marketCap: newMarketCap, // Immediately increase market cap
+            previousMarketCap: nft.marketCap // Store previous market cap
           };
         }
         return nft;
