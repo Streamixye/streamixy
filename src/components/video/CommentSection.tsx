@@ -40,7 +40,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (onFollow) onFollow(!isFollowing);
   };
 
-  // Simplified comment click handler to work across all reels
+  // Improved comment click handler to work consistently across all reels
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
