@@ -56,18 +56,6 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         playPromise
           .then(() => {
             console.log("Video autoplay started for", reelId);
-            
-            // Try unmuting after a short delay if autoplay succeeded
-            setTimeout(() => {
-              if (videoRef.current) {
-                try {
-                  videoRef.current.muted = false;
-                  setIsMuted(false);
-                } catch (e) {
-                  console.log("Could not unmute automatically:", e);
-                }
-              }
-            }, 1000);
           })
           .catch(error => {
             console.error("Autoplay prevented:", error);
@@ -82,8 +70,16 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && videoRef.current) {
-            // Try to play when video comes into view
+            // Attempt to play the video that's in view
             attemptPlayback();
+            
+            // Pause all other videos
+            document.querySelectorAll('video').forEach(video => {
+              if (video !== videoRef.current) {
+                video.pause();
+                video.muted = true;
+              }
+            });
           } else if (!entry.isIntersecting && videoRef.current) {
             // Pause when out of view to save resources
             videoRef.current.pause();
@@ -120,11 +116,18 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
     };
   }, [reelId]);
 
-  // Toggle mute status
+  // Toggle mute status with proper isolation
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
       const newMutedState = !videoRef.current.muted;
+      
+      // First mute all videos
+      document.querySelectorAll('video').forEach(video => {
+        video.muted = true;
+      });
+      
+      // Then unmute only the current video if requested
       videoRef.current.muted = newMutedState;
       setIsMuted(newMutedState);
     }
@@ -143,6 +146,7 @@ const VideoContainer: React.FC<VideoContainerProps> = ({
         autoPlay
         poster={thumbnailUrl}
         preload="auto"
+        data-reel-id={reelId}
       >
         <source src={videoSource} type="video/mp4" />
         Your browser does not support the video tag.

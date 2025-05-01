@@ -107,15 +107,32 @@ const Index = () => {
     
     if (e.deltaY > 0) {
       // Scrolling down
-      setCurrentReelIndex((prevIndex) =>
-        prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentReelIndex((prevIndex) => {
+        const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
+        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        return newIndex;
+      });
     } else {
       // Scrolling up
-      setCurrentReelIndex((prevIndex) =>
-        prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
-      );
+      setCurrentReelIndex((prevIndex) => {
+        const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
+        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        return newIndex;
+      });
     }
+  };
+
+  // Helper function to pause all videos except the active one
+  const pauseAllVideosExcept = (activeReelId: string) => {
+    setTimeout(() => {
+      document.querySelectorAll('video').forEach(video => {
+        const videoReelId = video.dataset.reelId;
+        if (videoReelId !== activeReelId) {
+          video.pause();
+          video.muted = true;
+        }
+      });
+    }, 100); // Small delay to ensure DOM is updated
   };
 
   // Handle touch events for mobile
@@ -170,27 +187,35 @@ const Index = () => {
     
     if (touchStart - touchEnd > 50) {
       // Swipe up - go to next reel
-      setCurrentReelIndex((prevIndex) =>
-        prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentReelIndex((prevIndex) => {
+        const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
+        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        return newIndex;
+      });
     } else if (touchEnd - touchStart > 50) {
       // Swipe down - go to previous reel
-      setCurrentReelIndex((prevIndex) =>
-        prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
-      );
+      setCurrentReelIndex((prevIndex) => {
+        const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
+        pauseAllVideosExcept(`stream-${newIndex + 1}`);
+        return newIndex;
+      });
     }
   };
 
   const handleNext = () => {
-    setCurrentReelIndex((prevIndex) =>
-      prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1
-    );
+    setCurrentReelIndex((prevIndex) => {
+      const newIndex = prevIndex === MOCK_REELS.length - 1 ? 0 : prevIndex + 1;
+      pauseAllVideosExcept(`stream-${newIndex + 1}`);
+      return newIndex;
+    });
   };
 
   const handlePrevious = () => {
-    setCurrentReelIndex((prevIndex) =>
-      prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1
-    );
+    setCurrentReelIndex((prevIndex) => {
+      const newIndex = prevIndex === 0 ? MOCK_REELS.length - 1 : prevIndex - 1;
+      pauseAllVideosExcept(`stream-${newIndex + 1}`);
+      return newIndex;
+    });
   };
 
   // Add keyboard navigation
@@ -231,6 +256,11 @@ const Index = () => {
       document.removeEventListener('mouseup', handleInteractionEnd);
     };
   }, []);
+
+  // Ensure only the current reel's video plays
+  useEffect(() => {
+    pauseAllVideosExcept(`stream-${currentReelIndex + 1}`);
+  }, [currentReelIndex]);
 
   return (
     <SidebarProvider>
