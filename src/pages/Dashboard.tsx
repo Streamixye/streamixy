@@ -346,8 +346,12 @@ const Dashboard = () => {
     } 
     // Update token balance for audience mode
     else {
-      // Directly update token balance for audience
-      setTokenBalance(prev => prev + referralAmount);
+      // Use handleReferralClaim for audience mode to ensure proper transaction handling
+      handleTransaction({
+        amount: referralAmount,
+        type: 'referral',
+        description: "Referral bonus claimed"
+      });
       
       showToast({
         title: "Referral Bonus Claimed",
@@ -359,7 +363,7 @@ const Dashboard = () => {
     // Emit a custom event to update token balance globally
     const event = new CustomEvent('tokenBalanceUpdate', {
       detail: {
-        type: 'earn',
+        type: 'referral',
         amount: referralAmount
       }
     });

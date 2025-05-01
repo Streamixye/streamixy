@@ -4,7 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface TokenTransaction {
   amount: number;
-  type: 'vote' | 'gift' | 'stake' | 'withdraw' | 'stakeNft' | 'withdrawNft';
+  type: 'vote' | 'gift' | 'stake' | 'withdraw' | 'stakeNft' | 'withdrawNft' | 'referral';
   description: string;
   creatorUsername?: string; // Add creator username for targeting specific streams
 }
@@ -27,7 +27,7 @@ export const useTokens = (creatorName: string = '') => {
     const handleTokenEvent = (e: CustomEvent) => {
       const { type, amount } = e.detail;
       
-      if (type === 'earn' || type === 'withdraw') {
+      if (type === 'earn' || type === 'withdraw' || type === 'referral') {
         setTokenBalance(prev => {
           const newBalance = prev + amount;
           return newBalance;
@@ -72,11 +72,15 @@ export const useTokens = (creatorName: string = '') => {
         }`,
         description: transaction.description,
       });
-    } else if (transaction.type === 'withdraw' || transaction.type === 'withdrawNft') {
-      // Add tokens for withdrawal actions
+    } else if (transaction.type === 'withdraw' || transaction.type === 'withdrawNft' || transaction.type === 'referral') {
+      // Add tokens for withdrawal actions and referrals
       setTokenBalance(prev => prev + transaction.amount);
       toast({
-        title: `${transaction.type === 'withdraw' ? 'Withdrawal Successful' : 'NFT Unstake Successful'}`,
+        title: `${
+          transaction.type === 'withdraw' ? 'Withdrawal Successful' : 
+          transaction.type === 'withdrawNft' ? 'NFT Unstake Successful' :
+          'Referral Bonus Claimed'
+        }`,
         description: transaction.description,
       });
     }
@@ -112,12 +116,22 @@ export const useTokens = (creatorName: string = '') => {
       description,
     });
   };
+  
+  // Referral claim function
+  const handleReferralClaim = (amount: number, description: string) => {
+    return handleTransaction({
+      amount,
+      type: 'referral',
+      description,
+    });
+  };
 
   return {
     tokenBalance,
     setTokenBalance, // Expose this for direct updates from outside
     handleTransaction,
     handleNftStake,
-    handleNftUnstake
+    handleNftUnstake,
+    handleReferralClaim
   };
 };
