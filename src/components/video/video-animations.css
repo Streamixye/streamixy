@@ -1,0 +1,63 @@
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+
+@keyframes like-float {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -80%) scale(1);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-out forwards;
+}
+
+.animate-like-float {
+  animation: like-float 1.5s ease-out forwards;
+}
+
+/* Heart animation specific classes */
+@keyframes heart-float {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(var(--rotation));
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 1;
+    transform: scale(var(--scale)) translateY(-30px) rotate(var(--rotation));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(var(--scale)) translateY(-60px) rotate(var(--rotation));
+  }
+}
+
+.animate-heart-float {
+  animation: heart-float 2s ease-out forwards;
+}
