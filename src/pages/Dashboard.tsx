@@ -345,12 +345,8 @@ const Dashboard = () => {
     } 
     // Update token balance for audience mode
     else {
-      // Use handleTransaction from useTokens hook to update the token balance
-      handleTransaction({
-        amount: referralAmount,
-        type: 'withdraw', // Using withdraw type as it adds tokens to balance
-        description: "Referral bonus claimed"
-      });
+      // Directly update token balance for audience
+      setTokenBalance(prev => prev + referralAmount);
       
       showToast({
         title: "Referral Bonus Claimed",

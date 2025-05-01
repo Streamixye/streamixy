@@ -35,10 +35,10 @@ export const useTokens = (creatorName: string = '') => {
       }
     };
     
-    document.addEventListener('tokenBalanceUpdate', handleTokenEvent as EventListener);
+    window.addEventListener('tokenBalanceUpdate', handleTokenEvent as EventListener);
     
     return () => {
-      document.removeEventListener('tokenBalanceUpdate', handleTokenEvent as EventListener);
+      window.removeEventListener('tokenBalanceUpdate', handleTokenEvent as EventListener);
     };
   }, []);
 
