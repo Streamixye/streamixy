@@ -4,15 +4,37 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-interface VoteButtonProps {
-  icon: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-  active?: boolean;
-  requiresWallet?: boolean;
-  onWalletRequired?: () => void;
+// Configuration types for wallet integration
+export interface WalletConfig {
+  requiresWallet: boolean;
+  redirectPath?: string;
+  redirectDelay?: number;
 }
 
+// Define props interface with improved documentation
+export interface VoteButtonProps {
+  /** Icon to display in the button */
+  icon: React.ReactNode;
+  /** Label text for the button */
+  label: string;
+  /** Click handler function */
+  onClick?: () => void;
+  /** Whether the button is in active state */
+  active?: boolean;
+  /** Whether wallet connection is required */
+  requiresWallet?: boolean;
+  /** Optional custom wallet required callback */
+  onWalletRequired?: () => void;
+  /** Optional configuration for wallet interactions */
+  walletConfig?: Partial<WalletConfig>;
+}
+
+/**
+ * VoteButton Component
+ * 
+ * Used for interactive elements that may require wallet connectivity
+ * such as voting, gifting, following, etc.
+ */
 const VoteButton: React.FC<VoteButtonProps> = ({
   icon,
   label,
@@ -20,18 +42,30 @@ const VoteButton: React.FC<VoteButtonProps> = ({
   active = false,
   requiresWallet = false,
   onWalletRequired,
+  walletConfig,
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Default wallet configuration that can be overridden
+  const defaultWalletConfig: WalletConfig = {
+    requiresWallet: requiresWallet,
+    redirectPath: '/dashboard',
+    redirectDelay: 1500,
+  };
+  
+  // Merge provided config with defaults
+  const config = { ...defaultWalletConfig, ...walletConfig };
   
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // If wallet is required but not connected, trigger wallet required callback
-    if (requiresWallet) {
+    // Wallet connection check with configurable behavior
+    if (config.requiresWallet) {
       const hasWallet = localStorage.getItem('userWalletConnected') === 'true';
       if (!hasWallet) {
+        // Use custom callback if provided
         if (onWalletRequired) {
           onWalletRequired();
         } else {
@@ -42,10 +76,12 @@ const VoteButton: React.FC<VoteButtonProps> = ({
             variant: "destructive",
           });
           
-          // Redirect to dashboard after a short delay
-          setTimeout(() => {
-            navigate('/dashboard');
-          }, 1500);
+          // Configurable redirection
+          if (config.redirectPath) {
+            setTimeout(() => {
+              navigate(config.redirectPath!);
+            }, config.redirectDelay);
+          }
         }
         return;
       }
@@ -58,6 +94,7 @@ const VoteButton: React.FC<VoteButtonProps> = ({
     <button
       onClick={handleClick}
       className="flex flex-col items-center glass p-1.5 rounded-full mb-2 transition-all hover:bg-streamixy-primary/30"
+      data-testid={`vote-button-${label.toLowerCase()}`}
     >
       <div
         className={cn(

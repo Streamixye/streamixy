@@ -8,17 +8,36 @@ import LiveComment from "../LiveComment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-interface ActionButtonsProps {
+// Configuration for wallet requirements
+const WALLET_CONFIG = {
+  redirectPath: '/dashboard',
+  redirectDelay: 2000
+};
+
+export interface ActionButtonsProps {
+  /** Handler for vote button clicks */
   onVoteClick: () => void;
+  /** Handler for gift button clicks */
   onGiftClick: () => void;
+  /** Handler for share button clicks */
   onShareClick: () => void;
+  /** Handler for search button clicks */
   onSearchClick: () => void;
+  /** Handler for request button clicks */
   onRequestClick: () => void;
+  /** Current request status */
   requestStatus: "idle" | "pending" | "accepted" | "rejected";
+  /** Function to stop event propagation */
   stopAllPropagation: (e: React.MouseEvent) => void;
-  reelId: string; // Add unique ID for each reel
+  /** Unique identifier for the reel */
+  reelId: string;
 }
 
+/**
+ * Action Buttons Component
+ * 
+ * Displays interactive buttons for video interactions like voting, gifts, etc.
+ */
 const ActionButtons: React.FC<ActionButtonsProps> = ({
   onVoteClick,
   onGiftClick,
@@ -33,6 +52,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Custom wallet required handler with configurable behavior
   const handleWalletRequired = () => {
     toast({
       title: "Wallet Connection Required",
@@ -59,6 +79,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
             onClick={onVoteClick}
             requiresWallet={true}
             onWalletRequired={handleWalletRequired}
+            walletConfig={WALLET_CONFIG}
           />
         </div>
 
@@ -69,6 +90,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
             onClick={onGiftClick}
             requiresWallet={true}
             onWalletRequired={handleWalletRequired}
+            walletConfig={WALLET_CONFIG}
           />
         </div>
 
@@ -83,6 +105,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
         <button 
           className="bg-black/40 backdrop-blur-sm p-3 rounded-full hover:bg-streamixy-primary/30 transition-all"
           onClick={onSearchClick}
+          data-testid="search-button"
         >
           <Search className="h-7 w-7 text-white" />
           <span className="text-[8px] text-white/70 mt-0.5">Search</span>
@@ -94,6 +117,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           onClick={onRequestClick}
           requiresWallet={true}
           onWalletRequired={handleWalletRequired}
+          walletConfig={WALLET_CONFIG}
         />
       </div>
     </div>

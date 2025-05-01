@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
+// Types for token transactions
 export interface TokenTransaction {
   amount: number;
   type: 'vote' | 'gift' | 'stake' | 'withdraw' | 'stakeNft' | 'withdrawNft' | 'referral';
@@ -9,6 +10,30 @@ export interface TokenTransaction {
   creatorUsername?: string; // Add creator username for targeting specific streams
 }
 
+// Wallet status type for type safety
+export type WalletStatus = 'connected' | 'disconnected';
+
+// Event details for token balance updates
+export interface TokenEventDetail {
+  type: string;
+  amount: number;
+}
+
+// Event interface for token transactions
+export interface TokenTransactionEvent extends CustomEvent {
+  detail: TokenTransaction & {
+    creatorName: string;
+    timestamp: string;
+    affectsNftPrice: boolean;
+  };
+}
+
+/**
+ * Token management hook
+ * 
+ * Provides functionality for managing user tokens, transactions, and wallet state
+ * @param creatorName Optional creator name for targeted transactions
+ */
 export const useTokens = (creatorName: string = '') => {
   const { toast } = useToast();
   const [tokenBalance, setTokenBalance] = useState<number>(() => {
@@ -57,7 +82,7 @@ export const useTokens = (creatorName: string = '') => {
 
   // Subscribe to global token events
   useEffect(() => {
-    const handleTokenEvent = (e: CustomEvent) => {
+    const handleTokenEvent = (e: CustomEvent<TokenEventDetail>) => {
       const { type, amount } = e.detail;
       
       if (type === 'earn' || type === 'withdraw' || type === 'referral') {
@@ -75,7 +100,12 @@ export const useTokens = (creatorName: string = '') => {
     };
   }, []);
 
-  const handleTransaction = (transaction: TokenTransaction) => {
+  /**
+   * Handle a token transaction
+   * @param transaction The transaction details
+   * @returns boolean Success status of the transaction
+   */
+  const handleTransaction = (transaction: TokenTransaction): boolean => {
     if (tokenBalance < transaction.amount && 
         (transaction.type === 'vote' || 
          transaction.type === 'gift' || 
@@ -132,8 +162,14 @@ export const useTokens = (creatorName: string = '') => {
     return true;
   };
 
-  // NFT staking function
-  const handleNftStake = (nftId: number, amount: number, description: string) => {
+  /**
+   * NFT staking function
+   * @param nftId NFT identifier
+   * @param amount Amount to stake
+   * @param description Transaction description
+   * @returns boolean Success status
+   */
+  const handleNftStake = (nftId: number, amount: number, description: string): boolean => {
     return handleTransaction({
       amount,
       type: 'stakeNft',
@@ -141,8 +177,14 @@ export const useTokens = (creatorName: string = '') => {
     });
   };
 
-  // NFT unstake function
-  const handleNftUnstake = (nftId: number, amount: number, description: string) => {
+  /**
+   * NFT unstake function
+   * @param nftId NFT identifier
+   * @param amount Amount to unstake
+   * @param description Transaction description
+   * @returns boolean Success status
+   */
+  const handleNftUnstake = (nftId: number, amount: number, description: string): boolean => {
     return handleTransaction({
       amount,
       type: 'withdrawNft',
@@ -150,13 +192,45 @@ export const useTokens = (creatorName: string = '') => {
     });
   };
   
-  // Referral claim function
-  const handleReferralClaim = (amount: number, description: string) => {
+  /**
+   * Referral claim function
+   * @param amount Amount to claim
+   * @param description Transaction description
+   * @returns boolean Success status
+   */
+  const handleReferralClaim = (amount: number, description: string): boolean => {
     return handleTransaction({
       amount,
       type: 'referral',
       description,
     });
+  };
+
+  /**
+   * Get current wallet connection status
+   * @returns WalletStatus Current wallet status
+   */
+  const getWalletStatus = (): WalletStatus => {
+    return localStorage.getItem('userWalletConnected') === 'true' 
+      ? 'connected' 
+      : 'disconnected';
+  };
+
+  /**
+   * Connect wallet and reset to live account
+   * @returns void
+   */
+  const connectWallet = (): void => {
+    localStorage.setItem('userWalletConnected', 'true');
+    setTokenBalance(100); // Reset to default balance for new accounts
+  };
+
+  /**
+   * Disconnect wallet
+   * @returns void
+   */
+  const disconnectWallet = (): void => {
+    localStorage.setItem('userWalletConnected', 'false');
   };
 
   return {
@@ -165,6 +239,9 @@ export const useTokens = (creatorName: string = '') => {
     handleTransaction,
     handleNftStake,
     handleNftUnstake,
-    handleReferralClaim
+    handleReferralClaim,
+    getWalletStatus,
+    connectWallet,
+    disconnectWallet
   };
 };
