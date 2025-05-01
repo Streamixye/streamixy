@@ -27,6 +27,7 @@ interface NFT {
   previousRoi: number;
   staked: number;
   pnl: number;
+  description?: string;
 }
 
 const NFTs = () => {
@@ -91,6 +92,43 @@ const NFTs = () => {
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
   const [stakeModalOpen, setStakeModalOpen] = useState(false);
+  
+  // Load NFTs from localStorage on component mount
+  useEffect(() => {
+    try {
+      const createdNFTs = JSON.parse(localStorage.getItem("createdNFTs") || "[]");
+      if (createdNFTs.length > 0) {
+        // Combine with existing NFTs but avoid duplicates
+        setNfts(prevNfts => {
+          const existingIds = new Set(prevNfts.map(nft => nft.id));
+          const newNfts = createdNFTs.filter((nft: NFT) => !existingIds.has(nft.id));
+          return [...prevNfts, ...newNfts];
+        });
+      }
+    } catch (error) {
+      console.error("Error loading NFTs from localStorage:", error);
+    }
+  }, []);
+  
+  // Listen for newly created NFTs
+  useEffect(() => {
+    const handleNftCreated = (event: CustomEvent) => {
+      const newNft = event.detail.nft;
+      setNfts(prevNfts => {
+        // Check if NFT already exists to avoid duplicates
+        if (!prevNfts.some(nft => nft.id === newNft.id)) {
+          return [...prevNfts, newNft];
+        }
+        return prevNfts;
+      });
+    };
+    
+    document.addEventListener('nftCreated', handleNftCreated as EventListener);
+    
+    return () => {
+      document.removeEventListener('nftCreated', handleNftCreated as EventListener);
+    };
+  }, []);
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -169,6 +207,14 @@ const NFTs = () => {
         return nft;
       })
     );
+    
+    // Save staked NFTs to localStorage
+    localStorage.setItem("stakedNFTs", JSON.stringify(
+      nfts.map(nft => nft.id === selectedNft.id 
+        ? {...nft, staked: nft.staked + parseFloat(stakeAmount)} 
+        : nft
+      ).filter(nft => nft.staked > 0)
+    ));
     
     setStakeAmount("");
     setStakeModalOpen(false);
