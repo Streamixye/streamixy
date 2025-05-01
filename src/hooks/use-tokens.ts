@@ -14,7 +14,7 @@ export const useTokens = (creatorName: string = '') => {
   const [tokenBalance, setTokenBalance] = useState(() => {
     // Try to get balance from localStorage
     const savedBalance = localStorage.getItem('userTokenBalance');
-    return savedBalance ? parseInt(savedBalance) : 1000; // Default initial balance
+    return savedBalance ? parseInt(savedBalance, 10) : 1000; // Default initial balance
   });
 
   // Save balance to localStorage whenever it changes

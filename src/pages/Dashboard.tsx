@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { 
   Tabs,
@@ -362,7 +363,7 @@ const Dashboard = () => {
         amount: referralAmount
       }
     });
-    document.dispatchEvent(event);
+    window.dispatchEvent(event);
   };
 
   const handleNFTCreated = () => {
