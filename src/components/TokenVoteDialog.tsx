@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,6 +10,8 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { TokenTransaction } from "@/hooks/use-tokens";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface TokenVoteDialogProps {
   isOpen: boolean;
@@ -27,8 +29,30 @@ const TokenVoteDialog: React.FC<TokenVoteDialogProps> = ({
   tokenBalance,
 }) => {
   const [voteAmount, setVoteAmount] = useState("");
-
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const predefinedAmounts = [10, 50, 100, 500, 1000];
+  
+  // Check wallet connection on component mount and when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const hasWallet = localStorage.getItem('userWalletConnected') === 'true';
+      if (!hasWallet) {
+        toast({
+          title: "Wallet Connection Required",
+          description: "Please connect your wallet from the dashboard to vote tokens.",
+          variant: "destructive",
+        });
+        
+        onClose();
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      }
+    }
+  }, [isOpen, navigate, toast, onClose]);
 
   const handleVote = (amount: number) => {
     onVote({

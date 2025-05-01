@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,6 +9,8 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { TokenTransaction } from "@/hooks/use-tokens";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface GiftDialogProps {
   isOpen: boolean;
@@ -25,12 +27,36 @@ const GiftDialog: React.FC<GiftDialogProps> = ({
   creatorName,
   tokenBalance,
 }) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const giftItems = [
     { id: 1, name: "Flower", value: 5, emoji: "🌹" },
     { id: 2, name: "Lion", value: 50, emoji: "🦁" },
     { id: 3, name: "Crown", value: 100, emoji: "👑" },
     { id: 4, name: "Diamond", value: 500, emoji: "💎" },
   ];
+  
+  // Check wallet connection on component mount and when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const hasWallet = localStorage.getItem('userWalletConnected') === 'true';
+      if (!hasWallet) {
+        toast({
+          title: "Wallet Connection Required",
+          description: "Please connect your wallet from the dashboard to send gifts.",
+          variant: "destructive",
+        });
+        
+        onClose();
+        
+        // Redirect to dashboard after a short delay
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      }
+    }
+  }, [isOpen, navigate, toast, onClose]);
 
   const handleGift = (gift: typeof giftItems[0]) => {
     onGift({

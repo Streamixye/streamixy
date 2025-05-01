@@ -7,6 +7,8 @@ interface VoteButtonProps {
   label: string;
   onClick?: () => void;
   active?: boolean;
+  requiresWallet?: boolean;
+  onWalletRequired?: () => void;
 }
 
 const VoteButton: React.FC<VoteButtonProps> = ({
@@ -14,10 +16,22 @@ const VoteButton: React.FC<VoteButtonProps> = ({
   label,
   onClick,
   active = false,
+  requiresWallet = false,
+  onWalletRequired,
 }) => {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // If wallet is required but not connected, trigger wallet required callback
+    if (requiresWallet) {
+      const hasWallet = localStorage.getItem('userWalletConnected') === 'true';
+      if (!hasWallet && onWalletRequired) {
+        onWalletRequired();
+        return;
+      }
+    }
+    
     if (onClick) onClick();
   };
 

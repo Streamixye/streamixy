@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from "react";
 import { Heart, UserPlus, Check, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import LiveComment from "../LiveComment";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface CommentSectionProps {
   onLike?: () => void;
@@ -18,16 +19,40 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   creatorName = "Creator",
   reelId
 }) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState<{id: number, text: string}[]>([]);
   const [commentCounter, setCommentCounter] = useState(0);
   
+  const checkWalletConnection = () => {
+    const hasWallet = localStorage.getItem('userWalletConnected') === 'true';
+    if (!hasWallet) {
+      toast({
+        title: "Wallet Connection Required",
+        description: "Please connect your wallet from the dashboard to perform this action.",
+        variant: "destructive",
+      });
+      
+      // Redirect to dashboard after a short delay
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+      
+      return false;
+    }
+    return true;
+  };
+  
   // Handle like button click
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!checkWalletConnection()) return;
+    
     if (onLike) onLike();
   };
   
@@ -35,6 +60,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const handleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!checkWalletConnection()) return;
+    
     setIsFollowing(!isFollowing);
     
     if (onFollow) onFollow(!isFollowing);
@@ -44,6 +72,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const handleCommentClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!checkWalletConnection()) return;
+    
     setIsCommentOpen(prev => !prev);
   };
 
@@ -51,6 +82,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const handleSubmitComment = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!checkWalletConnection()) return;
     
     if (!commentText.trim()) return;
     
@@ -77,6 +110,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
+      
+      if (!checkWalletConnection()) return;
       
       if (!commentText.trim()) return;
       

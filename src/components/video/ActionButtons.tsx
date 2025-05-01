@@ -1,10 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Gift, Search, Share, Heart } from "lucide-react";
 import VoteButton from "../VoteButton";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import LiveComment from "../LiveComment";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface ActionButtonsProps {
   onVoteClick: () => void;
@@ -28,6 +30,21 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   reelId
 }) => {
   const [commentCounter, setCommentCounter] = useState(0);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleWalletRequired = () => {
+    toast({
+      title: "Wallet Connection Required",
+      description: "Please connect your wallet from the dashboard to perform this action.",
+      variant: "destructive",
+    });
+    
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 2000);
+  };
 
   return (
     <div 
@@ -40,6 +57,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
             icon={<Heart className="h-7 w-7" />}
             label="Vote"
             onClick={onVoteClick}
+            requiresWallet={true}
+            onWalletRequired={handleWalletRequired}
           />
         </div>
 
@@ -48,6 +67,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
             icon={<Gift className="h-7 w-7" />}
             label="Gift"
             onClick={onGiftClick}
+            requiresWallet={true}
+            onWalletRequired={handleWalletRequired}
           />
         </div>
 
@@ -71,6 +92,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           icon={<Heart className="h-7 w-7" />}
           label="Request"
           onClick={onRequestClick}
+          requiresWallet={true}
+          onWalletRequired={handleWalletRequired}
         />
       </div>
     </div>
