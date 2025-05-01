@@ -48,6 +48,7 @@ import { Badge } from "@/components/ui/badge";
 import { BadgeDollarSign } from "@/components/ui/badge-dollar-sign";
 import { useNavigate } from "react-router-dom";
 import EditProfileDialog from "@/components/EditProfileDialog";
+import { useTokens } from "@/hooks/use-tokens";
 
 interface Transaction {
   id: number;
@@ -63,6 +64,7 @@ interface StakedNFT {
   amount: number;
   roi: number;
   pnl: number;
+  image?: string;
 }
 
 const Dashboard = () => {
@@ -80,6 +82,7 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [stakedNFTs, setStakedNFTs] = useState<StakedNFT[]>([]);
   const { toast: showToast } = useToast();
+  const { tokenBalance } = useTokens();
 
   useEffect(() => {
     const randomEarnings = Math.floor(Math.random() * 10000) + 1000;
@@ -127,30 +130,84 @@ const Dashboard = () => {
     ];
     setTransactions(sampleTransactions);
     
-    const sampleStakedNFTs: StakedNFT[] = [
-      {
-        id: 1,
-        name: "Streamixy Genesis",
-        amount: 250,
-        roi: 12.5,
-        pnl: 31.25
-      },
-      {
-        id: 2,
-        name: "Digital Dreamscape",
-        amount: 180,
-        roi: -4.2,
-        pnl: -7.56
-      },
-      {
-        id: 3,
-        name: "Virtual Reality",
-        amount: 320,
-        roi: 6.8,
-        pnl: 21.76
+    // Load staked NFTs from localStorage
+    try {
+      const savedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+      if (savedNFTs.length > 0) {
+        const formattedNFTs: StakedNFT[] = savedNFTs.map((nft: any) => ({
+          id: nft.id,
+          name: nft.name,
+          amount: nft.staked,
+          roi: nft.roi || 0,
+          pnl: nft.pnl || 0,
+          image: nft.image
+        }));
+        setStakedNFTs(formattedNFTs);
+      } else {
+        const sampleStakedNFTs: StakedNFT[] = [
+          {
+            id: 1,
+            name: "Streamixy Genesis",
+            amount: 250,
+            roi: 12.5,
+            pnl: 31.25
+          },
+          {
+            id: 2,
+            name: "Digital Dreamscape",
+            amount: 180,
+            roi: -4.2,
+            pnl: -7.56
+          },
+          {
+            id: 3,
+            name: "Virtual Reality",
+            amount: 320,
+            roi: 6.8,
+            pnl: 21.76
+          }
+        ];
+        setStakedNFTs(sampleStakedNFTs);
       }
-    ];
-    setStakedNFTs(sampleStakedNFTs);
+    } catch (error) {
+      console.error("Error loading staked NFTs:", error);
+    }
+  }, []);
+
+  // Listen for NFT staking/unstaking events
+  useEffect(() => {
+    const handleNftEvent = () => {
+      try {
+        const savedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+        if (savedNFTs.length > 0) {
+          const formattedNFTs: StakedNFT[] = savedNFTs.map((nft: any) => ({
+            id: nft.id,
+            name: nft.name,
+            amount: nft.staked,
+            roi: nft.roi || 0,
+            pnl: nft.pnl || 0,
+            image: nft.image
+          }));
+          setStakedNFTs(formattedNFTs);
+        } else {
+          // If no staked NFTs, clear the list
+          setStakedNFTs([]);
+        }
+      } catch (error) {
+        console.error("Error updating staked NFTs:", error);
+      }
+    };
+    
+    // Listen for storage changes (local storage updates from other tabs/components)
+    window.addEventListener('storage', handleNftEvent);
+    
+    // Set up an interval to periodically check for updates
+    const interval = setInterval(handleNftEvent, 5000);
+    
+    return () => {
+      window.removeEventListener('storage', handleNftEvent);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
@@ -302,6 +359,10 @@ const Dashboard = () => {
 
   const navigateToFeatures = () => {
     navigate("/features");
+  };
+
+  const handleNftDetails = (nftId: number) => {
+    navigate(`/nfts/${nftId}`);
   };
 
   // Filter transactions to only show referral and withdraw types
@@ -530,7 +591,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-white">{earnings.toFixed(2)}</div>
+                <div className="text-2xl font-bold text-white">{tokenBalance}</div>
                 <Button 
                   size="sm" 
                   className="mt-2 text-xs bg-streamixy-primary hover:bg-streamixy-primary/80 text-white"
@@ -554,7 +615,7 @@ const Dashboard = () => {
                   size="sm" 
                   variant="outline"
                   className="mt-2 text-xs bg-black border-white/20 hover:bg-black/80 text-white"
-                  onClick={() => window.location.href = '/nfts'}
+                  onClick={() => navigate('/nfts')}
                 >
                   View NFTs
                 </Button>
@@ -592,7 +653,8 @@ const Dashboard = () => {
                 {stakedNFTs.map(nft => (
                   <div 
                     key={nft.id}
-                    className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
+                    className="p-3 rounded-lg border border-white/10 hover:border-white/20 transition-colors cursor-pointer"
+                    onClick={() => handleNftDetails(nft.id)}
                   >
                     <div className="flex justify-between items-center">
                       <div className="font-medium text-white">{nft.name}</div>
@@ -601,7 +663,10 @@ const Dashboard = () => {
                           size="sm" 
                           variant="ghost"
                           className="h-6 text-xs text-white hover:text-white"
-                          onClick={() => window.location.href = '/nfts'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleNftDetails(nft.id);
+                          }}
                         >
                           Details
                           <ArrowRight className="ml-1 h-3 w-3" />
@@ -635,7 +700,7 @@ const Dashboard = () => {
                     <Button 
                       variant="link" 
                       className="text-streamixy-primary mt-2"
-                      onClick={() => window.location.href = '/nfts'}
+                      onClick={() => navigate('/nfts')}
                     >
                       Browse NFT marketplace
                     </Button>

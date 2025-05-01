@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   Card, 
   CardContent, 
@@ -12,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, TrendingDown, Coins } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { useTokens } from "@/hooks/use-tokens";
+import { useToast } from "@/hooks/use-toast";
 
 interface NFT {
   id: number;
@@ -33,31 +36,43 @@ const NFTDetail = () => {
   const [nft, setNft] = useState<NFT | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
   const [showStakeModal, setShowStakeModal] = useState(false);
+  const { tokenBalance, handleTransaction, handleNftStake, handleNftUnstake } = useTokens();
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulated NFT data fetch based on ID
-    const nftImages = [
-      "https://source.unsplash.com/photo-1518770660439-4636190af475",
-      "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      "https://source.unsplash.com/photo-1582562124811-c09040d0a901",
-      "https://source.unsplash.com/photo-1535268647677-300dbf3d78d1"
-    ];
-    
-    const mockNft = {
-      id: parseInt(id || "1"),
-      name: id === "2" ? "Digital Dreamscape" : id === "3" ? "Virtual Reality" : id === "4" ? "Metaverse Token" : "Streamixy Genesis",
-      creator: id === "2" ? "NFTMaster" : id === "3" ? "VRCreator" : id === "4" ? "MetaDesigner" : "CryptoArtist",
-      price: 230,
-      previousPrice: 220,
-      image: nftImages[parseInt(id || "1") - 1] || nftImages[0],
-      marketCap: 45000,
-      previousMarketCap: 44000,
-      roi: 12,
-      previousRoi: 10,
-      staked: 0,
-      pnl: 0
-    };
-    setNft(mockNft);
+    // Load existing staked NFTs from localStorage
+    try {
+      const stakedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+      const stakedNft = stakedNFTs.find((n: NFT) => n.id.toString() === id);
+      
+      // Simulated NFT data fetch based on ID
+      const nftImages = [
+        "https://source.unsplash.com/photo-1518770660439-4636190af475",
+        "https://source.unsplash.com/photo-1488590528505-98d2b5aba04b",
+        "https://source.unsplash.com/photo-1582562124811-c09040d0a901",
+        "https://source.unsplash.com/photo-1535268647677-300dbf3d78d1"
+      ];
+      
+      const nftId = parseInt(id || "1");
+      const mockNft = {
+        id: nftId,
+        name: id === "2" ? "Digital Dreamscape" : id === "3" ? "Virtual Reality" : id === "4" ? "Metaverse Token" : "Streamixy Genesis",
+        creator: id === "2" ? "NFTMaster" : id === "3" ? "VRCreator" : id === "4" ? "MetaDesigner" : "CryptoArtist",
+        price: 230,
+        previousPrice: 220,
+        image: nftImages[nftId - 1] || nftImages[0],
+        marketCap: 45000,
+        previousMarketCap: 44000,
+        roi: 12,
+        previousRoi: 10,
+        staked: stakedNft ? stakedNft.staked : 0,
+        pnl: stakedNft ? stakedNft.pnl : 0
+      };
+      setNft(mockNft);
+    } catch (error) {
+      console.error("Error loading NFT data:", error);
+    }
   }, [id]);
 
   useEffect(() => {
@@ -113,38 +128,82 @@ const NFTDetail = () => {
     
     const amount = parseFloat(stakeAmount);
     
-    setNft(prev => {
-      if (!prev) return null;
-      
-      // Set initial PNL based on stake amount
-      let initialPnl = 0.02; // Default starting PNL
-      
-      if (amount >= 500) {
-        initialPnl = 0.9; // Higher starting PNL for large stakes
-      }
-      
-      return {
-        ...prev,
-        staked: prev.staked + amount,
-        pnl: initialPnl // Start with the initial PNL value
-      };
-    });
+    // Use the NFT stake handler from useTokens hook
+    const success = handleNftStake(
+      nft.id, 
+      amount, 
+      `Staked ${amount} SYX on ${nft.name} NFT`
+    );
     
-    setStakeAmount("");
-    setShowStakeModal(false);
+    if (success) {
+      setNft(prev => {
+        if (!prev) return null;
+        
+        // Set initial PNL based on stake amount
+        let initialPnl = 0.02; // Default starting PNL
+        
+        if (amount >= 500) {
+          initialPnl = 0.9; // Higher starting PNL for large stakes
+        }
+        
+        const updatedNft = {
+          ...prev,
+          staked: prev.staked + amount,
+          pnl: initialPnl // Start with the initial PNL value
+        };
+        
+        // Update localStorage for dashboard synchronization
+        const stakedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+        const existingIndex = stakedNFTs.findIndex((n: NFT) => n.id === nft.id);
+        
+        if (existingIndex >= 0) {
+          stakedNFTs[existingIndex] = updatedNft;
+        } else {
+          stakedNFTs.push(updatedNft);
+        }
+        
+        localStorage.setItem("stakedNFTs", JSON.stringify(stakedNFTs));
+        
+        return updatedNft;
+      });
+      
+      setStakeAmount("");
+      setShowStakeModal(false);
+    }
   };
 
   const handleWithdraw = () => {
     if (!nft || nft.staked <= 0) return;
     
-    setNft(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        staked: 0,
-        pnl: 0
-      };
-    });
+    // Calculate total withdrawal amount (staked amount + profit)
+    const totalAmount = nft.staked + nft.pnl;
+    
+    // Use the NFT unstake handler from useTokens hook
+    const success = handleNftUnstake(
+      nft.id, 
+      totalAmount, 
+      `Withdrew ${nft.staked.toFixed(2)} SYX + ${nft.pnl.toFixed(2)} SYX profit from ${nft.name} NFT`
+    );
+    
+    if (success) {
+      setNft(prev => {
+        if (!prev) return null;
+        
+        const updatedNft = {
+          ...prev,
+          staked: 0,
+          pnl: 0
+        };
+        
+        // Update localStorage for dashboard synchronization
+        const stakedNFTs = JSON.parse(localStorage.getItem("stakedNFTs") || "[]");
+        const filteredNFTs = stakedNFTs.filter((n: NFT) => n.id !== nft.id);
+        
+        localStorage.setItem("stakedNFTs", JSON.stringify(filteredNFTs));
+        
+        return updatedNft;
+      });
+    }
   };
 
   if (!nft) return <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">Loading...</div>;
@@ -253,6 +312,10 @@ const NFTDetail = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-white">Available Balance:</span>
+                  <span className="font-bold text-white">{tokenBalance} SYX</span>
+                </div>
                 <label className="text-sm text-white mb-1 block">Amount to Stake</label>
                 <Input
                   type="number"
@@ -260,6 +323,7 @@ const NFTDetail = () => {
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   className="bg-transparent border-white/20 text-white placeholder:text-white/50"
+                  max={tokenBalance}
                 />
               </div>
               
@@ -283,7 +347,7 @@ const NFTDetail = () => {
               <Button 
                 className="w-1/2 bg-streamixy-primary hover:bg-streamixy-primary/80"
                 onClick={handleStake}
-                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0}
+                disabled={!stakeAmount || parseFloat(stakeAmount) <= 0 || parseFloat(stakeAmount) > tokenBalance}
               >
                 Confirm Stake
               </Button>
